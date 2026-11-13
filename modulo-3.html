@@ -1,0 +1,1589 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>El dato en la IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: guía de estudio con índice lateral fijo (10 temas + glosario) y una vista por tema; en móvil el índice pasa a barra superior deslizable. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#141C29; --muted:#566275; --line:#D9DFE8;
+  --accent:#2448C4; --accent-ink:#FFFFFF; --accent-soft:#E5EBFB;
+  --example:#A4510B; --example-soft:#FCF0E1;
+  --ok:#157A3A; --ok-soft:#E3F4E8; --bad:#B42323; --bad-soft:#FBE7E7;
+  --p1:#0E8A88; --p2:#2448C4; --p3:#7A3FC2; --p4:#B9650E; --p5:#2E8A3A;
+  --s1:#3C6FE0; --s2:#D9822B; --s3:#2E9C6E;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+    --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+    --example:#F1AC62; --example-soft:#33261A;
+    --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+    --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+    --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+  --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+  --example:#F1AC62; --example-soft:#33261A;
+  --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+  --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+  --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:2.2rem}
+h3{font-size:1.1rem;font-weight:600;margin-top:1.4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 14px 24px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px}
+.brand small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;line-height:1.25;display:block;margin-top:2px}
+.progress{padding:0 8px}
+.progress .bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress span{font-size:.8rem;color:var(--muted)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.navlist a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.92rem;line-height:1.3}
+.navlist a:hover{background:var(--surface-2)}
+.navlist a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlist .num{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem;background:var(--surface-2);color:var(--muted)}
+.navlist a[aria-current="page"] .num{background:var(--accent);color:var(--accent-ink)}
+.navlist a.done .num{background:var(--ok-soft);color:var(--ok)}
+.navsep{height:1px;background:var(--line);margin:6px 8px}
+
+main{min-width:0;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{max-width:860px;margin:0 auto}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--accent)}
+.lead{font-size:1.12rem;color:var(--muted);max-width:65ch}
+.prose{max-width:68ch}
+.oneline{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius) var(--radius) 0;font-weight:500}
+.objs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.objs li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);background:var(--surface)}
+
+/* Callouts */
+.callout{margin:1.2rem 0;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.callout>.tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+.callout p:first-of-type{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.ex{background:var(--example-soft);border-color:transparent}
+.ex>.tag{color:var(--example)}
+.exam{background:var(--surface);border:1px solid var(--accent)}
+.exam>.tag{color:var(--accent)}
+.exam ul{margin:.3rem 0 0;padding-left:1.2rem}
+.warn{background:var(--bad-soft);border-color:transparent}
+.warn>.tag{color:var(--bad)}
+
+/* Diagrams */
+.diagram{margin:1.2rem 0;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow-x:auto}
+.diagram figcaption{font-size:.8rem;color:var(--muted);margin-top:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
+.flow .node{flex:1 1 0;min-width:110px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.86rem;line-height:1.35}
+.flow .node b{display:block;font-family:var(--font-display);font-size:.95rem;margin-bottom:2px}
+.flow .arrow{flex:none;align-self:center;color:var(--muted);font-size:1.2rem}
+.flow .node.hl{background:var(--accent-soft);border-color:var(--accent)}
+@media (max-width:640px){
+  .flow.stack{flex-direction:column}
+  .flow.stack .arrow{transform:rotate(90deg)}
+  .flow.stack .node{min-width:0}
+}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.box{padding:12px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.9rem;line-height:1.45;min-width:0}
+.box h4{font-size:.98rem;margin-bottom:4px}
+.box .k{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.box.accent{background:var(--accent-soft);border-color:var(--accent)}
+.box small{color:var(--muted)}
+
+/* Tree */
+.tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:560px}
+.tree .lvl{display:flex;gap:16px;justify-content:center;width:100%}
+.tree .tnode{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:.85rem;text-align:center;line-height:1.3}
+.tree .tnode.root{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tree .tnode.mid{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.tree .branch{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;border-top:2px solid var(--line);position:relative}
+.tree .stem{width:2px;height:14px;background:var(--line)}
+.tree .leaves{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tree .leaf{font-size:.8rem;padding:6px 9px;border-radius:6px;background:var(--surface);border:1px dashed var(--line);text-align:center;line-height:1.3}
+.tree .leaf em{display:block;font-style:normal;color:var(--muted);font-size:.74rem}
+
+/* Lifecycle */
+.cycle{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-width:640px;counter-reset:ph}
+.phase{position:relative;padding:12px;border-radius:10px;background:var(--surface-2);border-top:4px solid var(--c);font-size:.85rem;line-height:1.4}
+.phase .pn{font-family:var(--font-mono);font-size:.72rem;color:var(--c);font-weight:600}
+.phase b{display:block;font-family:var(--font-display);font-size:.95rem;margin:2px 0 6px}
+.phase .topics{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.phase .topics a{font-size:.72rem;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.phase:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:1rem}
+.loopback{margin-top:10px;font-size:.8rem;color:var(--muted);text-align:center;min-width:640px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;margin:1rem 0}
+pre.code .c{color:var(--muted)}
+pre.code .o{color:var(--ok)}
+
+/* Data matrix (dato/obs/variable) */
+.matrix td,.matrix th{text-align:center;font-family:var(--font-mono);font-size:.82rem;transition:background .15s}
+.matrix.show-var td:nth-child(3),.matrix.show-var th:nth-child(3){background:var(--accent-soft);color:var(--accent)}
+.matrix.show-obs tbody tr:nth-child(2) td{background:var(--example-soft);color:var(--example)}
+.matrix.show-dat tbody tr:nth-child(3) td:nth-child(4){background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+/* Buttons & inputs */
+.btn{font:inherit;font-size:.88rem;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+input[type=text],input[type=number]{font:inherit;font-size:.92rem;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.out{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* Interactive SVG */
+svg text{fill:var(--muted);font-family:var(--font-body)}
+.dot{transition:r .2s,opacity .2s}
+.dot.st1{fill:var(--s1)}.dot.st2{fill:var(--s2)}.dot.st3{fill:var(--s3)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px repeat(8,minmax(44px,1fr));min-width:620px;font-size:.8rem}
+.gantt>div{padding:6px 6px;border-bottom:1px solid var(--line);min-height:32px;display:flex;align-items:center}
+.gantt .gh{font-weight:600;color:var(--muted);font-size:.72rem;justify-content:center}
+.gantt .bar{background:var(--surface-2);border-radius:5px;margin:4px 0;padding:0 6px;font-size:.72rem;color:var(--muted)}
+.gantt .bar.crit{background:var(--accent);color:var(--accent-ink)}
+.gantt .bar.mile{background:transparent;justify-content:center;color:var(--example);font-size:1rem}
+
+/* Quiz */
+.quiz{margin-top:2.4rem;padding:20px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.quiz h2{margin-top:0}
+.qitem{padding:14px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0}
+.qitem p.q{font-weight:600;margin:0 0 8px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{text-align:left;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.qopt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.qopt:disabled{cursor:default}
+.qexp{font-size:.86rem;color:var(--muted);margin-top:8px}
+.qscore{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.pager a{flex:1 1 220px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager small{display:block;color:var(--muted);font-size:.75rem}
+.pager a.next{text-align:right}
+.studied{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* Home cards */
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.tcard{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.tcard:hover{border-color:var(--accent)}
+.tcard .n{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.tcard b{font-family:var(--font-display);font-size:1rem;line-height:1.3}
+.tcard span.d{font-size:.84rem;color:var(--muted);line-height:1.4}
+.tcard .st{margin-top:auto;padding-top:6px}
+
+/* Glossary */
+.gloss{display:grid;gap:8px;margin-top:14px}
+.gloss dt{font-weight:600;font-family:var(--font-display)}
+.gloss dd{margin:0 0 6px;color:var(--muted);font-size:.92rem}
+.gloss .gi{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.gloss .gi small{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+
+/* Mobile nav */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .brand,.progress{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .navlist::-webkit-scrollbar{display:none}
+  .navlist a{white-space:nowrap;padding:6px 8px}
+  .navlist a .lbl{display:none}
+  .navlist a[aria-current="page"] .lbl{display:inline}
+  .navsep{width:1px;height:20px;margin:auto 2px}
+  main{padding-block:24px 64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Módulo 3: componentes extra */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyramid>div{padding:12px 16px;border-radius:8px;text-align:center;font-size:.88rem;line-height:1.4;max-width:100%}
+.pyramid b{display:block;font-family:var(--font-display);font-size:1rem}
+.pyramid span{color:var(--muted)}
+.pyramid .lvl3{width:55%;background:var(--accent);color:var(--accent-ink)}
+.pyramid .lvl3 span{color:var(--accent-ink);opacity:.85}
+.pyramid .lvl2{width:75%;background:var(--accent-soft);border:1px solid var(--accent)}
+.pyramid .lvl1{width:95%;background:var(--surface-2);border:1px solid var(--line)}
+@media (max-width:560px){.pyramid>div{width:100%!important}}
+.balbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.balbar .maj{background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:600;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden}
+.balbar .min{background:var(--example);min-width:3px}
+.cm{display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;max-width:520px}
+.cm .cmh{font-size:.78rem;font-weight:600;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;text-align:center}
+.cm .cmh.side{justify-content:flex-start;align-items:center;text-align:left}
+.cm .cell{padding:10px;border-radius:8px;border:1px solid var(--line)}
+.cm .cell.good{background:var(--ok-soft)}
+.cm .cell.badc{background:var(--bad-soft)}
+.cm .cell label{margin-bottom:4px}
+@media (max-width:480px){.cm{grid-template-columns:80px 1fr 1fr}}
+.mini{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--example)}
+.kfold{display:flex;flex-direction:column;gap:6px;min-width:480px}
+.kfrow{display:grid;grid-template-columns:100px repeat(5,1fr);gap:4px;align-items:center}
+.kfrow span{font-size:.75rem;text-align:center;padding:6px 0;border-radius:5px}
+.kfrow .kt{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.kfrow .ktr{background:var(--accent-soft);color:var(--accent)}
+.kfrow .out{text-align:left;color:var(--muted)}
+select.btn{padding-right:8px}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav" aria-label="Temas">
+    <div class="brand"><small>Módulo 3 · Guía de estudio</small><strong>El dato en la inteligencia artificial</strong></div>
+    <div class="progress"><span id="progText">0 de 10 temas estudiados</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="navlist" id="navlist">
+      <li><a href="./" data-v="__home"><span class="num">⌂</span><span class="lbl">Todos los módulos</span></a></li>
+      <li><a href="#inicio" data-v="inicio"><span class="num">◎</span><span class="lbl">Mapa del módulo</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#tema-1" data-v="tema-1"><span class="num">1</span><span class="lbl">Ciencia de datos</span></a></li>
+      <li><a href="#tema-2" data-v="tema-2"><span class="num">2</span><span class="lbl">Datos, información y conocimiento</span></a></li>
+      <li><a href="#tema-3" data-v="tema-3"><span class="num">3</span><span class="lbl">De los datos a la información</span></a></li>
+      <li><a href="#tema-4" data-v="tema-4"><span class="num">4</span><span class="lbl">Visualización</span></a></li>
+      <li><a href="#tema-5" data-v="tema-5"><span class="num">5</span><span class="lbl">Calidad de los datos</span></a></li>
+      <li><a href="#tema-6" data-v="tema-6"><span class="num">6</span><span class="lbl">Dataset</span></a></li>
+      <li><a href="#tema-7" data-v="tema-7"><span class="num">7</span><span class="lbl">Desbalanceo</span></a></li>
+      <li><a href="#tema-8" data-v="tema-8"><span class="num">8</span><span class="lbl">Modelos no supervisados</span></a></li>
+      <li><a href="#tema-9" data-v="tema-9"><span class="num">9</span><span class="lbl">Modelos supervisados</span></a></li>
+      <li><a href="#tema-10" data-v="tema-10"><span class="num">10</span><span class="lbl">Herramientas y buenas prácticas</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#glosario" data-v="glosario"><span class="num">Aa</span><span class="lbl">Glosario</span></a></li>
+    </ul>
+  </nav>
+
+  <main>
+<!-- ===================== INICIO ===================== -->
+<section class="view" data-view="inicio">
+  <p class="eyebrow">Módulo 3 · 10 temas</p>
+  <h1>El dato en la inteligencia artificial</h1>
+  <p class="lead">Del dato en crudo al modelo que predice: Python, análisis exploratorio, calidad del dato, desbalanceo y modelos supervisados y no supervisados. Con ejemplos de mercados financieros, simuladores y un test al final de cada tema.</p>
+
+  <h2>El recorrido del módulo</h2>
+  <p class="prose">Cada tema es un paso del flujo de trabajo de un científico de datos. Se repiten dos datasets: <b>Iris</b> (150 flores, 3 clases) y el de <b>fraude con tarjetas</b> (284.807 transacciones).</p>
+  <figure class="diagram">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">HERRAMIENTAS</span><b>Python y sus datos</b>Lenguajes, Anaconda, tipos y estructuras.<div class="topics"><a href="#tema-1">T1</a><a href="#tema-2">T2</a></div></div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">EXPLORAR</span><b>Análisis exploratorio</b>Estadísticos y gráficos.<div class="topics"><a href="#tema-3">T3</a><a href="#tema-4">T4</a></div></div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">PREPARAR</span><b>Calidad y dataset</b>Duplicados, nulos, outliers, codificación, PCA, escalado.<div class="topics"><a href="#tema-5">T5</a><a href="#tema-6">T6</a></div></div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">EQUILIBRAR</span><b>Desbalanceo</b>Pesos, submuestreo, SMOTE.<div class="topics"><a href="#tema-7">T7</a></div></div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">MODELAR</span><b>Modelos</b>No supervisados y supervisados, métricas.<div class="topics"><a href="#tema-8">T8</a><a href="#tema-9">T9</a></div></div>
+    </div>
+    <p class="loopback">En todas las fases: <a href="#tema-10">T10 Herramientas y buenas prácticas</a> · Regla del temario: el 80 % del tiempo se va en preparar los datos y el 20 % en modelar.</p>
+    <figcaption>Flujo del módulo, de las herramientas al modelado.</figcaption>
+  </figure>
+
+  <h2>Temas</h2>
+  <div class="tcards" id="tcards"></div>
+
+  <div class="callout exam">
+    <span class="tag">Cómo usar esta guía</span>
+    <ul>
+      <li>Cada tema empieza con una frase resumen y acaba con un test de 5 preguntas.</li>
+      <li>Los recuadros naranjas son <b>ejemplos en mercados</b>; los azules, lo que más se pregunta en el <b>examen</b>.</li>
+      <li>Los simuladores (k-means, matriz de confusión, histograma, escalado…) usan datos de ejemplo: cambia los valores y observa el efecto.</li>
+      <li>Tu progreso se guarda en este navegador.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== TEMA 1 ===================== -->
+<section class="view" data-view="tema-1" hidden>
+  <p class="eyebrow">Tema 1</p>
+  <h1>Ciencia de datos</h1>
+  <p class="oneline">La ciencia de datos combina <b>programación</b>, <b>matemáticas y estadística</b> y <b>conocimiento experto</b> del problema. Su herramienta principal es un lenguaje de programación, y el más usado es <b>Python</b>.</p>
+  <ul class="objs"><li>Qué es la ciencia de datos</li><li>Lenguajes para el análisis de datos</li><li>Python: historia y características</li><li>Anaconda y Jupyter</li></ul>
+
+  <h2>El diagrama de Venn de Drew Conway</h2>
+  <figure class="diagram">
+    <svg viewBox="0 0 520 380" width="100%" style="max-width:540px;display:block;margin:0 auto" role="img" aria-label="Diagrama de Venn de la ciencia de datos">
+      <circle cx="190" cy="140" r="115" style="fill:var(--s1);fill-opacity:.18;stroke:var(--s1);stroke-width:2"/>
+      <circle cx="330" cy="140" r="115" style="fill:var(--s2);fill-opacity:.18;stroke:var(--s2);stroke-width:2"/>
+      <circle cx="260" cy="255" r="115" style="fill:var(--s3);fill-opacity:.18;stroke:var(--s3);stroke-width:2"/>
+      <text x="140" y="95" text-anchor="middle" font-size="14" style="fill:var(--ink);font-weight:600">Programación</text>
+      <text x="140" y="112" text-anchor="middle" font-size="11">(hacking skills)</text>
+      <text x="380" y="95" text-anchor="middle" font-size="14" style="fill:var(--ink);font-weight:600">Matemáticas y</text>
+      <text x="380" y="112" text-anchor="middle" font-size="14" style="fill:var(--ink);font-weight:600">estadística</text>
+      <text x="260" y="335" text-anchor="middle" font-size="14" style="fill:var(--ink);font-weight:600">Conocimiento experto</text>
+      <text x="260" y="352" text-anchor="middle" font-size="11">(substantive expertise)</text>
+      <text x="260" y="118" text-anchor="middle" font-size="12" style="fill:var(--ink)">Machine learning</text>
+      <text x="175" y="235" text-anchor="middle" font-size="12" style="fill:var(--bad);font-weight:600">Zona de peligro</text>
+      <text x="350" y="235" text-anchor="middle" font-size="12" style="fill:var(--ink)">Investigación</text>
+      <text x="350" y="250" text-anchor="middle" font-size="12" style="fill:var(--ink)">tradicional</text>
+      <text x="260" y="185" text-anchor="middle" font-size="14" style="fill:var(--accent);font-weight:700">Ciencia de datos</text>
+    </svg>
+    <figcaption>Programación + matemáticas = machine learning. Para que sea ciencia de datos falta el conocimiento experto, que plantea hipótesis y elige las técnicas. Programación + conocimiento sin estadística es la "zona de peligro".</figcaption>
+  </figure>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span>
+    <p>Un programador que entrena una red neuronal con cotizaciones sin saber estadística (zona de peligro) puede "descubrir" una estrategia que solo funciona en el histórico. Un analista cuantitativo combina las tres áreas: programa el backtest, controla el sobreajuste con estadística y sabe, por experiencia de mercado, qué señales tienen sentido económico.</p>
+  </div>
+
+  <h2>Lenguajes para el análisis de datos</h2>
+  <p class="prose">Hay más de 600 lenguajes. Los del análisis de datos comparten tres rasgos: <b>curva de aprendizaje baja</b>, <b>muchas librerías</b> con funciones predefinidas y <b>pocas líneas de código</b> (a cambio de ser más lentos que los de bajo nivel).</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Posición (Kaggle 2018)</th><th>Lenguaje</th><th>Para qué destaca</th></tr></thead>
+    <tbody>
+      <tr><td>1.º</td><td><b>Python</b></td><td>Enorme número de librerías de análisis; en constante actualización</td></tr>
+      <tr><td>2.º</td><td><b>R</b></td><td>Lenguaje estadístico de código abierto; librerías estadísticas avanzadas</td></tr>
+      <tr><td>3.º</td><td><b>SQL</b></td><td>Consultas a bases de datos estructuradas</td></tr>
+      <tr><td>Otros</td><td><b>Scala</b></td><td>Base de Apache Spark: procesamiento paralelo y big data</td></tr>
+      <tr><td>Otros</td><td><b>Julia</b></td><td>Alto nivel, computación distribuida y en la nube; más rápido que Python</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Python</h2>
+  <div class="flow stack">
+    <div class="node"><b>1988</b>Guido van Rossum empieza a desarrollarlo, inspirado en el lenguaje ABC</div><div class="arrow">→</div>
+    <div class="node"><b>1991</b>Primera publicación. El nombre viene de los Monty Python</div><div class="arrow">→</div>
+    <div class="node"><b>2.x → 3.x</b>La versión 3 simplifica y elimina redundancias</div><div class="arrow">→</div>
+    <div class="node hl"><b>2018</b>Van Rossum deja la dirección; fue el primer "BDFL"</div>
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="box"><h4>Interpretado</h4>El intérprete traduce el código cada vez que se ejecuta. El ciclo de prueba y error es más rápido; la ejecución, más lenta que en un compilado.</div>
+    <div class="box"><h4>Multiparadigma</h4>Admite varios estilos, incluida la orientación a objetos: en Python todo es un objeto con atributos y métodos.</div>
+    <div class="box"><h4>Libre y multiplataforma</h4>Licencia PSFL (compatible con GPL), gratis y disponible en Windows, macOS y Linux.</div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4>Compilado</h4>Se traduce a código máquina una vez y se ejecuta muchas. Más eficiente, pero el código máquina cambia según el sistema operativo (peor portabilidad).</div>
+    <div class="box accent"><h4>Ventaja / desventaja de Python</h4>Fácil de aprender y muy demandado. Su punto débil es la velocidad de cómputo frente a lenguajes como Julia.</div>
+  </div>
+
+  <h2>Entorno de trabajo: Anaconda</h2>
+  <p class="prose">Un <b>IDE</b> (como PyCharm) reúne editor, consola y terminal en una interfaz y organiza el código en proyectos. <b>Anaconda</b> es un distribuidor de paquetes libre que crea <b>entornos virtuales</b>: varias versiones de Python en el mismo equipo sin conflictos. Desde Anaconda se lanza <b>Jupyter Notebook</b>, que mezcla celdas de código y de texto (Markdown).</p>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>1</b>Instalar Anaconda (Individual Edition)</div><div class="arrow">→</div>
+      <div class="node"><b>2</b>Environments → Create: nuevo entorno con Python</div><div class="arrow">→</div>
+      <div class="node"><b>3</b>Instalar y lanzar Jupyter Notebook en ese entorno</div><div class="arrow">→</div>
+      <div class="node"><b>4</b>Crear cuaderno Python 3 y ejecutar un "hola mundo"</div><div class="arrow">→</div>
+      <div class="node hl"><b>5</b>Instalar librerías (p. ej. NumPy) desde Environments</div>
+    </div>
+  </figure>
+<pre class="code"><span class="c"># Celda de código en Jupyter</span>
+print("Hola mundo")
+<span class="o">Hola mundo</span></pre>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Ciencia de datos = programación + matemáticas/estadística + conocimiento experto (Drew Conway).</li>
+    <li>Ranking Kaggle 2018: Python, R, SQL. Scala → Spark; Julia → computación distribuida.</li>
+    <li>Python: Guido van Rossum, 1991, interpretado, multiparadigma, libre, multiplataforma.</li>
+    <li>Anaconda = entornos virtuales sin conflictos de versiones; Jupyter = código + texto.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-1"></div>
+</section>
+
+<!-- ===================== TEMA 2 ===================== -->
+<section class="view" data-view="tema-2" hidden>
+  <p class="eyebrow">Tema 2</p>
+  <h1>Datos, información y conocimiento</h1>
+  <p class="oneline">Un <b>dato</b> es un hecho sin contexto; con contexto se vuelve <b>información</b>; con experiencia, <b>conocimiento</b>. En Python los datos se guardan en tipos básicos (int, float, complex, bool, str) y en estructuras (tuplas, listas, diccionarios, sets, arrays y data frames).</p>
+  <ul class="objs"><li>Dato, información, conocimiento</li><li>Tipos básicos y complejos</li><li>Operaciones y estructuras de control</li><li>Leer ficheros</li></ul>
+
+  <h2>De dato a conocimiento</h2>
+  <figure class="diagram">
+    <div class="pyramid">
+      <div class="lvl3"><b>Conocimiento</b><span>Información + experiencia: "cuando el BCE sube tipos por sorpresa, la banca suele subir y las inmobiliarias caer"</span></div>
+      <div class="lvl2"><b>Información</b><span>Dato con contexto: "el índice cayó un 1,2 % el día del anuncio del BCE"</span></div>
+      <div class="lvl1"><b>Dato</b><span>Hecho objetivo sin contexto: "−1,2"</span></div>
+    </div>
+    <figcaption>Por eso en los proyectos de datos se trabaja con expertos del negocio: aportan el conocimiento.</figcaption>
+  </figure>
+
+  <h2>Tipos básicos en Python</h2>
+  <p class="prose">No hace falta declarar el tipo: el intérprete lo asigna según el valor. Se consulta con <code>type()</code> o <code>isinstance()</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Clase</th><th>Ejemplo</th><th>Nota</th></tr></thead>
+    <tbody>
+      <tr><td>Entero</td><td><code>int</code></td><td><code>a = -2</code></td><td>Sin parte decimal</td></tr>
+      <tr><td>Real</td><td><code>float</code></td><td><code>c = 0.023</code></td><td>Decimal con punto. <code>1/2</code> devuelve float</td></tr>
+      <tr><td>Complejo</td><td><code>complex</code></td><td><code>1 + 3j</code></td><td><code>.real</code> y <code>.imag</code></td></tr>
+      <tr><td>Lógico</td><td><code>bool</code></td><td><code>True</code>, <code>False</code></td><td>Es un subtipo de entero: <code>isinstance(True, int)</code> → True</td></tr>
+      <tr><td>Cadena</td><td><code>str</code></td><td><code>"Hola"</code> o <code>'Hola'</code></td><td>Símbolos especiales con <code>\</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Tipos complejos</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>¿Mutable?</th><th>Definición</th><th>Acceso</th><th>Clave</th></tr></thead>
+    <tbody>
+      <tr><td><b>Tupla</b></td><td><span class="pill bad">No</span></td><td><code>t = ('a','b','c')</code></td><td><code>t[0]</code></td><td>Inmutable; reasignar da error</td></tr>
+      <tr><td><b>Lista</b></td><td><span class="pill ok">Sí</span></td><td><code>l = ['a', 2, 1.8]</code></td><td><code>l[0]</code></td><td>Mezcla tipos y se modifica</td></tr>
+      <tr><td><b>Diccionario</b></td><td><span class="pill ok">Sí</span></td><td><code>d = {'a':1, 'b':2}</code></td><td><code>d['a']</code></td><td>Por clave única, sin orden</td></tr>
+      <tr><td><b>Set</b></td><td><span class="pill ok">Sí</span></td><td><code>s = {'a','a','b'}</code></td><td>Sin índice: se recorre</td><td>Sin repetidos ni orden</td></tr>
+      <tr><td><b>Vector</b> (NumPy)</td><td><span class="pill ok">Sí</span></td><td><code>np.array([1,2,3])</code></td><td><code>v[0]</code></td><td>Todos del mismo tipo</td></tr>
+      <tr><td><b>Matriz</b> (NumPy)</td><td><span class="pill ok">Sí</span></td><td><code>np.array([[1,2],[3,4]])</code></td><td><code>m[0][0]</code></td><td>Vector de más dimensiones</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><span class="tag">Recuerda</span><p>En Python los índices empiezan en <b>0</b>. Y un set elimina repetidos: <code>{'Ana','Ana','Pedro'}</code> se queda en <code>{'Ana','Pedro'}</code>.</p></div>
+
+  <h3>Data frames (pandas)</h3>
+  <p class="prose">Tabla de dos dimensiones: cada columna es una variable (puede tener su propio tipo) y cada fila una instancia. Se crea a partir de un diccionario: las claves son los nombres de columna.</p>
+<pre class="code">import pandas as pd
+cartera = {'Ticker': ['SAN', 'ITX', 'IBE'], 'Peso': [0.40, 0.35, 0.25]}
+df = pd.DataFrame(cartera)
+df['Sector'] = ['Banca', 'Textil', 'Eléctrica']   <span class="c"># nueva columna</span>
+df.iloc[0]                                          <span class="c"># primera fila</span>
+df.Ticker[0]                                        <span class="c"># 'SAN'</span></pre>
+
+  <h3>Cambiar de tipo</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Coerción</h4>La hace el intérprete para poder operar: <code>2 + 0.5</code> convierte el 2 en real.</div>
+    <div class="box"><h4>Casting</h4>Explícita: <code>int(2.323)</code> → 2. Se pierden los decimales: evítala si no es necesaria.</div>
+    <div class="box"><h4>Conversión implícita</h4>Ej. en R, <code>c(1, 2, 3, TRUE)</code> trata TRUE como 1.</div>
+  </div>
+
+  <h2>Operadores</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Operador</th><th>Ejemplo</th><th>No lo admiten</th></tr></thead>
+    <tbody>
+      <tr><td>Aritmético</td><td><code>+ - * / % ** //</code></td><td><code>9 // -2</code> → −5 · <code>9 % -2</code> → −1</td><td>Cadenas: solo <code>+</code> (concatenar) y <code>*</code> (repetir). Complejos: ni <code>%</code> ni <code>//</code></td></tr>
+      <tr><td>Lógico</td><td><code>and or</code> · bit a bit <code>&amp; |</code></td><td><code>True and False</code> → False</td><td><code>&amp;</code> y <code>|</code> solo enteros y lógicos</td></tr>
+      <tr><td>Relacional</td><td><code>&lt; &gt; &lt;= &gt;= == != is</code></td><td><code>"Si" &gt; "Casino"</code> → True (orden alfabético)</td><td>Complejos: solo <code>==</code> y <code>!=</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Estructuras de control</h2>
+  <p class="prose">En Python la <b>indentación es obligatoria</b>: marca qué líneas están dentro de cada bloque.</p>
+<pre class="code">precio = 102.5
+if precio &gt; 105:
+    print("Vender")
+elif precio &lt; 95:
+    print("Comprar")
+else:
+    print("Mantener")              <span class="o">Mantener</span>
+
+for ticker in ['SAN', 'ITX', 'IBE']:   <span class="c"># recorre una colección</span>
+    print(ticker)
+
+dias = 0
+while dias &lt; 5:                    <span class="c"># repite mientras se cumpla</span>
+    dias += 1</pre>
+
+  <h2>Fuentes de datos: ficheros</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Modo</th><th>Qué hace</th><th>¿Si no existe?</th></tr></thead>
+    <tbody>
+      <tr><td><code>"r"</code></td><td>Lectura (por defecto)</td><td>Error</td></tr>
+      <tr><td><code>"w"</code></td><td>Escritura: <b>borra</b> el contenido previo</td><td>Lo crea</td></tr>
+      <tr><td><code>"a"</code></td><td>Añadir al final sin borrar</td><td>Lo crea</td></tr>
+      <tr><td><code>"r+"</code></td><td>Lectura y escritura</td><td>Error</td></tr>
+      <tr><td><code>"w+"</code></td><td>Lectura y escritura, sobrescribe</td><td>Lo crea</td></tr>
+      <tr><td><code>"a+"</code></td><td>Lectura y escritura, empieza al final</td><td>Lo crea</td></tr>
+    </tbody>
+  </table></div>
+<pre class="code">f = open("cotizaciones.txt", "r")
+for linea in f:                   <span class="c"># cada línea suele ser una instancia</span>
+    print(linea.split())          <span class="c"># split() separa en palabras</span>
+f.close()                         <span class="c"># liberar memoria</span>
+
+df = pd.read_csv("cotizaciones.csv")   <span class="c"># con pandas, en una línea</span></pre>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Dato (sin contexto) → información (con contexto) → conocimiento (con experiencia).</li>
+    <li>Tupla inmutable; lista, diccionario y set mutables. Set sin repetidos ni índice.</li>
+    <li>Coerción (automática), casting (explícita, puede perder información), conversión implícita.</li>
+    <li>Modos de fichero: "w" borra, "a" añade, "r" solo lee.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-2"></div>
+</section>
+
+<!-- ===================== TEMA 3 ===================== -->
+<section class="view" data-view="tema-3" hidden>
+  <p class="eyebrow">Tema 3</p>
+  <h1>De los datos a la información</h1>
+  <p class="oneline">El análisis de datos estudia un conjunto para tomar decisiones. Se empieza con <b>estadísticos descriptivos</b> de cada variable (univariante) y luego se miran las <b>relaciones</b> entre variables (multivariante): tablas de contingencia, covarianza y correlación.</p>
+  <ul class="objs"><li>Tipos de análisis</li><li>describe()</li><li>Análisis univariante y normalidad</li><li>Covarianza y correlación</li></ul>
+
+  <h2>Antes de analizar: dos clasificaciones</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Cuantitativo vs. cualitativo</h4>Cuantitativo: datos numéricos con métodos estadísticos. Cualitativo: categorías textuales. Un mismo atributo puede expresarse de ambas formas: valoración "Malo / Normal / Bueno" o de 1 a 5.</div>
+    <div class="box"><h4>Clasificación vs. regresión</h4><b>Regresión</b>: predecir un valor continuo (precio de cierre de mañana). <b>Clasificación</b>: asignar una clase (¿el cliente impagará: sí/no?).</div>
+  </div>
+  <h3>Las 7 preguntas antes de modelar</h3>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="box">¿De qué <b>tipo</b> son los valores?</div>
+    <div class="box">¿Tienen la misma <b>magnitud</b>?</div>
+    <div class="box">¿Están muy <b>dispersos</b>?</div>
+    <div class="box">¿Siguen una distribución <b>normal</b>?</div>
+    <div class="box">¿Hay valores <b>atípicos</b>?</div>
+    <div class="box">¿Cómo <b>influyen</b> unas variables en otras?</div>
+    <div class="box">¿Son todos los atributos <b>importantes</b>?</div>
+  </div>
+
+  <h2>Resumen estadístico: <code>describe()</code></h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th class="num">Long. sépalo</th><th class="num">Ancho sépalo</th><th class="num">Long. pétalo</th><th class="num">Ancho pétalo</th></tr></thead>
+    <tbody>
+      <tr><td><b>count</b></td><td class="num">150</td><td class="num">150</td><td class="num">150</td><td class="num">150</td></tr>
+      <tr><td><b>mean</b></td><td class="num">5,84</td><td class="num">3,05</td><td class="num">3,76</td><td class="num">1,20</td></tr>
+      <tr><td><b>std</b></td><td class="num">0,83</td><td class="num">0,43</td><td class="num">1,76</td><td class="num">0,76</td></tr>
+      <tr><td><b>min</b></td><td class="num">4,3</td><td class="num">2,0</td><td class="num">1,0</td><td class="num">0,1</td></tr>
+      <tr><td><b>25 %</b></td><td class="num">5,1</td><td class="num">2,8</td><td class="num">1,6</td><td class="num">0,3</td></tr>
+      <tr><td><b>50 %</b></td><td class="num">5,8</td><td class="num">3,0</td><td class="num">4,35</td><td class="num">1,3</td></tr>
+      <tr><td><b>75 %</b></td><td class="num">6,4</td><td class="num">3,3</td><td class="num">5,1</td><td class="num">1,8</td></tr>
+      <tr><td><b>max</b></td><td class="num">7,9</td><td class="num">4,4</td><td class="num">6,9</td><td class="num">2,5</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Con variables categóricas se usa <code>describe(include="all")</code>, que añade <b>unique</b> (valores distintos), <b>top</b> (la moda) y <b>freq</b> (su frecuencia). En el dataset de cáncer de mama: 286 pacientes, top = sano, freq = 201.</p>
+
+  <h2>Análisis univariante</h2>
+  <p class="prose">Mira cada variable por separado: frecuencias (<code>value_counts()</code>, con <code>bins</code> para números), centro (media, mediana, moda), dispersión (desviación típica, CV), percentiles y normalidad.</p>
+  <figure class="diagram" id="statCalc">
+    <label for="statIn">Datos (separados por comas)</label>
+    <input type="text" id="statIn" value="2.18, 1.72, 1.72, 1.69, 1.68, 1.63, 1.56">
+    <div class="grid g4" id="statOut" style="margin-top:12px"></div>
+    <figcaption>Ejemplo del temario: alturas de una clase con un alumno muy alto (2,18 m). La media sube a 1,74, pero la mediana (1,69) sigue representando al alumno típico. Prueba a borrar el 2.18.</figcaption>
+  </figure>
+  <div class="grid g3">
+    <div class="box"><h4>Desviación típica</h4>Dispersión respecto a la media, en las unidades de la variable. No sirve para comparar variables con unidades distintas.</div>
+    <div class="box accent"><h4>Coeficiente de variación</h4><span class="mono">CV = σ / media</span>. Sin unidades. Si <b>CV ≤ 30 %</b>, la media es representativa.</div>
+    <div class="box"><h4>Asimetría y curtosis</h4>En una normal valen ≈ 0. Entre −1 y 1: desviación ligera; entre −2 y 2: evidente pero no extrema.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span>
+    <p>Comparar la volatilidad de una acción de 5 € con otra de 500 € por su desviación típica en euros no tiene sentido. Con el <b>CV</b> (o mirando rentabilidades en %) sí se pueden comparar. Además, las rentabilidades diarias suelen tener <b>curtosis alta</b> ("colas gordas"): los días extremos son mucho más frecuentes de lo que predice una normal.</p>
+  </div>
+
+  <h3>Tests de normalidad</h3>
+  <p class="prose">Muchos métodos asumen que los datos son normales. Hipótesis nula: <i>la variable es normal</i>. Con α = 0,05:</p>
+  <div class="grid g2">
+    <div class="box" style="border-color:var(--bad)"><h4>p ≤ α</h4>Se <b>rechaza</b> la normalidad.</div>
+    <div class="box" style="border-color:var(--ok)"><h4>p &gt; α</h4>No se puede rechazar: se <b>asume</b> normalidad.</div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Test</th><th>Cuándo usarlo</th><th>Iris, long. sépalo</th></tr></thead>
+    <tbody>
+      <tr><td><b>Shapiro-Wilk</b></td><td>Muestras pequeñas (&lt; 50), muy sensible</td><td class="mono">p = 0,010 → no normal</td></tr>
+      <tr><td><b>Kolmogorov-Smirnov</b></td><td>Muestras grandes; requiere media y varianza representativas</td><td class="mono">p = 0,0 → no normal</td></tr>
+      <tr><td><b>Jarque-Bera</b></td><td>Usa asimetría y curtosis; no necesita estimar parámetros</td><td class="mono">p = 0,106 → normal</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">Los tests discrepan porque la muestra es pequeña (150). Con más datos las conclusiones son más robustas.</p>
+
+  <h2>Análisis multivariante</h2>
+  <h3>Tabla de contingencia: <code>pd.crosstab()</code></h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Long. sépalo</th><th class="num">Setosa</th><th class="num">Versicolor</th><th class="num">Virginica</th></tr></thead>
+    <tbody>
+      <tr><td>(4,3 – 4,8]</td><td class="num"><b>15</b></td><td class="num">0</td><td class="num">0</td></tr>
+      <tr><td>(4,8 – 5,3]</td><td class="num"><b>24</b></td><td class="num">5</td><td class="num">1</td></tr>
+      <tr><td>(5,3 – 5,8]</td><td class="num">10</td><td class="num"><b>19</b></td><td class="num">5</td></tr>
+      <tr><td>(5,8 – 6,3]</td><td class="num">0</td><td class="num">15</td><td class="num">13</td></tr>
+      <tr><td>(6,3 – 6,8]</td><td class="num">0</td><td class="num">9</td><td class="num"><b>16</b></td></tr>
+      <tr><td>(6,8 – 7,3]</td><td class="num">0</td><td class="num">2</td><td class="num"><b>8</b></td></tr>
+      <tr><td>(7,3 – 7,8]</td><td class="num">0</td><td class="num">0</td><td class="num"><b>6</b></td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Con un sépalo de 4,3–4,8 cm la flor es setosa seguro; entre 5,5 y 6 cm hace falta más información. Para variables numéricas, primero se definen los rangos con <code>pd.cut()</code>.</p>
+
+  <h3>Covarianza y correlación</h3>
+  <div class="grid g2">
+    <div class="box"><h4>Covarianza: <code>cov()</code></h4>Indica si la relación es positiva o negativa, pero su valor depende de las unidades: no dice si es fuerte.</div>
+    <div class="box accent"><h4>Correlación de Pearson: <code>corr()</code></h4>Covarianza de las variables estandarizadas. Va de −1 a 1 y permite comparar la fuerza de las relaciones.</div>
+  </div>
+  <div class="table-wrap"><table class="heat">
+    <thead><tr><th></th><th class="num">Long. sépalo</th><th class="num">Ancho sépalo</th><th class="num">Long. pétalo</th><th class="num">Ancho pétalo</th></tr></thead>
+    <tbody id="irisCorr"></tbody>
+  </table></div>
+  <p class="prose" style="font-size:.9rem">Longitud y ancho del pétalo: 0,96, relación positiva muy fuerte. Ancho y longitud del sépalo: −0,11, casi sin relación.</p>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>La matriz de correlación de las rentabilidades de varias acciones es la base de la <b>diversificación</b>: combinar activos con correlación baja o negativa reduce el riesgo de la cartera. Ojo: en las crisis las correlaciones tienden a subir a la vez.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Regresión = valor continuo; clasificación = clase.</li>
+    <li>describe(): count, mean, std, min, 25/50/75 %, max. Con categóricas: unique, top, freq.</li>
+    <li>CV = σ/media; CV ≤ 30 % → media representativa. La mediana es robusta a outliers.</li>
+    <li>Shapiro (&lt; 50), Kolmogorov-Smirnov, Jarque-Bera. p ≤ 0,05 → no normal.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-3"></div>
+</section>
+
+<!-- ===================== TEMA 4 ===================== -->
+<section class="view" data-view="tema-4" hidden>
+  <p class="eyebrow">Tema 4</p>
+  <h1>Extracción de información mediante visualización</h1>
+  <p class="oneline">Los gráficos permiten detectar a simple vista patrones, inconsistencias y desbalanceos. Siempre deben ir acompañados de los estadísticos numéricos para que las conclusiones sean robustas.</p>
+  <ul class="objs"><li>Gráficos univariantes</li><li>Gráficos bivariantes</li><li>Gráficos multivariantes</li><li>matplotlib y seaborn</li></ul>
+
+  <h2>Qué gráfico usar</h2>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div class="box"><h4>Univariantes</h4><b>Histograma</b>: frecuencias en barras (bins).<br><b>Box plot</b>: mediana, cuartiles, outliers.<br><b>QQ plot</b>: cuantiles teóricos de una normal frente a los de la muestra.<br><b>Barras</b>: para categóricas.</div>
+      <div class="box"><h4>Bivariantes</h4><b>Histograma bivariante</b>: frecuencia de cada clase por rango de un atributo.<br><b>Scatter plot</b>: una variable frente a otra.<br><b>Regresión lineal</b> (<code>regplot</code>): tendencia conjunta.</div>
+      <div class="box"><h4>Multivariantes</h4><b>Matriz de correlación</b> como mapa de calor (<code>heatmap</code>).<br><b>Resumen gráfico</b> (<code>pairplot</code>): todas las parejas de variables coloreadas por clase.</div>
+    </div>
+  </figure>
+
+  <h2>Histograma: el efecto de los bins</h2>
+  <p class="prose">Un <b>bin</b> es el rango que agrupa cada barra. Pocos bins esconden la forma; demasiados la llenan de ruido. Los histogramas no son adecuados con pocos datos.</p>
+  <figure class="diagram">
+    <label for="binSlider">Número de bins: <b class="out" id="binVal">20</b></label>
+    <input type="range" id="binSlider" min="2" max="60" value="20" style="width:100%">
+    <svg id="histSvg" viewBox="0 0 600 260" width="100%" style="display:block;margin-top:8px" role="img" aria-label="Histograma de rentabilidades diarias simuladas"></svg>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Media</span><span><i style="background:var(--example)"></i>Mediana</span></div>
+    <figcaption>500 rentabilidades diarias <b>simuladas</b> de una acción (%), con colas gordas como las reales. Prueba bins = 2 y bins = 50, como en el temario.</figcaption>
+  </figure>
+<pre class="code">from matplotlib import pyplot
+pyplot.hist(dataset['Longitud sépalo'], bins=50)
+pyplot.show()</pre>
+
+  <h2>Box plot y QQ plot</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Box plot</h4>Muestra si la distribución es simétrica y si hay outliers. En Iris, la longitud del sépalo no tiene outliers; el ancho del sépalo sí, por arriba y por abajo (65 de 150 flores entre 3,0 y 3,5).</div>
+    <div class="box"><h4>QQ plot</h4>Si los puntos se alejan de la diagonal, la variable no es normal. Es difícil saber "cuánto" se alejan: hay que acompañarlo de un test (tema 3).</div>
+  </div>
+  <figure class="diagram">
+    <svg viewBox="0 0 560 220" width="100%" style="max-width:600px;display:block;margin:0 auto" role="img" aria-label="Comparativa de QQ plot normal y de colas gordas" id="qqSvg"></svg>
+    <figcaption>Izquierda: datos normales sobre la diagonal. Derecha: rentabilidades con colas gordas; los extremos se escapan de la recta por ambos lados.</figcaption>
+  </figure>
+
+  <h2>Bivariante y multivariante con Iris</h2>
+<pre class="code">import seaborn as sns
+pyplot.scatter(dataset['Longitud sépalo'], dataset['Longitud pétalo'])
+sns.regplot(x='Longitud sépalo', y='Longitud pétalo', data=dataset)
+sns.heatmap(dataset.corr(), annot=True, fmt=".2f")
+sns.pairplot(dataset, hue="Clase")</pre>
+  <div class="grid g3">
+    <div class="box"><h4>Histograma por clase</h4>Sépalo de 4,5–5,5 cm → casi siempre setosa; de 7 cm en adelante → virginica.</div>
+    <div class="box"><h4>Scatter + regplot</h4>A más longitud de sépalo, más longitud de pétalo: con 6 cm de sépalo, el pétalo mide unos 4–5 cm.</div>
+    <div class="box"><h4>Pairplot</h4>Setosa se separa linealmente con cualquier par de atributos; versicolor y virginica se mezclan algo.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un <b>heatmap</b> de correlaciones entre sectores del IBEX y un <b>scatter</b> de rentabilidad frente a volatilidad de cada valor son dos gráficos clásicos para construir una cartera: muestran de un vistazo qué activos se mueven juntos y cuáles pagan más riesgo con más rentabilidad.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Univariantes: histograma, box plot, QQ plot. Bivariantes: histograma bivariante, scatter, regresión lineal. Multivariantes: matriz de correlación y pairplot.</li>
+    <li>El histograma depende del bin y no sirve con pocos datos.</li>
+    <li>QQ plot: lejos de la recta → no normal. Mediana más robusta que la media.</li>
+    <li>Librerías: matplotlib (pyplot) y seaborn.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-4"></div>
+</section>
+
+<!-- ===================== TEMA 5 ===================== -->
+<section class="view" data-view="tema-5" hidden>
+  <p class="eyebrow">Tema 5</p>
+  <h1>Calidad de los datos</h1>
+  <p class="oneline">Lo importante no es la cantidad sino la <b>calidad</b>. El preprocesamiento limpia tres problemas: <b>duplicados</b>, <b>valores perdidos</b> y <b>valores erróneos o extremos</b>, y además elimina variables redundantes y adapta los tipos.</p>
+  <ul class="objs"><li>Factores de calidad</li><li>Duplicados, perdidos, outliers</li><li>Relación entre variables</li><li>Variables categóricas</li></ul>
+
+  <h2>Cinco factores de calidad</h2>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div class="box"><h4>Diversidad</h4>Representar todas las situaciones del problema.</div>
+    <div class="box"><h4>Actualización</h4>Datos actuales: el problema puede haber cambiado.</div>
+    <div class="box"><h4>Relevancia</h4>Lo irrelevante solo añade ruido.</div>
+    <div class="box"><h4>Coherencia</h4>Detectar errores que rompen los patrones.</div>
+    <div class="box"><h4>Confiabilidad</h4>Representación fiel de la realidad.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p><b>Actualización y diversidad</b>: un modelo de riesgo entrenado solo con datos de 2010–2019, una década de tipos bajos y mercado alcista, no conoce un escenario como el de 2022, con inflación alta y subidas rápidas de tipos. Le faltan regímenes de mercado.</p></div>
+
+  <h2>El dataset del temario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th class="num">Edad</th><th class="num">Peso</th><th class="num">Altura</th><th class="num">Sexo</th><th>Problema</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td class="num">25</td><td class="num">190,69</td><td class="num">161,65</td><td class="num">0</td><td><span class="pill bad">Outlier</span> <span class="pill neutral">Duplicado</span></td></tr>
+      <tr><td>1</td><td class="num">25</td><td class="num">190,69</td><td class="num">161,65</td><td class="num">0</td><td><span class="pill neutral">Duplicado</span></td></tr>
+      <tr><td>2</td><td class="num">40</td><td class="num">NaN</td><td class="num">180,45</td><td class="num">1</td><td><span class="pill neutral">Perdido</span></td></tr>
+      <tr><td>3</td><td class="num">70</td><td class="num">51,16</td><td class="num">0,00</td><td class="num">1</td><td><span class="pill bad">Erróneo</span></td></tr>
+      <tr><td>4</td><td class="num">27</td><td class="num">69,78</td><td class="num">169,49</td><td class="num">0</td><td><span class="pill ok">Correcto</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>1. Duplicados</h2>
+  <p class="prose">Una instancia repetida pesa más en el modelo. Ejemplo: en una bolsa con las bolas [1,1,1,1,2,3,4,5], apostarías por el 1. El modelo razona igual.</p>
+  <div class="grid g2">
+    <div class="box"><h4>Eliminarlos</h4><code>dataset.duplicated().sum()</code> los cuenta; <code>drop()</code> o <code>drop_duplicates()</code> los quita. 101 → 99 instancias.</div>
+    <div class="box"><h4>Ponderarlos</h4>Dar a cada repetido un peso menor (p. ej. 0,25 si aparece 4 veces). Más fino, pero es difícil elegir el peso.</div>
+  </div>
+
+  <h2>2. Valores perdidos (NaN)</h2>
+  <p class="prose"><code>dataset.isnull().sum()</code> cuenta los NaN por columna (en el ejemplo: edad 2, peso 6, altura 1).</p>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div class="box"><h4>Eliminar la instancia</h4>Se pierde información (101 → 92 filas).</div>
+      <div class="box"><h4>Eliminar la variable</h4>Si otra variable muy correlacionada aporta lo mismo. Mala idea con pocos atributos.</div>
+      <div class="box accent"><h4>Generar un valor</h4>Media, mediana o un modelo que lo prediga: <code>fillna(dataset.mean())</code>. Introduce sesgo: la media se mantiene, pero bajan la desviación típica y cambian los percentiles.</div>
+    </div>
+    <figcaption>Regla general: si faltan muchísimos valores de una variable, no tiene sentido inventarlos; mejor eliminar la variable.</figcaption>
+  </figure>
+
+  <h2>3. Valores extremos (outliers)</h2>
+  <p class="prose">Test de Tukey: atípico <b>leve</b> si está a más de 1,5·IQR de los cuartiles; <b>extremo</b> si está a más de 3·IQR. Se detectan con <b>box plot</b> (una variable) o <b>scatter plot</b> (dos variables).</p>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>¿Es imposible?</b>Altura de 0 cm, edad de −2 años<br><small>→ error: eliminar o aplicar reglas ("ninguna edad &lt; 0")</small></div><div class="arrow">→</div>
+      <div class="node"><b>¿Es un error plausible?</b>Ruido dentro del rango posible<br><small>→ difícil de detectar; depende del resto de datos</small></div><div class="arrow">→</div>
+      <div class="node hl"><b>¿Es real pero raro?</b>Un adulto de 2 m, 200 kg<br><small>→ conservar si interesa; muchos problemas modelan justo esto</small></div>
+    </div>
+    <figcaption>Las tres causas de un outlier según el temario. Al quitar los outliers del ejemplo (filas 0, 1, 3 y 37), la regresión peso–altura muestra una relación mucho más clara.</figcaption>
+  </figure>
+  <div class="callout ex"><span class="tag">Ejemplo real: el flash crash</span><p>El 6 de mayo de 2010 el Dow Jones se desplomó cerca de un 9 % en minutos y se recuperó casi enseguida. Es un outlier <b>real</b>, no un error de datos. Si modelas el riesgo de cola, borrarlo sería quitar justo lo que quieres aprender. En cambio, un precio de cierre a 0 € por un fallo del proveedor de datos sí es un error y se elimina.</p></div>
+
+  <h2>Relación e importancia de variables</h2>
+  <p class="prose">Dos variables pueden explicar lo mismo (cilindros y caballos de un coche): la información redundante perjudica a las demás. Y no todas pesan igual sobre la clase. Herramientas: <b>heatmap</b> de correlaciones y los <b>coeficientes de una regresión lineal</b> como medida de importancia (en el ejemplo, la edad es la variable más relevante).</p>
+
+  <h2>Variables categóricas en modelos de distancias</h2>
+  <p class="prose">Muchos modelos (los basados en distancias) solo aceptan números. Al convertir colores de ojos en 0, 1, 2 se crea un <b>orden</b> que no existe, y eso distorsiona la distancia euclídea. Cómo evitarlo se ve en el <a href="#tema-6">tema 6</a> (one-hot encoding).</p>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Calidad: diversidad, actualización, relevancia, coherencia, confiabilidad.</li>
+    <li>Duplicados: eliminar o ponderar. Perdidos: eliminar instancia, eliminar variable o imputar.</li>
+    <li>Tukey: leve 1,5·IQR, extremo 3·IQR. Tres causas: error imposible, error plausible, valor real.</li>
+    <li>Imputar con la media mantiene la media pero reduce la desviación típica.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-5"></div>
+</section>
+
+<!-- ===================== TEMA 6 ===================== -->
+<section class="view" data-view="tema-6" hidden>
+  <p class="eyebrow">Tema 6</p>
+  <h1>Dataset</h1>
+  <p class="oneline">Para preparar un dataset hay que codificar bien las categóricas (<b>one-hot</b> mejor que label encoding), reducir dimensiones cuando hay demasiados atributos (<b>PCA</b>) y poner las variables en la misma escala (<b>normalizar</b> o, mejor normalmente, <b>estandarizar</b>).</p>
+  <ul class="objs"><li>Label vs. one-hot encoding</li><li>Maldición de la dimensionalidad</li><li>PCA</li><li>Normalizar y estandarizar</li></ul>
+
+  <h2>Codificar variables categóricas</h2>
+  <div class="grid g2">
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th>Color</th><th class="num">Label encoder</th></tr></thead>
+      <tbody>
+        <tr><td>Azul</td><td class="num">0</td></tr>
+        <tr><td>Marrón</td><td class="num">1</td></tr>
+        <tr><td>Verde</td><td class="num">2</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th>Color</th><th class="num">_Azul</th><th class="num">_Marrón</th><th class="num">_Verde</th></tr></thead>
+      <tbody>
+        <tr><td>Azul</td><td class="num"><b>1</b></td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>Marrón</td><td class="num">0</td><td class="num"><b>1</b></td><td class="num">0</td></tr>
+        <tr><td>Verde</td><td class="num">0</td><td class="num">0</td><td class="num"><b>1</b></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4><code>LabelEncoder()</code> (sklearn)</h4>Un entero por categoría. Problema: asume un orden y unas distancias (Verde &gt; Marrón &gt; Azul) que no existen.</div>
+    <div class="box accent"><h4>One-hot: <code>pd.get_dummies()</code></h4>Una columna de 0/1 por categoría. Sin orden falso. (sklearn tiene también <code>OneHotEncoder()</code>.)</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>El <b>sector</b> de una empresa (banca, energía, tecnología) o el <b>rating</b> de un bono. El sector no tiene orden: one-hot. El rating (AAA &gt; AA &gt; A &gt; BBB…) sí lo tiene, así que ahí una codificación ordinal con números tiene sentido. Antes de codificar, pregúntate si existe un orden real.</p></div>
+
+  <h2>La maldición de la dimensionalidad</h2>
+  <p class="prose">Con muchos atributos, los puntos se alejan en el espacio: la distancia media crece y la diferencia entre el punto más cercano y el más lejano se reduce. Los modelos de distancias dejan de distinguir qué se parece a qué. Compruébalo:</p>
+  <figure class="diagram">
+    <label for="dimSlider">Dimensiones (atributos): <b class="out" id="dimVal">2</b></label>
+    <input type="range" id="dimSlider" min="1" max="200" value="2" style="width:100%">
+    <div class="grid g3" style="margin-top:12px" id="dimOut"></div>
+    <figcaption>300 puntos aleatorios en un hipercubo. Contraste = (distancia máxima − mínima) / mínima, medido desde un punto de referencia. Cuando se acerca a 0, "cerca" y "lejos" ya no significan nada.</figcaption>
+  </figure>
+
+  <h3>Reducir dimensiones con PCA</h3>
+  <p class="prose">El <b>análisis de componentes principales</b> crea atributos nuevos como combinaciones lineales de los originales, ordenados por la varianza que explican (C1 &gt; C2 &gt; …). Desventaja: los componentes pierden su significado conceptual. Antes de aplicarlo hay que <b>estandarizar</b>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Fraude con tarjetas (árbol de decisión, 80/20)</th><th class="num">Fraudes detectados</th><th class="num">No fraudes correctos</th><th>Coste</th></tr></thead>
+    <tbody>
+      <tr><td>30 atributos originales</td><td class="num">15</td><td class="num">56.575</td><td>Más lento</td></tr>
+      <tr><td><b>4 componentes PCA</b></td><td class="num"><b>19</b></td><td class="num"><b>56.581</b></td><td>Más rápido y mejor</td></tr>
+    </tbody>
+  </table></div>
+<pre class="code">from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+X = StandardScaler().fit_transform(X)        <span class="c"># media 0, desviación 1</span>
+pca = PCA(n_components=4)
+componentes = pca.fit_transform(X)
+pca.explained_variance_ratio_                 <span class="c"># varianza explicada por cada componente</span></pre>
+  <div class="callout ex"><span class="tag">Ejemplo real: la curva de tipos</span><p>Si aplicas PCA a los movimientos diarios de los tipos de interés a distintos plazos (1, 2, 5, 10, 30 años), unos <b>3 componentes</b> explican la gran mayoría de la variación. Los gestores de renta fija los llaman <b>nivel</b>, <b>pendiente</b> y <b>curvatura</b>. Es un caso raro en el que los componentes sí tienen una interpretación clara.</p></div>
+
+  <h2>Escalar: reescalar, normalizar, estandarizar</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Reescalar</h4>Cambiar de unidad: °C → °F, euros → miles de euros.</div>
+    <div class="box"><h4>Normalizar (min-max)</h4><span class="mono">(x − mín) / (máx − mín)</span> → rango [0, 1]. Útil en k-NN y redes neuronales y si no se conoce la distribución. <b>Pierde la información de los outliers</b>, que quedan "aplastados".</div>
+    <div class="box accent"><h4>Estandarizar (z-score)</h4><span class="mono">(x − media) / σ</span> → media 0, σ 1. Útil en regresión logística, SVM y PCA. <b>Conserva el peso relativo de los outliers</b>: suele ser la opción recomendada.</div>
+  </div>
+  <figure class="diagram">
+    <label for="scaleIn">Precios (separados por comas)</label>
+    <input type="text" id="scaleIn" value="102, 98, 105, 110, 95, 101, 240">
+    <div class="table-wrap" style="margin-top:12px"><table id="scaleTable"></table></div>
+    <figcaption>Con un precio atípico (240), la normalización comprime todos los demás cerca de 0; la estandarización los deja en torno a −0,5 y marca el 240 con un z-score alto.</figcaption>
+  </figure>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Label encoder inventa un orden; one-hot (<code>get_dummies</code>) no.</li>
+    <li>Maldición de la dimensionalidad: las distancias pierden capacidad de discriminar.</li>
+    <li>PCA: combinaciones lineales que maximizan la varianza; se pierde el significado. Fraude: 4 componentes funcionan mejor que 30 atributos.</li>
+    <li>Normalizar = [0, 1], pierde outliers. Estandarizar = media 0 y σ 1, recomendada.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-6"></div>
+</section>
+
+<!-- ===================== TEMA 7 ===================== -->
+<section class="view" data-view="tema-7" hidden>
+  <p class="eyebrow">Tema 7</p>
+  <h1>Desbalanceo</h1>
+  <p class="oneline">Un dataset está <b>desbalanceado</b> cuando una clase es muchísimo más frecuente que otra. El modelo aprende a predecir siempre la mayoritaria, el <b>accuracy</b> sale altísimo y la clase que importa (el fraude) casi no se detecta.</p>
+  <ul class="objs"><li>El problema</li><li>Matriz de confusión</li><li>Ajuste de pesos</li><li>Submuestreo y remuestreo</li></ul>
+
+  <h2>El caso: fraude con tarjetas</h2>
+  <figure class="diagram">
+    <div class="balbar"><span class="maj" style="flex:99.83">No fraude · 284.315 (99,83 %)</span><span class="min" style="flex:0.6" title="Fraude: 492"></span></div>
+    <p class="prose" style="font-size:.9rem;margin-bottom:0">Dataset de Kaggle con transacciones europeas de 2013: 284.807 operaciones, solo <b>492 fraudes (0,17 %)</b>. La barra naranja, casi invisible, es el fraude.</p>
+  </figure>
+  <div class="callout warn"><span class="tag">La trampa del accuracy</span><p>Un modelo que diga siempre "no fraude", sin mirar nada, acierta el 99,83 %. Por eso con datos desbalanceados hay que mirar la <b>matriz de confusión</b> y el acierto de cada clase.</p></div>
+
+  <h2>Matriz de confusión</h2>
+  <p class="prose">Datos del temario (árbol de decisión, 30 % de test), tomando el <b>fraude como clase positiva</b>. Cambia los números para ver cómo responden las métricas:</p>
+  <figure class="diagram" id="cmCalc">
+    <div class="cm">
+      <div></div><div class="cmh">Predicho: fraude</div><div class="cmh">Predicho: no fraude</div>
+      <div class="cmh side">Real: fraude</div>
+      <div class="cell good"><label for="cmTP">VP (TP)</label><input type="number" id="cmTP" value="40" min="0"></div>
+      <div class="cell badc"><label for="cmFN">FN</label><input type="number" id="cmFN" value="102" min="0"></div>
+      <div class="cmh side">Real: no fraude</div>
+      <div class="cell badc"><label for="cmFP">FP</label><input type="number" id="cmFP" value="118" min="0"></div>
+      <div class="cell good"><label for="cmTN">VN (TN)</label><input type="number" id="cmTN" value="84858" min="0"></div>
+    </div>
+    <div class="grid g3" id="cmOut" style="margin-top:14px"></div>
+    <figcaption>Accuracy del 99,74 %, pero solo se detecta el 28 % de los fraudes (recall). Prueba a poner FN = 20 y FP = 2000, que es más o menos lo que ocurre al submuestrear.</figcaption>
+  </figure>
+
+  <h2>Técnicas de mitigación</h2>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div class="box"><h4>Ajustar pesos</h4>Penalizar la clase mayoritaria en el entrenamiento: <code>class_weight="balanced"</code> o pesos manuales <code>{'No fraude':0.5,'Fraude':1}</code>.<br><small>+ No crea datos sintéticos. − Difícil elegir los pesos.</small></div>
+      <div class="box"><h4>Submuestreo</h4>Quitar instancias de la mayoritaria.<br>• <b>Aleatorio</b>: <code>RandomUnderSampler</code><br>• <b>Por vecindad</b>: <code>NearMiss</code> conserva las más cercanas a la minoritaria.<br><small>− Se tira mucha información.</small></div>
+      <div class="box"><h4>Remuestreo</h4>Añadir instancias a la minoritaria.<br>• <b>Aleatorio</b>: <code>RandomOverSampler</code><br>• <b>SMOTE</b>: crea puntos nuevos sobre las líneas que unen instancias reales cercanas.<br><small>− Información sintética.</small></div>
+    </div>
+    <figcaption>Librería de Python: <b>imblearn</b> (imbalanced-learn). En la práctica se suelen combinar: reducir algo la mayoritaria y aumentar algo la minoritaria.</figcaption>
+  </figure>
+
+  <h3>SMOTE en un dibujo</h3>
+  <figure class="diagram">
+    <svg viewBox="0 0 520 200" width="100%" style="max-width:560px;display:block;margin:0 auto" role="img" aria-label="Esquema de SMOTE">
+      <line x1="120" y1="130" x2="260" y2="60" style="stroke:var(--example);stroke-dasharray:5 4;stroke-width:2"/>
+      <line x1="260" y1="60" x2="400" y2="120" style="stroke:var(--example);stroke-dasharray:5 4;stroke-width:2"/>
+      <circle cx="120" cy="130" r="9" style="fill:var(--example)"/><circle cx="260" cy="60" r="9" style="fill:var(--example)"/><circle cx="400" cy="120" r="9" style="fill:var(--example)"/>
+      <circle cx="190" cy="95" r="7" style="fill:var(--surface);stroke:var(--example);stroke-width:2.5"/>
+      <circle cx="330" cy="90" r="7" style="fill:var(--surface);stroke:var(--example);stroke-width:2.5"/>
+      <circle cx="225" cy="78" r="7" style="fill:var(--surface);stroke:var(--example);stroke-width:2.5"/>
+      <text x="120" y="160" text-anchor="middle" font-size="12">Fraude real</text>
+      <text x="400" y="150" text-anchor="middle" font-size="12">Fraude real</text>
+      <text x="290" y="40" text-anchor="middle" font-size="12">Fraude real</text>
+      <text x="260" y="190" text-anchor="middle" font-size="12" style="fill:var(--ink)">○ = fraudes sintéticos generados entre vecinos reales</text>
+    </svg>
+  </figure>
+
+  <h2>Resultados del temario</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Método</th><th class="num">Acierto general</th><th class="num">Acierto fraude</th><th class="num">Acierto no fraude</th><th style="min-width:140px">Fraude detectado</th></tr></thead>
+    <tbody id="balTable"></tbody>
+  </table></div>
+  <p class="prose">Cualquier técnica mejora la detección de fraude a costa del acierto general. El <b>submuestreo</b> detecta más fraude pero estropea mucho la clase mayoritaria. <b>SMOTE</b> logra el mejor compromiso porque genera datos a partir de casos reales (con otra semilla o partición, el resultado podría cambiar).</p>
+  <div class="callout ex"><span class="tag">En banca</span><p>Lo mismo ocurre en la detección de <b>impagos</b> (default) en carteras de crédito y en blanqueo de capitales. Un falso negativo (no detectar un fraude) cuesta dinero; un falso positivo (bloquear una compra legítima) cuesta clientes. Elegir el equilibrio entre recall y precisión es una decisión de negocio, no solo técnica.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Con desbalanceo, el accuracy engaña: hay que mirar la matriz de confusión y el acierto por clase.</li>
+    <li>Tres técnicas: ajuste de pesos, submuestreo (aleatorio, NearMiss) y remuestreo (aleatorio, SMOTE).</li>
+    <li>Librería imblearn. SMOTE interpola entre vecinos reales de la clase minoritaria.</li>
+    <li>Siempre se evalúa sobre un test con la distribución real, reservado antes de balancear.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-7"></div>
+</section>
+
+<!-- ===================== TEMA 8 ===================== -->
+<section class="view" data-view="tema-8" hidden>
+  <p class="eyebrow">Tema 8</p>
+  <h1>Modelos no supervisados</h1>
+  <p class="oneline">Los modelos no supervisados <b>no usan la clase</b> al entrenar: agrupan instancias por similitud para descubrir patrones. Sirven tanto en problemas de clasificación como de regresión. Los principales: <b>k-means</b>, <b>jerárquicos</b>, <b>DBSCAN</b> y <b>reglas de asociación</b>.</p>
+  <ul class="objs"><li>Qué es modelar</li><li>Agrupamiento y asociación</li><li>k-means y curva del codo</li><li>Dendrograma y DBSCAN</li></ul>
+
+  <h2>Tipos de modelos no supervisados</h2>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))">
+    <div class="box"><h4>Clustering (k-means)</h4>Crea k centroides y asigna cada punto al más cercano, recalculando hasta estabilizarse. Hay que fijar k antes.</div>
+    <div class="box"><h4>Jerárquico</h4>Agrupa a varios niveles. <b>Aglomerativo</b>: une instancias de abajo arriba. <b>Divisivo</b>: parte del todo y divide. Se ve en un <b>dendrograma</b>.</div>
+    <div class="box"><h4>Densidad (DBSCAN)</h4>Un clúster es una región densa (mínimo de vecinos) separada de otras por zonas poco densas. No necesita k.</div>
+    <div class="box"><h4>Asociación</h4>Reglas "si X entonces Y". Típicas en recomendación de productos.</div>
+  </div>
+
+  <h2>k-means paso a paso</h2>
+  <figure class="diagram" id="kmeans">
+    <div class="btnrow">
+      <label for="kSel" style="margin:auto 6px auto 0">k =</label>
+      <select id="kSel" class="btn"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+      <button class="btn" id="kStep">Siguiente paso</button>
+      <button class="btn" id="kRun">Hasta converger</button>
+      <button class="btn" id="kReset">Nuevos centroides</button>
+    </div>
+    <div class="grid g2" style="align-items:start">
+      <svg id="kSvg" viewBox="0 0 320 260" width="100%" role="img" aria-label="Clientes agrupados por k-means"></svg>
+      <svg id="elbowSvg" viewBox="0 0 320 260" width="100%" role="img" aria-label="Curva del codo"></svg>
+    </div>
+    <p class="out" id="kInfo"></p>
+    <figcaption>Izquierda: 150 clientes <b>simulados</b> de un banco según saldo medio (eje X) y nº de operaciones al mes (eje Y). Cruces = centroides. Derecha: curva del codo; la distancia media al centroide deja de bajar mucho a partir de k = 3.</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>Curva del codo</h4>Más centroides siempre reducen la distancia media, pero pueden partir grupos reales. El "codo" es el k a partir del cual la mejora es insignificante. Iris: k = 3. Dataset de CPU: k = 4.</div>
+    <div class="box"><h4>Resultado en Iris</h4>k-means con k = 3 acierta un <b>89,33 %</b> comparado con las clases reales (que no usó). Setosa sin fallos; versicolor y virginica se mezclan.</div>
+  </div>
+
+  <h2>Jerárquico y DBSCAN</h2>
+<pre class="code">import scipy.cluster.hierarchy as sch
+sch.dendrogram(sch.linkage(X, method='complete'))   <span class="c"># dendrograma</span>
+
+from sklearn.cluster import DBSCAN
+DBSCAN(min_samples=5, metric="euclidean").fit(X)</pre>
+  <div class="grid g2">
+    <div class="box"><h4>Dendrograma</h4>El eje Y es la distancia. Un corte horizontal donde los saltos son grandes da el número de grupos: 3 en Iris y 3 en CPU.</div>
+    <div class="box"><h4>DBSCAN</h4>En Iris solo separa una clase (setosa) por densidad; en el dataset de CPU no encuentra regiones distintas y crea un único clúster.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplos en finanzas</span>
+    <p><b>Segmentar clientes</b> de un banco por saldo, edad y uso de productos para ofrecer a cada grupo un servicio distinto (k-means). <b>Agrupar acciones</b> por cómo se mueven sus rentabilidades (jerárquico sobre la matriz de correlación) para diversificar mejor que con los sectores oficiales. <b>Reglas de asociación</b> para venta cruzada: "quien tiene hipoteca y nómina suele contratar un seguro de hogar".</p>
+  </div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>No supervisado = no usa la clase; sirve para clasificación y regresión.</li>
+    <li>Agrupamiento (clustering, jerárquico, densidad) y asociación.</li>
+    <li>k-means: hay que elegir k (curva del codo). Jerárquico: dendrograma, aglomerativo o divisivo. DBSCAN: densidad, mínimo de vecinos.</li>
+    <li>Iris con k-means (k = 3): 89,33 %.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-8"></div>
+</section>
+
+<!-- ===================== TEMA 9 ===================== -->
+<section class="view" data-view="tema-9" hidden>
+  <p class="eyebrow">Tema 9</p>
+  <h1>Modelos supervisados</h1>
+  <p class="oneline">Los modelos supervisados <b>sí usan la clase</b> (el target) para aprender. Se divide el dataset en entrenamiento, validación y test para evitar el <b>sobreentrenamiento</b>, y se evalúan con métricas distintas según sea regresión o clasificación.</p>
+  <ul class="objs"><li>Algoritmos</li><li>Fases del modelado</li><li>División y validación cruzada</li><li>Métricas</li></ul>
+
+  <h2>Algoritmos</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Algoritmo</th><th>Regresión</th><th>Clasificación</th></tr></thead>
+    <tbody>
+      <tr><td><b>KNN</b> (k vecinos)</td><td>Media del valor de los k vecinos</td><td>Votación de la clase de los k vecinos</td></tr>
+      <tr><td><b>Árbol de decisión</b></td><td>Divide por rangos ("altura entre 1,2 y 1,9")</td><td>Condiciones if-else anidadas; muy explicable</td></tr>
+      <tr><td><b>Regresión lineal</b></td><td>Fórmula por mínimos cuadrados</td><td>—</td></tr>
+      <tr><td><b>Regresión logística multinomial</b></td><td>—</td><td>Probabilidad de cada clase (más de dos clases)</td></tr>
+      <tr><td><b>SVM</b> (máquinas vector soporte)</td><td>Kernel lineal + regresión</td><td>Busca una dimensión donde las clases sean separables</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Fases del modelado</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>0. EDA</b>Análisis exploratorio y datos limpios</div><div class="arrow">→</div>
+      <div class="node"><b>1. Definir el modelo</b>¿Clasificación o regresión? ¿Cuántos datos y atributos?</div><div class="arrow">→</div>
+      <div class="node"><b>2. Dividir</b>Entrenamiento / validación / test</div><div class="arrow">→</div>
+      <div class="node"><b>3. Entrenar</b><code>fit()</code></div><div class="arrow">→</div>
+      <div class="node"><b>4. Validar</b>Ajustar parámetros con datos no vistos</div><div class="arrow">→</div>
+      <div class="node hl"><b>5. Predecir</b><code>predict()</code> sobre test: el rendimiento real</div>
+    </div>
+  </figure>
+  <div class="callout warn"><span class="tag">Sobreentrenamiento (overfitting)</span><p>Evaluar con los mismos datos de entrenamiento engaña. En Iris, el árbol de decisión acierta el <b>100 %</b> en entrenamiento y el <b>86,7 %</b> en test. En regresión, el árbol tiene error 0 en entrenamiento y RMSE ≈ 58,5 en test.</p></div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Es el gran riesgo del trading algorítmico: una estrategia ajustada con todo el histórico parece perfecta en el backtest y falla en real. Por eso se reserva un periodo <b>fuera de muestra</b> que el modelo nunca ha visto. Con series temporales, además, el test debe ser <b>posterior</b> al entrenamiento: mezclar fechas al azar deja al modelo "ver el futuro".</p></div>
+
+  <h2>Cómo dividir el dataset</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Aleatoria</h4>Train y test al azar: <code>train_test_split(X, y, test_size=0.2)</code>.</div>
+    <div class="box"><h4>Estratificada</h4>Misma proporción de cada clase en train y test: <code>stratify=y</code>.</div>
+    <div class="box accent"><h4>Validación cruzada (k-folds)</h4>k partes; cada una hace de test una vez. Se promedian las métricas: resultado más robusto.</div>
+  </div>
+  <figure class="diagram">
+    <div class="kfold" id="kfold"></div>
+    <figcaption>Validación cruzada con k = 5: cada fila es un entrenamiento independiente; el bloque oscuro es el test de esa iteración. El temario usa <code>StratifiedKFold(n_splits=3)</code>.</figcaption>
+  </figure>
+  <div class="table-wrap"><table>
+    <thead><tr><th>División (Iris)</th><th class="num">KNN (k = 3)</th><th class="num">Árbol de decisión</th></tr></thead>
+    <tbody>
+      <tr><td>Aleatoria</td><td class="num">0,9667</td><td class="num">0,8667</td></tr>
+      <tr><td>Estratificada</td><td class="num">0,9333</td><td class="num">0,9333</td></tr>
+      <tr><td>Validación cruzada estratificada</td><td class="num"><b>0,9733</b></td><td class="num"><b>0,9533</b></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Métricas de regresión</h2>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="box"><h4>MSE</h4>Error cuadrático medio. Siempre ≥ 0. Sensible a outliers y a la magnitud.</div>
+    <div class="box"><h4>RMSE</h4>Raíz del MSE: error en las unidades reales (p. ej. euros).</div>
+    <div class="box"><h4>MAE</h4>Error absoluto medio. Menos sensible a outliers.</div>
+    <div class="box"><h4>R² y R² ajustado</h4>R² de 0 a 1: 1 = el modelo explica toda la variación; 0 = no mejora a predecir la media. El ajustado penaliza atributos inútiles.</div>
+  </div>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="regReal">Valores reales</label><input type="text" id="regReal" value="10, 12, 9, 15, 20, 18"></div>
+      <div><label for="regPred">Predicciones</label><input type="text" id="regPred" value="11, 12, 10, 13, 22, 17"></div>
+    </div>
+    <div class="grid g4" id="regOut" style="margin-top:12px"></div>
+    <figcaption>Calculadora de métricas de regresión. Cambia una predicción a un valor muy alejado y verás que el MSE se dispara mucho más que el MAE.</figcaption>
+  </figure>
+
+  <h2>Métricas de clasificación</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Métrica</th><th>Fórmula</th><th>Pregunta que responde</th></tr></thead>
+    <tbody>
+      <tr><td><b>Accuracy</b> (exactitud)</td><td class="mono">(VP+VN) / total</td><td>¿Qué parte acierta? Engaña con desbalanceo</td></tr>
+      <tr><td><b>Precisión</b></td><td class="mono">VP / (VP+FP)</td><td>De lo que marco como positivo, ¿cuánto lo es?</td></tr>
+      <tr><td><b>Recall</b> (sensibilidad, TPR)</td><td class="mono">VP / (VP+FN)</td><td>De los positivos reales, ¿cuántos detecto?</td></tr>
+      <tr><td><b>Especificidad</b> (TNR)</td><td class="mono">VN / (VN+FP)</td><td>De los negativos reales, ¿cuántos detecto?</td></tr>
+      <tr><td><b>F1</b></td><td class="mono">2·P·R / (P+R)</td><td>Equilibrio entre precisión y recall</td></tr>
+      <tr><td><b>AUC</b></td><td>Área bajo la curva ROC (TPR frente a FPR en todos los umbrales)</td><td>1 = perfecto; 0,5 = azar</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Puedes calcularlas con la matriz de confusión interactiva del <a href="#tema-7">tema 7</a>.</p>
+
+  <h2>Comparativa de algoritmos (temario)</h2>
+  <div class="grid g2">
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th>Regresión (CPU)</th><th class="num">RMSE</th><th class="num">R²</th></tr></thead>
+      <tbody>
+        <tr><td>KNN</td><td class="num">55,38</td><td class="num">0,879</td></tr>
+        <tr><td>Árbol de decisión</td><td class="num">58,51</td><td class="num">0,863</td></tr>
+        <tr><td><b>Regresión lineal</b></td><td class="num"><b>45,87</b></td><td class="num"><b>0,915</b></td></tr>
+        <tr><td>SVM</td><td class="num">61,67</td><td class="num">0,849</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th>Clasificación (Iris)</th><th class="num">Accuracy</th></tr></thead>
+      <tbody>
+        <tr><td>KNN</td><td class="num">0,9733</td></tr>
+        <tr><td>Árbol de decisión</td><td class="num">0,9533</td></tr>
+        <tr><td>Regresión logística multinomial</td><td class="num">0,9733</td></tr>
+        <tr><td><b>SVM</b></td><td class="num"><b>0,98</b></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">Todos con parámetros por defecto. Para una comparación justa se prueba una rejilla (grid) de parámetros.</p>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Supervisado = usa el target. KNN, árboles, regresión lineal/logística, SVM.</li>
+    <li>Fases: definir modelo → dividir → entrenar → validar → predecir.</li>
+    <li>División aleatoria, estratificada y validación cruzada (k-folds), la más robusta.</li>
+    <li>Regresión: MSE, RMSE, MAE, R², R² ajustado. Clasificación: accuracy, precisión, recall, especificidad, F1, AUC.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-9"></div>
+</section>
+
+<!-- ===================== TEMA 10 ===================== -->
+<section class="view" data-view="tema-10" hidden>
+  <p class="eyebrow">Tema 10</p>
+  <h1>Herramientas y buenas prácticas</h1>
+  <p class="oneline">Antes de programar, mira si alguien ya lo ha hecho; escribe código legible, modular y documentado; dedica el tiempo a los datos (80 %); elige modelos que puedas <b>explicar</b>; y apóyate en herramientas como Colab, Kaggle y UCI.</p>
+  <ul class="objs"><li>Buenas prácticas de código</li><li>Buenas prácticas de análisis</li><li>¿Cuál es el mejor modelo?</li><li>Herramientas</li></ul>
+
+  <h2>Buenas prácticas de programación</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Reutilizar</h4>¿Existe ya una librería o una respuesta en un foro? Ahorra tiempo, está probada y suele estar optimizada.</div>
+    <div class="box"><h4>Documentar</h4>Comentarios en el código y ficheros que expliquen objetivo, estado y requisitos.</div>
+    <div class="box"><h4>Indentación</h4>Que se vean los niveles. En Python es obligatoria.</div>
+    <div class="box"><h4>Nombres explicativos</h4>No reutilizar <code>dataset</code> para guardar un número; no repetir nombres de variable y función.</div>
+    <div class="box"><h4>No condensar líneas</h4>Encadenar con <code>;</code> hace el código ilegible.</div>
+    <div class="box"><h4>Partes definidas</h4>Orden: librerías → variables globales → funciones → código principal.</div>
+    <div class="box"><h4>Modularidad</h4>Funciones para lo que se repite: "divide y vencerás".</div>
+    <div class="box"><h4>Homogeneidad</h4>Un mismo estilo en todo el código.</div>
+  </div>
+<pre class="code"><span class="c"># Mal</span>
+d=pd.read_csv("f.csv");d=d.dropna();x=d.mean()
+
+<span class="c"># Bien</span>
+import pandas as pd
+
+def cargar_precios(ruta):
+    """Lee un CSV de cotizaciones y elimina filas incompletas."""
+    precios = pd.read_csv(ruta)
+    return precios.dropna()
+
+precios = cargar_precios("cotizaciones.csv")
+precio_medio = precios["cierre"].mean()</pre>
+
+  <h2>Buenas prácticas de análisis</h2>
+  <div class="grid g2">
+    <div class="box accent"><span class="k">80 / 20</span><h4>Tiempo de un analista</h4>80 % preprocesar datos, 20 % modelar. Los datos reales son desordenados, irrelevantes o incompletos, a diferencia de los datasets del curso.</div>
+    <div class="box"><h4>Legislación y cambios</h4>Datos personales o protegidos, leyes del país donde se implanta y cambios en cómo se obtienen los datos: diseña código flexible desde el principio.</div>
+    <div class="box"><h4>Explicabilidad</h4>Un árbol de decisión se puede seguir nodo a nodo; el deep learning no. La UE exige que la IA en usos sensibles sea explicable y no opaca.</div>
+    <div class="box"><h4>Expertos y equipos multidisciplinares</h4>Validan las muestras, detectan malas interpretaciones. La comunicación debe ir en los dos sentidos.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo real: scoring de crédito</span><p>El Reglamento europeo de IA (AI Act, 2024) clasifica como de <b>alto riesgo</b> los sistemas que evalúan la solvencia de las personas para concederles crédito. Un banco que deniega un préstamo con un modelo debe poder explicar por qué. Por eso en riesgo de crédito siguen siendo habituales la regresión logística y los árboles, aunque existan modelos más precisos.</p></div>
+
+  <h2>¿Cuál es el mejor modelo?</h2>
+  <p class="prose">No existe uno universal: depende de los datos, su orden, el preprocesamiento y la métrica. La hoja de referencia de Hui Li (blog de SAS) ayuda a elegir una familia:</p>
+  <figure class="diagram">
+    <div class="tree" style="min-width:620px">
+      <div class="tnode root">¿Conoces el target (la respuesta)?</div>
+      <div class="stem"></div>
+      <div class="lvl">
+        <div class="branch">
+          <div class="tnode mid">No → no supervisado</div>
+          <div class="leaves">
+            <div class="leaf"><b>¿Conoces k?</b><em>sí</em>k-means</div>
+            <div class="leaf"><b>¿Conoces k?</b><em>no</em>jerárquico, DBSCAN</div>
+          </div>
+        </div>
+        <div class="branch">
+          <div class="tnode mid">Sí → supervisado</div>
+          <div class="leaves">
+            <div class="leaf"><b>Salida numérica</b><em>regresión</em>rapidez vs. precisión</div>
+            <div class="leaf"><b>Salida categórica</b><em>clasificación</em>rapidez, precisión o explicabilidad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figcaption>Versión simplificada de la hoja de referencia de algoritmos de machine learning.</figcaption>
+  </figure>
+
+  <h2>Herramientas útiles</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Herramienta</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td><b>Anaconda + Jupyter</b></td><td>Entornos virtuales (Python 2 y 3 a la vez) y cuadernos con código y texto</td></tr>
+      <tr><td><b>Consola online de python.org</b></td><td>Probar una expresión rápida sin instalar nada</td></tr>
+      <tr><td><b>Google Colab</b></td><td>Cuadernos en la nube, gratis con cuenta de Google; permite usar <b>GPU y TPU</b></td></tr>
+      <tr><td><b>Kaggle</b></td><td>Cuadernos con recursos gratuitos limitados, competiciones (algunas con premio), miles de datasets y soluciones con código</td></tr>
+      <tr><td><b>UCI Machine Learning Repository</b></td><td>Datasets académicos (Iris, breast cancer, CPU…)</td></tr>
+      <tr><td><b>Google Dataset Search</b></td><td>Buscador de datasets</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ex"><span class="tag">Para practicar con mercados</span><p>En Kaggle hay datasets públicos de cotizaciones históricas, el de fraude con tarjetas de este módulo y datos de riesgo de crédito. En Colab puedes abrir un cuaderno, cargar uno de ellos y repetir los pasos del módulo sin instalar nada.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Reutilizar, documentar, indentar, nombres claros, modularidad, homogeneidad.</li>
+    <li>80 % preprocesado, 20 % modelado.</li>
+    <li>La UE exige modelos explicables en usos sensibles; el árbol de decisión es explicable, el deep learning no.</li>
+    <li>No hay un mejor modelo universal. Colab (GPU/TPU), Kaggle, UCI, Google Dataset Search.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-10"></div>
+</section>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section class="view" data-view="glosario" hidden>
+  <p class="eyebrow">Consulta rápida</p>
+  <h1>Glosario</h1>
+  <p class="lead">Los términos clave del módulo 3. Escribe para filtrar.</p>
+  <label for="glossQ" style="margin-top:16px">Buscar término</label>
+  <input type="text" id="glossQ" placeholder="Por ejemplo: SMOTE, PCA, recall…">
+  <div class="gloss" id="glossList"></div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  const TOPICS = [
+    {id:"tema-1", t:"Ciencia de datos", d:"Venn de Drew Conway, lenguajes, Python y Anaconda."},
+    {id:"tema-2", t:"Datos, información y conocimiento", d:"Tipos básicos y complejos, data frames, operadores y ficheros."},
+    {id:"tema-3", t:"De los datos a la información", d:"describe(), univariante, normalidad, covarianza y correlación."},
+    {id:"tema-4", t:"Visualización", d:"Histograma, box plot, QQ plot, scatter, heatmap y pairplot."},
+    {id:"tema-5", t:"Calidad de los datos", d:"Duplicados, valores perdidos, outliers y variables redundantes."},
+    {id:"tema-6", t:"Dataset", d:"One-hot, maldición de la dimensionalidad, PCA y escalado."},
+    {id:"tema-7", t:"Desbalanceo", d:"Matriz de confusión, pesos, submuestreo y SMOTE."},
+    {id:"tema-8", t:"Modelos no supervisados", d:"k-means, curva del codo, jerárquico y DBSCAN."},
+    {id:"tema-9", t:"Modelos supervisados", d:"KNN, árboles, SVM, validación cruzada y métricas."},
+    {id:"tema-10", t:"Herramientas y buenas prácticas", d:"Código limpio, explicabilidad, Colab, Kaggle y UCI."}
+  ];
+  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (x,d=2) => isFinite(x) ? x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d}) : "—";
+  const parse = s => s.split(/[;\s]*,[;\s]*|\s+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(isFinite);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function gaussFrom(r){ return function(){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
+
+  // ---------- Storage ----------
+  const KEY = "dato-ia-m3-v1";
+  let state = {studied:{}, scores:{}};
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---------- Router ----------
+  const views = document.querySelectorAll(".view");
+  const navLinks = document.querySelectorAll("#navlist a");
+  function route(){
+    let h = (location.hash || "#inicio").slice(1);
+    if (!document.querySelector('.view[data-view="'+h+'"]')) h = "inicio";
+    views.forEach(v => v.hidden = v.dataset.view !== h);
+    navLinks.forEach(a => { if (a.dataset.v === h) { a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Quiz ----------
+  const QUIZ = {
+    "tema-1":[
+      {q:"Según el diagrama de Drew Conway, ¿qué falta a \"programación + matemáticas\" para ser ciencia de datos?", o:["Big data","Conocimiento experto","Bases de datos SQL"], a:1, e:"Programación + matemáticas es machine learning; con conocimiento experto se convierte en ciencia de datos."},
+      {q:"¿Qué lenguaje ocupaba el primer puesto en la encuesta de Kaggle 2018?", o:["R","SQL","Python"], a:2, e:"Python, seguido de R y SQL."},
+      {q:"Python es un lenguaje…", o:["Compilado y de propósito específico","Interpretado y multiparadigma","Compilado y orientado solo a objetos"], a:1, e:"Interpretado (se traduce al ejecutarse), multiparadigma, libre y multiplataforma."},
+      {q:"¿Para qué sirve principalmente Anaconda en el curso?", o:["Crear entornos virtuales sin conflictos de versiones","Compilar Python a código máquina","Sustituir a Jupyter"], a:0, e:"Gestiona paquetes y entornos virtuales; desde ahí se lanza Jupyter Notebook."},
+      {q:"Scala ha ganado relevancia en ciencia de datos por ser la base de…", o:["Julia","Apache Spark","Jupyter"], a:1, e:"Scala es la base de Apache Spark, para procesamiento paralelo y big data."}
+    ],
+    "tema-2":[
+      {q:"\"La cotización cayó un 3 % tras publicar resultados\" es…", o:["Un dato","Información","Conocimiento"], a:1, e:"Es un dato con contexto: información. Conocimiento sería añadir experiencia previa."},
+      {q:"¿Cuál de estas estructuras es inmutable?", o:["Lista","Diccionario","Tupla"], a:2, e:"La tupla no se puede modificar una vez definida."},
+      {q:"¿Qué devuelve isinstance(True, int)?", o:["True","False","Error"], a:0, e:"bool es un subtipo de entero en Python."},
+      {q:"int(2.323) es un ejemplo de…", o:["Coerción","Casting","Conversión implícita"], a:1, e:"Casting: conversión explícita, que además pierde los decimales."},
+      {q:"Abrir un fichero con el modo \"w\"…", o:["Añade al final sin borrar","Solo permite leer","Borra el contenido previo"], a:2, e:"\"w\" sobrescribe; \"a\" añade al final."}
+    ],
+    "tema-3":[
+      {q:"Predecir el precio de cierre de mañana es un problema de…", o:["Clasificación","Regresión","Agrupamiento"], a:1, e:"La salida es un valor numérico continuo: regresión."},
+      {q:"Alturas: 2,18 · 1,72 · 1,72 · 1,69 · 1,68 · 1,63 · 1,56. ¿Qué medida representa mejor al alumno típico?", o:["Media (1,74)","Mediana (1,69)","Máximo (2,18)"], a:1, e:"La mediana es robusta frente al valor extremo de 2,18."},
+      {q:"Si el coeficiente de variación es 18 %…", o:["La media es representativa","Hay outliers seguro","La variable es normal"], a:0, e:"CV ≤ 30 % indica que la media representa bien al conjunto."},
+      {q:"Un test de normalidad da p = 0,01 con α = 0,05. ¿Qué concluyes?", o:["Se asume normalidad","Se rechaza la normalidad","El test no es válido"], a:1, e:"p ≤ α: se rechaza la hipótesis de normalidad."},
+      {q:"¿Por qué se prefiere la correlación a la covarianza para comparar relaciones?", o:["Porque no depende de las unidades","Porque siempre es positiva","Porque detecta relaciones no lineales"], a:0, e:"La correlación estandariza las variables y va de −1 a 1."}
+    ],
+    "tema-4":[
+      {q:"¿Qué gráfico compara los cuantiles teóricos de una normal con los de la muestra?", o:["Box plot","QQ plot","Pairplot"], a:1, e:"El QQ plot: si los puntos se alejan de la recta, no es normal."},
+      {q:"¿Qué pasa en un histograma si eliges muy pocos bins?", o:["Se ve más ruido","Se esconde la forma de la distribución","No cambia nada"], a:1, e:"Barras muy anchas agrupan demasiado y ocultan la forma."},
+      {q:"Para ver la correlación de todas las variables a la vez usarías…", o:["Un heatmap de la matriz de correlación","Un histograma","Un QQ plot"], a:0, e:"sns.heatmap(dataset.corr(), annot=True)."},
+      {q:"sns.pairplot(dataset, hue=\"Clase\") muestra…", o:["Un único scatter","Todas las parejas de variables coloreadas por clase","La curva ROC"], a:1, e:"Es el resumen gráfico multivariante."},
+      {q:"¿Qué librería se usa para regplot, heatmap y pairplot?", o:["seaborn","numpy","imblearn"], a:0, e:"seaborn; matplotlib (pyplot) para hist, scatter y show."}
+    ],
+    "tema-5":[
+      {q:"¿Por qué hay que tratar las instancias duplicadas?", o:["Ocupan memoria","El modelo les da más peso","Generan NaN"], a:1, e:"Como la bola que más se repite, el modelo tenderá a predecirlas."},
+      {q:"Al rellenar los NaN con la media de la columna…", o:["Cambia la media","La media se mantiene pero baja la desviación típica","No cambia ningún estadístico"], a:1, e:"Se añaden valores en el centro: misma media, menos dispersión."},
+      {q:"Una altura de 0 cm en un dataset de adultos es…", o:["Un outlier real que hay que conservar","Un error que se debe eliminar o corregir con reglas","Un valor perdido"], a:1, e:"Es imposible: error de captura."},
+      {q:"Según Tukey, un atípico extremo está por encima de…", o:["Q3 + 1,5·IQR","Q3 + 3·IQR","Media + 2σ"], a:1, e:"Leve 1,5·IQR; extremo 3·IQR."},
+      {q:"El número de cilindros y los caballos de un coche son un ejemplo de…", o:["Variables redundantes","Variables desbalanceadas","Valores perdidos"], a:0, e:"Explican el mismo fenómeno; la información redundante perjudica a las demás variables."}
+    ],
+    "tema-6":[
+      {q:"¿Qué problema tiene LabelEncoder con la variable \"sector\"?", o:["Crea demasiadas columnas","Inventa un orden y unas distancias que no existen","Elimina categorías"], a:1, e:"Asigna 0, 1, 2… como si hubiera un orden real."},
+      {q:"pd.get_dummies() aplica…", o:["Label encoding","One-hot encoding","Estandarización"], a:1, e:"Crea una columna 0/1 por cada categoría."},
+      {q:"La maldición de la dimensionalidad perjudica sobre todo a…", o:["Modelos basados en distancias","Gráficos de barras","Tests de normalidad"], a:0, e:"Con muchas dimensiones las distancias dejan de discriminar."},
+      {q:"¿Cuál es la principal desventaja de PCA?", o:["Aumenta las dimensiones","Los componentes pierden su significado","Solo funciona con texto"], a:1, e:"Son combinaciones lineales de los atributos originales."},
+      {q:"¿Qué escalado conserva la influencia relativa de los outliers?", o:["Normalización min-max","Estandarización (z-score)","Ninguno"], a:1, e:"La normalización los aplasta en [0, 1]; la estandarización los mantiene."}
+    ],
+    "tema-7":[
+      {q:"Un modelo de fraude tiene 99,7 % de accuracy pero detecta el 28 % de los fraudes. ¿Qué pasa?", o:["Es un modelo excelente","El accuracy engaña por el desbalanceo","Hay sobreentrenamiento seguro"], a:1, e:"Con 99,8 % de no fraudes, decir siempre \"no fraude\" ya da un accuracy altísimo."},
+      {q:"SMOTE…", o:["Elimina instancias de la mayoritaria","Copia al azar instancias de la minoritaria","Genera instancias sintéticas entre vecinos reales de la minoritaria"], a:2, e:"Interpola sobre las líneas que unen instancias cercanas."},
+      {q:"NearMiss es una técnica de…", o:["Submuestreo basado en vecindad","Remuestreo aleatorio","Ajuste de pesos"], a:0, e:"Conserva las instancias mayoritarias más cercanas a la minoritaria."},
+      {q:"class_weight=\"balanced\" en un árbol de decisión…", o:["Duplica la clase minoritaria","Ajusta los pesos según el número de instancias de cada clase","Elimina la clase mayoritaria"], a:1, e:"Es la técnica de ajuste de pesos, sin datos sintéticos."},
+      {q:"En los resultados del temario, ¿qué método logra el mejor compromiso?", o:["Submuestreo aleatorio","Remuestreo aleatorio","SMOTE"], a:2, e:"79 % de fraude detectado sin hundir la clase mayoritaria (98 %)."}
+    ],
+    "tema-8":[
+      {q:"Un modelo no supervisado…", o:["Usa la clase para entrenar","No usa la clase para entrenar","Solo sirve para regresión"], a:1, e:"Agrupa por similitud entre atributos, sin target."},
+      {q:"¿Qué método ayuda a elegir k en k-means?", o:["La curva del codo","La curva ROC","El QQ plot"], a:0, e:"Buscar el punto donde añadir clústeres deja de reducir mucho la distancia."},
+      {q:"DBSCAN forma clústeres en función de…", o:["Un número k fijado","La densidad de puntos","La clase real"], a:1, e:"Regiones densas separadas por zonas poco densas."},
+      {q:"Un dendrograma se asocia a…", o:["k-means","Agrupamiento jerárquico","Reglas de asociación"], a:1, e:"Muestra cómo se unen (o dividen) los grupos a distintas distancias."},
+      {q:"\"Quien tiene hipoteca suele contratar seguro de hogar\" es un ejemplo de…", o:["Clustering","Regla de asociación","Regresión"], a:1, e:"Las reglas de asociación se usan para recomendar productos."}
+    ],
+    "tema-9":[
+      {q:"El árbol acierta el 100 % en entrenamiento y el 87 % en test. Esto indica…", o:["Sobreentrenamiento","Desbalanceo","Maldición de la dimensionalidad"], a:0, e:"Se ha ajustado demasiado a los datos de entrenamiento."},
+      {q:"¿Qué división asegura la misma proporción de clases en train y test?", o:["Aleatoria","Estratificada","Ninguna"], a:1, e:"stratify=y en train_test_split."},
+      {q:"¿Qué métrica de regresión da el error en las unidades reales de la variable?", o:["MSE","RMSE","R²"], a:1, e:"RMSE es la raíz del MSE; vuelve a las unidades originales."},
+      {q:"De todos los fraudes reales, ¿qué proporción detecto? Esa métrica es…", o:["Precisión","Recall","Especificidad"], a:1, e:"Recall o sensibilidad = VP / (VP + FN)."},
+      {q:"En Iris, ¿qué algoritmo obtuvo el mejor accuracy medio?", o:["Árbol de decisión","KNN","SVM"], a:2, e:"SVM con 0,98; KNN y logística 0,9733; árbol 0,9533."}
+    ],
+    "tema-10":[
+      {q:"Según el temario, ¿cómo se reparte el tiempo de un analista?", o:["50 % datos / 50 % modelo","80 % preprocesar / 20 % modelar","20 % preprocesar / 80 % modelar"], a:1, e:"La mayor parte del trabajo es preparar los datos."},
+      {q:"¿Qué modelo es más fácil de explicar?", o:["Árbol de decisión","Deep learning","Ambos igual"], a:0, e:"Se puede seguir nodo a nodo por qué se clasifica una instancia."},
+      {q:"¿Qué herramienta permite usar GPU y TPU gratis en la nube?", o:["UCI","Google Colab","Anaconda"], a:1, e:"Colab, con cuenta de Google y un límite de recursos."},
+      {q:"¿En qué orden se recomienda organizar un fichero de código?", o:["Funciones, librerías, código principal","Librerías, variables globales, funciones, código principal","Código principal, funciones, librerías"], a:1, e:"Así, con mirar la cabecera sabes qué librerías necesitas."},
+      {q:"¿Existe un \"mejor modelo\" universal?", o:["Sí, SVM","Sí, el deep learning","No, depende de los datos, la métrica y las restricciones"], a:2, e:"Se usan hojas de referencia para elegir una familia de algoritmos."}
+    ]
+  };
+
+  function renderProgress(){
+    const n = TOPICS.filter(t => state.studied[t.id]).length;
+    document.getElementById("progText").textContent = n + " de 10 temas estudiados";
+    document.getElementById("progBar").style.width = (n*10) + "%";
+    navLinks.forEach(a => a.classList.toggle("done", !!state.studied[a.dataset.v]));
+    document.getElementById("tcards").innerHTML = TOPICS.map((t,i) => {
+      const sc = state.scores[t.id];
+      const st = state.studied[t.id] ? '<span class="pill ok">Estudiado</span>' : '<span class="pill neutral">Pendiente</span>';
+      const scs = sc!=null ? ' <span class="pill neutral">Test: '+sc+'/'+QUIZ[t.id].length+'</span>' : '';
+      return '<a class="tcard" href="#'+t.id+'"><span class="n">TEMA '+(i+1)+'</span><b>'+t.t+'</b><span class="d">'+t.d+'</span><span class="st">'+st+scs+'</span></a>';
+    }).join("");
+    document.querySelectorAll(".studied button").forEach(b => {
+      const on = !!state.studied[b.dataset.t];
+      b.setAttribute("aria-pressed", on);
+      b.textContent = on ? "✓ Estudiado" : "Marcar como estudiado";
+    });
+  }
+
+  document.querySelectorAll(".quiz").forEach(box => {
+    const id = box.dataset.quiz, qs = QUIZ[id];
+    let answered = 0, right = 0;
+    box.innerHTML = '<h2>Autoevaluación</h2><p style="color:var(--muted);font-size:.9rem;margin-top:4px">' + qs.length + ' preguntas. Elige una respuesta para ver la explicación.</p>' +
+      qs.map((q,i) => '<div class="qitem"><p class="q">'+(i+1)+'. '+q.q+'</p><div class="qopts">'+q.o.map((o,j)=>'<button class="qopt" data-i="'+i+'" data-j="'+j+'">'+o+'</button>').join("")+'</div><p class="qexp" hidden></p></div>').join("") +
+      '<div class="qscore"><span class="out" data-score>0 de '+qs.length+' respondidas</span><button class="btn" data-reset>Repetir test</button></div>' +
+      '<div class="studied"><button class="btn primary" data-t="'+id+'" aria-pressed="false">Marcar como estudiado</button></div>';
+    box.addEventListener("click", ev => {
+      const b = ev.target.closest(".qopt");
+      if (b){
+        const i = +b.dataset.i, j = +b.dataset.j, q = qs[i], item = b.closest(".qitem");
+        item.querySelectorAll(".qopt").forEach((x,k) => { x.disabled = true; if (k===q.a) x.classList.add("right"); });
+        if (j !== q.a) b.classList.add("wrong"); else right++;
+        answered++;
+        const exp = item.querySelector(".qexp");
+        exp.textContent = (j===q.a ? "Correcto. " : "No es correcto. ") + q.e; exp.hidden = false;
+        box.querySelector("[data-score]").textContent = answered < qs.length ? (answered+" de "+qs.length+" respondidas · "+right+" aciertos") : ("Resultado: "+right+" de "+qs.length+" aciertos");
+        if (answered === qs.length){ state.scores[id] = right; if (right >= qs.length-1) state.studied[id] = true; save(); renderProgress(); }
+        return;
+      }
+      if (ev.target.closest("[data-reset]")){
+        answered = 0; right = 0;
+        box.querySelectorAll(".qopt").forEach(x => { x.disabled=false; x.classList.remove("right","wrong"); });
+        box.querySelectorAll(".qexp").forEach(x => x.hidden = true);
+        box.querySelector("[data-score]").textContent = "0 de "+qs.length+" respondidas";
+        return;
+      }
+      if (ev.target.closest(".studied button")){ state.studied[id] = !state.studied[id]; save(); renderProgress(); }
+    });
+  });
+
+  TOPICS.forEach((t,i) => {
+    const sec = document.querySelector('.view[data-view="'+t.id+'"]');
+    const prev = i>0 ? TOPICS[i-1] : null, next = i<TOPICS.length-1 ? TOPICS[i+1] : null;
+    const div = document.createElement("div"); div.className = "pager";
+    div.innerHTML = (prev ? '<a href="#'+prev.id+'"><small>← Tema '+i+'</small>'+prev.t+'</a>' : '<a href="#inicio"><small>←</small>Mapa del módulo</a>') +
+                    (next ? '<a class="next" href="#'+next.id+'"><small>Tema '+(i+2)+' →</small>'+next.t+'</a>' : '<a class="next" href="#glosario"><small>→</small>Glosario</a>');
+    sec.appendChild(div);
+  });
+
+  // ---------- T3: estadísticos ----------
+  function stats(){
+    const v = parse(document.getElementById("statIn").value), out = document.getElementById("statOut");
+    if (v.length < 2){ out.innerHTML = '<p class="out">Introduce al menos 2 números.</p>'; return; }
+    const s = v.slice().sort((a,b)=>a-b), n = v.length, mean = v.reduce((a,b)=>a+b,0)/n;
+    const med = n%2 ? s[(n-1)/2] : (s[n/2-1]+s[n/2])/2;
+    const cnt = {}; v.forEach(x => cnt[x]=(cnt[x]||0)+1); const mx = Math.max(...Object.values(cnt));
+    const moda = mx>1 ? Object.keys(cnt).filter(k=>cnt[k]===mx).map(Number).sort((a,b)=>a-b).map(x=>fmt(x)).join(" · ") : "sin moda";
+    const sd = Math.sqrt(v.reduce((a,x)=>a+(x-mean)**2,0)/(n-1)), cv = sd/Math.abs(mean)*100;
+    const box = (k,l,extra) => '<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.3rem">'+k+'</div>'+(extra||'')+'</div>';
+    out.innerHTML = box(fmt(mean),"Media") + box(fmt(med),"Mediana") + box(moda,"Moda") + box(fmt(sd,3),"Desv. típica (n−1)") +
+      box(fmt(cv,1)+" %","Coef. de variación", cv<=30 ? '<span class="pill ok">Media representativa</span>' : '<span class="pill bad">Media poco representativa</span>');
+  }
+  document.getElementById("statIn").addEventListener("input", stats); stats();
+
+  // ---------- T3: correlación Iris ----------
+  const IRIS = [["Long. sépalo",[1,-0.109,0.872,0.818]],["Ancho sépalo",[-0.109,1,-0.421,-0.357]],["Long. pétalo",[0.872,-0.421,1,0.963]],["Ancho pétalo",[0.818,-0.357,0.963,1]]];
+  document.getElementById("irisCorr").innerHTML = IRIS.map(([n,r]) => '<tr><td><b>'+n+'</b></td>'+r.map(x => '<td class="num" style="background:color-mix(in srgb, '+(x>=0?'var(--accent)':'var(--bad)')+' '+Math.round(Math.abs(x)*55)+'%, transparent)">'+fmt(x,2)+'</td>').join("")+'</tr>').join("");
+
+  // ---------- T4: histograma ----------
+  const hr = mulberry32(11), hg = gaussFrom(hr), RET = [];
+  for (let i=0;i<500;i++){ const vol = hr()<0.1 ? 2.8 : 1.0; RET.push(0.05 + hg()*vol); }
+  function hist(){
+    const b = +document.getElementById("binSlider").value; document.getElementById("binVal").textContent = b;
+    const lo = Math.min(...RET), hi = Math.max(...RET), w = (hi-lo)/b, c = new Array(b).fill(0);
+    RET.forEach(x => c[Math.min(b-1, Math.floor((x-lo)/w))]++);
+    const mxc = Math.max(...c), X = v => 40 + (v-lo)/(hi-lo)*540, Y = v => 220 - v/mxc*190;
+    let h = '<line x1="40" y1="220" x2="580" y2="220" stroke="var(--line)"/>';
+    c.forEach((k,i) => { h += '<rect x="'+(X(lo+i*w)+0.5).toFixed(1)+'" y="'+Y(k).toFixed(1)+'" width="'+Math.max(0.5,(540/b)-1).toFixed(1)+'" height="'+(220-Y(k)).toFixed(1)+'" fill="var(--accent)" fill-opacity=".35"/>'; });
+    const s = RET.slice().sort((a,b)=>a-b), mean = RET.reduce((a,x)=>a+x,0)/RET.length, med = (s[249]+s[250])/2;
+    h += '<line x1="'+X(mean)+'" x2="'+X(mean)+'" y1="25" y2="220" stroke="var(--accent)" stroke-width="2"/>';
+    h += '<line x1="'+X(med)+'" x2="'+X(med)+'" y1="25" y2="220" stroke="var(--example)" stroke-width="2" stroke-dasharray="4 3"/>';
+    for (let t=Math.ceil(lo); t<=Math.floor(hi); t+=2) h += '<text x="'+X(t)+'" y="238" text-anchor="middle" font-size="11">'+t+' %</text>';
+    h += '<text x="40" y="16" font-size="11">Frecuencia máx.: '+mxc+'</text>';
+    document.getElementById("histSvg").innerHTML = h;
+  }
+  document.getElementById("binSlider").addEventListener("input", hist); hist();
+
+  // ---------- T4: QQ plot ----------
+  (function(){
+    const r = mulberry32(5), g = gaussFrom(r), N = 80;
+    const normal = Array.from({length:N}, g).sort((a,b)=>a-b);
+    const fat = Array.from({length:N}, () => g()*(r()<0.15?2.6:0.8)).sort((a,b)=>a-b);
+    function invN(p){ const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+      const q=p-0.5; if (Math.abs(q)<=0.425){const r=q*q; return q*(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);} const r=Math.sqrt(-Math.log(q<0?p:1-p)); const x=(((((c[0]*r+c[1])*r+c[2])*r+c[3])*r+c[4])*r+c[5])/((((d[0]*r+d[1])*r+d[2])*r+d[3])*r+1); return q<0?x:-x; }
+    let h = "";
+    [[normal,20,"Normal"],[fat,295,"Colas gordas"]].forEach(([arr,ox,lab]) => {
+      const X = v => ox + 20 + (v+3.2)/6.4*220, Y = v => 190 - (v+3.6)/7.2*170;
+      h += '<rect x="'+(ox+20)+'" y="20" width="220" height="170" fill="var(--surface-2)" rx="6"/>';
+      h += '<line x1="'+X(-3.2)+'" y1="'+Y(-3.2)+'" x2="'+X(3.2)+'" y2="'+Y(3.2)+'" stroke="var(--muted)" stroke-dasharray="4 3"/>';
+      arr.forEach((v,i) => { const t = invN((i+0.5)/N), y = Math.max(-3.6,Math.min(3.6,v)); h += '<circle cx="'+X(t).toFixed(1)+'" cy="'+Y(y).toFixed(1)+'" r="2.8" fill="'+(lab==="Normal"?'var(--accent)':'var(--example)')+'"/>'; });
+      h += '<text x="'+(ox+130)+'" y="212" text-anchor="middle" font-size="12" style="fill:var(--ink)">'+lab+'</text>';
+    });
+    document.getElementById("qqSvg").innerHTML = h;
+  })();
+
+  // ---------- T6: dimensionalidad ----------
+  function dims(){
+    const d = +document.getElementById("dimSlider").value; document.getElementById("dimVal").textContent = d;
+    const r = mulberry32(99), q = Array.from({length:d}, r);
+    let mn = Infinity, mx = 0, sum = 0;
+    for (let i=0;i<300;i++){ let s=0; for (let k=0;k<d;k++){ const t=r()-q[k]; s+=t*t; } const di=Math.sqrt(s); mn=Math.min(mn,di); mx=Math.max(mx,di); sum+=di; }
+    const ct = (mx-mn)/mn;
+    document.getElementById("dimOut").innerHTML =
+      '<div class="box"><small>Distancia mínima</small><div class="k" style="font-size:1.3rem">'+fmt(mn)+'</div></div>'+
+      '<div class="box"><small>Distancia máxima</small><div class="k" style="font-size:1.3rem">'+fmt(mx)+'</div></div>'+
+      '<div class="box '+(ct<0.6?'':'accent')+'"><small>Contraste</small><div class="k" style="font-size:1.3rem">'+fmt(ct)+'</div>'+(ct<0.6?'<span class="pill bad">Casi todos parecen igual de lejos</span>':'<span class="pill ok">Se distingue cerca de lejos</span>')+'</div>';
+  }
+  document.getElementById("dimSlider").addEventListener("input", dims); dims();
+
+  // ---------- T6: escalado ----------
+  function scale(){
+    const v = parse(document.getElementById("scaleIn").value), t = document.getElementById("scaleTable");
+    if (v.length < 2){ t.innerHTML = '<tbody><tr><td>Introduce al menos 2 números.</td></tr></tbody>'; return; }
+    const mn = Math.min(...v), mx = Math.max(...v), m = v.reduce((a,b)=>a+b,0)/v.length, sd = Math.sqrt(v.reduce((a,x)=>a+(x-m)**2,0)/v.length);
+    t.innerHTML = '<thead><tr><th class="num">Valor</th><th class="num">Normalizado [0,1]</th><th class="num">Estandarizado (z)</th></tr></thead><tbody>' +
+      v.map(x => { const nz = mx>mn ? (x-mn)/(mx-mn) : 0, z = sd ? (x-m)/sd : 0; return '<tr><td class="num">'+fmt(x,2)+'</td><td class="num">'+fmt(nz,3)+'</td><td class="num"'+(Math.abs(z)>2?' style="color:var(--bad);font-weight:600"':'')+'>'+fmt(z,2)+'</td></tr>'; }).join("") + '</tbody>';
+  }
+  document.getElementById("scaleIn").addEventListener("input", scale); scale();
+
+  // ---------- T7: matriz de confusión ----------
+  function cm(){
+    const g = id => Math.max(0, +document.getElementById(id).value || 0);
+    const TP=g("cmTP"), FN=g("cmFN"), FP=g("cmFP"), TN=g("cmTN"), T=TP+FN+FP+TN;
+    const acc=(TP+TN)/T, prec=TP/(TP+FP), rec=TP/(TP+FN), spec=TN/(TN+FP), f1=2*prec*rec/(prec+rec);
+    const p = x => isFinite(x) ? fmt(x*100,2)+" %" : "—";
+    const card = (l,v,note,cls) => '<div class="box '+(cls||'')+'"><small>'+l+'</small><div class="k" style="font-size:1.3rem">'+v+'</div><small>'+note+'</small></div>';
+    document.getElementById("cmOut").innerHTML = card("Accuracy",p(acc),"(VP+VN)/total") + card("Recall (fraude detectado)",p(rec),"VP/(VP+FN)", rec<0.5?'':'accent') + card("Precisión",p(prec),"VP/(VP+FP)") + card("Especificidad",p(spec),"VN/(VN+FP)") + card("F1",p(f1),"2·P·R/(P+R)") + card("Total",fmt(T,0),"instancias");
+  }
+  ["cmTP","cmFN","cmFP","cmTN"].forEach(id => document.getElementById(id).addEventListener("input", cm)); cm();
+
+  const BAL = [["Ninguno",99.74,26.31,99.86],["Ajuste de pesos (manual)",99.74,28.42,99.86],["Submuestreo aleatorio",78.04,85.26,78.03],["Submuestreo por vecindad (NearMiss)",68.54,81.05,68.52],["Remuestreo aleatorio",99.77,30.13,99.89],["SMOTE",98.19,79.25,98.28]];
+  document.getElementById("balTable").innerHTML = BAL.map(r => '<tr'+(r[0]==="SMOTE"?' style="font-weight:600"':'')+'><td>'+r[0]+'</td><td class="num">'+fmt(r[1])+' %</td><td class="num">'+fmt(r[2])+' %</td><td class="num">'+fmt(r[3])+' %</td><td><div class="mini"><i style="width:'+r[2]+'%"></i></div></td></tr>').join("");
+
+  // ---------- T8: k-means ----------
+  const kr = mulberry32(2024), kg = gaussFrom(kr), PTS = [];
+  [[0.22,0.70,0.07],[0.55,0.30,0.08],[0.80,0.75,0.07]].forEach(([cx,cy,s]) => { for (let i=0;i<50;i++) PTS.push([Math.min(.98,Math.max(.02,cx+kg()*s)), Math.min(.98,Math.max(.02,cy+kg()*s))]); });
+  const CL = ["var(--s1)","var(--s2)","var(--s3)","var(--p3)","var(--bad)","var(--p1)"];
+  let cents = [], assign = [], iter = 0, rr = mulberry32(7);
+  const d2 = (a,b) => (a[0]-b[0])**2 + (a[1]-b[1])**2;
+  function initC(k, r){ return Array.from({length:k}, () => PTS[Math.floor(r()*PTS.length)].slice()); }
+  function assignStep(C){ return PTS.map(p => { let bi=0,bd=Infinity; C.forEach((c,i)=>{ const d=d2(p,c); if(d<bd){bd=d;bi=i;} }); return bi; }); }
+  function updateStep(C,A){ return C.map((c,i) => { const m = PTS.filter((_,j)=>A[j]===i); return m.length ? [m.reduce((s,p)=>s+p[0],0)/m.length, m.reduce((s,p)=>s+p[1],0)/m.length] : c; }); }
+  function inertia(C,A){ return PTS.reduce((s,p,j)=>s+Math.sqrt(d2(p,C[A[j]])),0)/PTS.length; }
+  function drawK(){
+    const X = v => 20 + v*290, Y = v => 240 - v*225;
+    let h = '<rect x="20" y="15" width="290" height="225" fill="var(--surface-2)" rx="6"/>';
+    PTS.forEach((p,j) => { h += '<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3.6" fill="'+(assign.length?CL[assign[j]]:'var(--muted)')+'" fill-opacity=".85"/>'; });
+    cents.forEach((c,i) => { const x=X(c[0]), y=Y(c[1]); h += '<path d="M'+(x-7)+' '+(y-7)+'L'+(x+7)+' '+(y+7)+'M'+(x+7)+' '+(y-7)+'L'+(x-7)+' '+(y+7)+'" stroke="var(--ink)" stroke-width="5"/><path d="M'+(x-7)+' '+(y-7)+'L'+(x+7)+' '+(y+7)+'M'+(x+7)+' '+(y-7)+'L'+(x-7)+' '+(y+7)+'" stroke="'+CL[i]+'" stroke-width="2.5"/>'; });
+    h += '<text x="165" y="256" text-anchor="middle" font-size="11">Saldo medio →</text><text x="10" y="128" text-anchor="middle" font-size="11" transform="rotate(-90 10 128)">Operaciones/mes →</text>';
+    document.getElementById("kSvg").innerHTML = h;
+    document.getElementById("kInfo").textContent = assign.length ? ("Iteración "+iter+" · distancia media al centroide: "+fmt(inertia(cents,assign),3)) : "Centroides colocados al azar. Pulsa «Siguiente paso».";
+  }
+  function resetK(){ cents = initC(+document.getElementById("kSel").value, rr); assign = []; iter = 0; drawK(); }
+  function stepK(){ if (!assign.length){ assign = assignStep(cents); iter = 1; } else { const nc = updateStep(cents,assign), na = assignStep(nc); cents = nc; const ch = na.some((a,j)=>a!==assign[j]); assign = na; iter++; drawK(); return ch; } drawK(); return true; }
+  document.getElementById("kStep").addEventListener("click", stepK);
+  document.getElementById("kRun").addEventListener("click", () => { let n=0; while (stepK() && n++<50); stepK(); });
+  document.getElementById("kReset").addEventListener("click", resetK);
+  document.getElementById("kSel").addEventListener("change", resetK);
+  (function elbow(){
+    const vals = [];
+    for (let k=1;k<=8;k++){ let best = Infinity; for (let t=0;t<6;t++){ const r = mulberry32(100+k*10+t); let C = initC(k,r), A = assignStep(C); for (let it=0;it<40;it++){ C = updateStep(C,A); A = assignStep(C); } best = Math.min(best, inertia(C,A)); } vals.push(best); }
+    const mx = vals[0], X = k => 40 + (k-1)/7*260, Y = v => 220 - v/mx*190;
+    let h = '<line x1="40" y1="220" x2="300" y2="220" stroke="var(--line)"/><line x1="40" y1="25" x2="40" y2="220" stroke="var(--line)"/>';
+    h += '<polyline fill="none" stroke="var(--accent)" stroke-width="2" points="'+vals.map((v,i)=>X(i+1)+','+Y(v)).join(" ")+'"/>';
+    vals.forEach((v,i) => { h += '<circle cx="'+X(i+1)+'" cy="'+Y(v)+'" r="'+(i===2?6:3.5)+'" fill="'+(i===2?'var(--example)':'var(--accent)')+'"/><text x="'+X(i+1)+'" y="236" text-anchor="middle" font-size="11">'+(i+1)+'</text>'; });
+    h += '<text x="'+(X(3)+10)+'" y="'+(Y(vals[2])-10)+'" font-size="12" style="fill:var(--example);font-weight:600">codo (k = 3)</text>';
+    h += '<text x="170" y="254" text-anchor="middle" font-size="11">Número de clústeres (k)</text><text x="14" y="122" text-anchor="middle" font-size="11" transform="rotate(-90 14 122)">Distancia media</text>';
+    document.getElementById("elbowSvg").innerHTML = h;
+  })();
+  resetK();
+
+  // ---------- T9: k-fold ----------
+  document.getElementById("kfold").innerHTML = [0,1,2,3,4].map(i => '<div class="kfrow"><span class="out">Iteración '+(i+1)+'</span>'+[0,1,2,3,4].map(j => '<span class="'+(i===j?'kt':'ktr')+'">'+(i===j?'Test':'Train')+'</span>').join("")+'</div>').join("");
+
+  // ---------- T9: métricas regresión ----------
+  function reg(){
+    const a = parse(document.getElementById("regReal").value), p = parse(document.getElementById("regPred").value), out = document.getElementById("regOut");
+    if (a.length < 2 || a.length !== p.length){ out.innerHTML = '<p class="out">Introduce el mismo número de valores reales y predichos (al menos 2).</p>'; return; }
+    const n = a.length, m = a.reduce((s,x)=>s+x,0)/n;
+    const mse = a.reduce((s,x,i)=>s+(x-p[i])**2,0)/n, mae = a.reduce((s,x,i)=>s+Math.abs(x-p[i]),0)/n, sst = a.reduce((s,x)=>s+(x-m)**2,0), r2 = 1 - mse*n/sst;
+    const card = (l,v) => '<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.3rem">'+v+'</div></div>';
+    out.innerHTML = card("MSE",fmt(mse,3)) + card("RMSE",fmt(Math.sqrt(mse),3)) + card("MAE",fmt(mae,3)) + card("R²",fmt(r2,3));
+  }
+  ["regReal","regPred"].forEach(id => document.getElementById(id).addEventListener("input", reg)); reg();
+
+  // ---------- Glosario ----------
+  const GL = [
+    ["Accuracy (exactitud)","Proporción de aciertos sobre el total. Engaña con clases desbalanceadas.",9],
+    ["Anaconda","Distribución de paquetes que crea entornos virtuales con distintas versiones de Python.",1],
+    ["AUC","Área bajo la curva ROC; 1 es perfecto y 0,5 equivale al azar.",9],
+    ["Bin","Rango que agrupa cada barra de un histograma.",4],
+    ["Box plot","Gráfico de caja: mediana, cuartiles y outliers.",4],
+    ["Casting","Conversión explícita de tipo, p. ej. int(2.3); puede perder información.",2],
+    ["Clasificación","Problema cuyo objetivo es asignar una clase.",3],
+    ["Coeficiente de variación","Desviación típica / media; sin unidades. ≤ 30 %: media representativa.",3],
+    ["Coerción","Cambio de tipo automático que hace el intérprete para operar.",2],
+    ["Correlación de Pearson","Covarianza de variables estandarizadas; de −1 a 1.",3],
+    ["Curva del codo","Gráfico para elegir k en k-means.",8],
+    ["Data frame","Tabla de pandas: columnas = variables, filas = instancias.",2],
+    ["DBSCAN","Clustering basado en densidad; no necesita fijar k.",8],
+    ["Dendrograma","Árbol que muestra el agrupamiento jerárquico.",8],
+    ["Desbalanceo","Una clase es mucho más frecuente que otra.",7],
+    ["Diccionario","Colección mutable de pares clave-valor.",2],
+    ["Estandarizar","Transformar a media 0 y desviación 1 (z-score).",6],
+    ["F1","Media armónica de precisión y recall.",9],
+    ["Jarque-Bera","Test de normalidad basado en asimetría y curtosis.",3],
+    ["Jupyter Notebook","Cuaderno que combina celdas de código y de texto.",1],
+    ["k-folds (validación cruzada)","Dividir en k partes y usar cada una como test una vez.",9],
+    ["k-means","Clustering con k centroides; cada punto al más cercano.",8],
+    ["KNN","k vecinos más cercanos: votación (clasificación) o media (regresión).",9],
+    ["LabelEncoder","Convierte categorías en enteros; inventa un orden.",6],
+    ["MAE","Error absoluto medio; menos sensible a outliers.",9],
+    ["Maldición de la dimensionalidad","Con muchos atributos las distancias dejan de discriminar.",6],
+    ["Matriz de confusión","Tabla de aciertos y fallos por clase real y predicha.",7],
+    ["MSE / RMSE","Error cuadrático medio y su raíz (en unidades reales).",9],
+    ["NearMiss","Submuestreo que conserva las instancias mayoritarias cercanas a la minoritaria.",7],
+    ["Normalizar","Llevar los valores al rango [0, 1] (min-max).",6],
+    ["One-hot encoding","Una columna 0/1 por categoría (pd.get_dummies).",6],
+    ["Outlier","Valor atípico: leve a 1,5·IQR, extremo a 3·IQR (Tukey).",5],
+    ["PCA","Análisis de componentes principales: reduce dimensiones maximizando la varianza.",6],
+    ["Precisión","VP / (VP + FP): de lo que marco como positivo, cuánto lo es.",9],
+    ["QQ plot","Cuantiles teóricos frente a empíricos para comprobar normalidad.",4],
+    ["R²","Coeficiente de determinación: proporción de variación explicada.",9],
+    ["Recall (sensibilidad)","VP / (VP + FN): de los positivos reales, cuántos detecto.",9],
+    ["Regresión","Problema cuyo objetivo es predecir un valor continuo.",3],
+    ["Set","Colección sin orden y sin elementos repetidos.",2],
+    ["Shapiro-Wilk","Test de normalidad para muestras pequeñas (< 50).",3],
+    ["SMOTE","Genera instancias sintéticas de la clase minoritaria entre vecinos reales.",7],
+    ["Sobreentrenamiento","El modelo memoriza el entrenamiento y falla con datos nuevos.",9],
+    ["Supervisado / no supervisado","Usa / no usa la clase (target) para entrenar.",8],
+    ["SVM","Máquina de vector soporte: busca una dimensión donde los datos sean separables.",9],
+    ["Tupla","Colección inmutable.",2]
+  ];
+  function gloss(){
+    const q = document.getElementById("glossQ").value.trim().toLowerCase();
+    const items = GL.filter(g => !q || (g[0]+" "+g[1]).toLowerCase().includes(q));
+    document.getElementById("glossList").innerHTML = items.length ? items.map(g => '<div class="gi"><dl style="margin:0"><dt>'+g[0]+'</dt><dd>'+g[1]+'</dd></dl><small><a href="#tema-'+g[2]+'">Tema '+g[2]+'</a></small></div>').join("") : '<p style="color:var(--muted)">No hay términos que coincidan. Prueba con otra palabra.</p>';
+  }
+  document.getElementById("glossQ").addEventListener("input", gloss); gloss();
+
+  renderProgress();
+  route();
+})();
+</script>
+
+</body>
+</html>

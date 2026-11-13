@@ -6,5 +6,6 @@ Páginas web interactivas para estudiar cada módulo: resúmenes, diagramas, eje
 |---|---|
 | Módulo 2 · Tipos y ciclo de vida del dato | `modulo-2.html` |
 | Módulo 3 · El dato en la inteligencia artificial | `modulo-3.html` |
+| Módulo 4 · Minería de datos: selección, preprocesamiento y transformación | `modulo-4.html` |
 
 La portada (`index.html`) enlaza todas las guías. Versión publicada con GitHub Pages: https://hrivarolainsfran-sys.github.io/guia-ciclo-vida-dato/

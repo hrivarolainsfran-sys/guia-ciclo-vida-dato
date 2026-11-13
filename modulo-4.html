@@ -1,0 +1,1407 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minería de datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: guía de estudio con índice lateral fijo (10 temas + glosario) y una vista por tema; en móvil el índice pasa a barra superior deslizable. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#141C29; --muted:#566275; --line:#D9DFE8;
+  --accent:#2448C4; --accent-ink:#FFFFFF; --accent-soft:#E5EBFB;
+  --example:#A4510B; --example-soft:#FCF0E1;
+  --ok:#157A3A; --ok-soft:#E3F4E8; --bad:#B42323; --bad-soft:#FBE7E7;
+  --p1:#0E8A88; --p2:#2448C4; --p3:#7A3FC2; --p4:#B9650E; --p5:#2E8A3A;
+  --s1:#3C6FE0; --s2:#D9822B; --s3:#2E9C6E;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+    --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+    --example:#F1AC62; --example-soft:#33261A;
+    --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+    --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+    --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+  --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+  --example:#F1AC62; --example-soft:#33261A;
+  --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+  --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+  --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:2.2rem}
+h3{font-size:1.1rem;font-weight:600;margin-top:1.4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 14px 24px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px}
+.brand small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;line-height:1.25;display:block;margin-top:2px}
+.progress{padding:0 8px}
+.progress .bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress span{font-size:.8rem;color:var(--muted)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.navlist a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.92rem;line-height:1.3}
+.navlist a:hover{background:var(--surface-2)}
+.navlist a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlist .num{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem;background:var(--surface-2);color:var(--muted)}
+.navlist a[aria-current="page"] .num{background:var(--accent);color:var(--accent-ink)}
+.navlist a.done .num{background:var(--ok-soft);color:var(--ok)}
+.navsep{height:1px;background:var(--line);margin:6px 8px}
+
+main{min-width:0;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{max-width:860px;margin:0 auto}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--accent)}
+.lead{font-size:1.12rem;color:var(--muted);max-width:65ch}
+.prose{max-width:68ch}
+.oneline{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius) var(--radius) 0;font-weight:500}
+.objs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.objs li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);background:var(--surface)}
+
+/* Callouts */
+.callout{margin:1.2rem 0;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.callout>.tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+.callout p:first-of-type{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.ex{background:var(--example-soft);border-color:transparent}
+.ex>.tag{color:var(--example)}
+.exam{background:var(--surface);border:1px solid var(--accent)}
+.exam>.tag{color:var(--accent)}
+.exam ul{margin:.3rem 0 0;padding-left:1.2rem}
+.warn{background:var(--bad-soft);border-color:transparent}
+.warn>.tag{color:var(--bad)}
+
+/* Diagrams */
+.diagram{margin:1.2rem 0;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow-x:auto}
+.diagram figcaption{font-size:.8rem;color:var(--muted);margin-top:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
+.flow .node{flex:1 1 0;min-width:110px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.86rem;line-height:1.35}
+.flow .node b{display:block;font-family:var(--font-display);font-size:.95rem;margin-bottom:2px}
+.flow .arrow{flex:none;align-self:center;color:var(--muted);font-size:1.2rem}
+.flow .node.hl{background:var(--accent-soft);border-color:var(--accent)}
+@media (max-width:640px){
+  .flow.stack{flex-direction:column}
+  .flow.stack .arrow{transform:rotate(90deg)}
+  .flow.stack .node{min-width:0}
+}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.box{padding:12px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.9rem;line-height:1.45;min-width:0}
+.box h4{font-size:.98rem;margin-bottom:4px}
+.box .k{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.box.accent{background:var(--accent-soft);border-color:var(--accent)}
+.box small{color:var(--muted)}
+
+/* Tree */
+.tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:560px}
+.tree .lvl{display:flex;gap:16px;justify-content:center;width:100%}
+.tree .tnode{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:.85rem;text-align:center;line-height:1.3}
+.tree .tnode.root{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tree .tnode.mid{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.tree .branch{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;border-top:2px solid var(--line);position:relative}
+.tree .stem{width:2px;height:14px;background:var(--line)}
+.tree .leaves{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tree .leaf{font-size:.8rem;padding:6px 9px;border-radius:6px;background:var(--surface);border:1px dashed var(--line);text-align:center;line-height:1.3}
+.tree .leaf em{display:block;font-style:normal;color:var(--muted);font-size:.74rem}
+
+/* Lifecycle */
+.cycle{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-width:640px;counter-reset:ph}
+.phase{position:relative;padding:12px;border-radius:10px;background:var(--surface-2);border-top:4px solid var(--c);font-size:.85rem;line-height:1.4}
+.phase .pn{font-family:var(--font-mono);font-size:.72rem;color:var(--c);font-weight:600}
+.phase b{display:block;font-family:var(--font-display);font-size:.95rem;margin:2px 0 6px}
+.phase .topics{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.phase .topics a{font-size:.72rem;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.phase:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:1rem}
+.loopback{margin-top:10px;font-size:.8rem;color:var(--muted);text-align:center;min-width:640px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;margin:1rem 0}
+pre.code .c{color:var(--muted)}
+pre.code .o{color:var(--ok)}
+
+/* Data matrix (dato/obs/variable) */
+.matrix td,.matrix th{text-align:center;font-family:var(--font-mono);font-size:.82rem;transition:background .15s}
+.matrix.show-var td:nth-child(3),.matrix.show-var th:nth-child(3){background:var(--accent-soft);color:var(--accent)}
+.matrix.show-obs tbody tr:nth-child(2) td{background:var(--example-soft);color:var(--example)}
+.matrix.show-dat tbody tr:nth-child(3) td:nth-child(4){background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+/* Buttons & inputs */
+.btn{font:inherit;font-size:.88rem;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+input[type=text],input[type=number]{font:inherit;font-size:.92rem;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.out{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* Interactive SVG */
+svg text{fill:var(--muted);font-family:var(--font-body)}
+.dot{transition:r .2s,opacity .2s}
+.dot.st1{fill:var(--s1)}.dot.st2{fill:var(--s2)}.dot.st3{fill:var(--s3)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px repeat(8,minmax(44px,1fr));min-width:620px;font-size:.8rem}
+.gantt>div{padding:6px 6px;border-bottom:1px solid var(--line);min-height:32px;display:flex;align-items:center}
+.gantt .gh{font-weight:600;color:var(--muted);font-size:.72rem;justify-content:center}
+.gantt .bar{background:var(--surface-2);border-radius:5px;margin:4px 0;padding:0 6px;font-size:.72rem;color:var(--muted)}
+.gantt .bar.crit{background:var(--accent);color:var(--accent-ink)}
+.gantt .bar.mile{background:transparent;justify-content:center;color:var(--example);font-size:1rem}
+
+/* Quiz */
+.quiz{margin-top:2.4rem;padding:20px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.quiz h2{margin-top:0}
+.qitem{padding:14px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0}
+.qitem p.q{font-weight:600;margin:0 0 8px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{text-align:left;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.qopt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.qopt:disabled{cursor:default}
+.qexp{font-size:.86rem;color:var(--muted);margin-top:8px}
+.qscore{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.pager a{flex:1 1 220px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager small{display:block;color:var(--muted);font-size:.75rem}
+.pager a.next{text-align:right}
+.studied{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* Home cards */
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.tcard{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.tcard:hover{border-color:var(--accent)}
+.tcard .n{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.tcard b{font-family:var(--font-display);font-size:1rem;line-height:1.3}
+.tcard span.d{font-size:.84rem;color:var(--muted);line-height:1.4}
+.tcard .st{margin-top:auto;padding-top:6px}
+
+/* Glossary */
+.gloss{display:grid;gap:8px;margin-top:14px}
+.gloss dt{font-weight:600;font-family:var(--font-display)}
+.gloss dd{margin:0 0 6px;color:var(--muted);font-size:.92rem}
+.gloss .gi{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.gloss .gi small{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+
+/* Mobile nav */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .brand,.progress{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .navlist::-webkit-scrollbar{display:none}
+  .navlist a{white-space:nowrap;padding:6px 8px}
+  .navlist a .lbl{display:none}
+  .navlist a[aria-current="page"] .lbl{display:inline}
+  .navsep{width:1px;height:20px;margin:auto 2px}
+  main{padding-block:24px 64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Módulo 3: componentes extra */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyramid>div{padding:12px 16px;border-radius:8px;text-align:center;font-size:.88rem;line-height:1.4;max-width:100%}
+.pyramid b{display:block;font-family:var(--font-display);font-size:1rem}
+.pyramid span{color:var(--muted)}
+.pyramid .lvl3{width:55%;background:var(--accent);color:var(--accent-ink)}
+.pyramid .lvl3 span{color:var(--accent-ink);opacity:.85}
+.pyramid .lvl2{width:75%;background:var(--accent-soft);border:1px solid var(--accent)}
+.pyramid .lvl1{width:95%;background:var(--surface-2);border:1px solid var(--line)}
+@media (max-width:560px){.pyramid>div{width:100%!important}}
+.balbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.balbar .maj{background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:600;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden}
+.balbar .min{background:var(--example);min-width:3px}
+.cm{display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;max-width:520px}
+.cm .cmh{font-size:.78rem;font-weight:600;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;text-align:center}
+.cm .cmh.side{justify-content:flex-start;align-items:center;text-align:left}
+.cm .cell{padding:10px;border-radius:8px;border:1px solid var(--line)}
+.cm .cell.good{background:var(--ok-soft)}
+.cm .cell.badc{background:var(--bad-soft)}
+.cm .cell label{margin-bottom:4px}
+@media (max-width:480px){.cm{grid-template-columns:80px 1fr 1fr}}
+.mini{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--example)}
+.kfold{display:flex;flex-direction:column;gap:6px;min-width:480px}
+.kfrow{display:grid;grid-template-columns:100px repeat(5,1fr);gap:4px;align-items:center}
+.kfrow span{font-size:.75rem;text-align:center;padding:6px 0;border-radius:5px}
+.kfrow .kt{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.kfrow .ktr{background:var(--accent-soft);color:var(--accent)}
+.kfrow .out{text-align:left;color:var(--muted)}
+select.btn{padding-right:8px}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav" aria-label="Temas">
+    <div class="brand"><small>Módulo 4 · Guía de estudio</small><strong>Minería de datos: selección, preprocesamiento y transformación</strong></div>
+    <div class="progress"><span id="progText">0 de 10 temas estudiados</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="navlist" id="navlist">
+      <li><a href="./" data-v="__home"><span class="num">⌂</span><span class="lbl">Todos los módulos</span></a></li>
+      <li><a href="#inicio" data-v="inicio"><span class="num">◎</span><span class="lbl">Mapa del módulo</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#tema-1" data-v="tema-1"><span class="num">1</span><span class="lbl">La inferencia estadística</span></a></li>
+      <li><a href="#tema-2" data-v="tema-2"><span class="num">2</span><span class="lbl">Análisis exploratorio</span></a></li>
+      <li><a href="#tema-3" data-v="tema-3"><span class="num">3</span><span class="lbl">Preparación de datos</span></a></li>
+      <li><a href="#tema-4" data-v="tema-4"><span class="num">4</span><span class="lbl">Los valores perdidos</span></a></li>
+      <li><a href="#tema-5" data-v="tema-5"><span class="num">5</span><span class="lbl">El ruido en los datos</span></a></li>
+      <li><a href="#tema-6" data-v="tema-6"><span class="num">6</span><span class="lbl">Desbalanceo y dimensionalidad</span></a></li>
+      <li><a href="#tema-7" data-v="tema-7"><span class="num">7</span><span class="lbl">De continuos a discretos</span></a></li>
+      <li><a href="#tema-8" data-v="tema-8"><span class="num">8</span><span class="lbl">Selección de características</span></a></li>
+      <li><a href="#tema-9" data-v="tema-9"><span class="num">9</span><span class="lbl">Selección de instancias</span></a></li>
+      <li><a href="#tema-10" data-v="tema-10"><span class="num">10</span><span class="lbl">Preprocesamiento en big data</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#glosario" data-v="glosario"><span class="num">Aa</span><span class="lbl">Glosario</span></a></li>
+    </ul>
+  </nav>
+
+  <main>
+<!-- ===================== INICIO ===================== -->
+<section class="view" data-view="inicio">
+  <p class="eyebrow">Módulo 4 · 10 temas</p>
+  <h1>Minería de datos: selección, preprocesamiento y transformación</h1>
+  <p class="lead">Todo lo que hay que hacer con los datos antes de entrenar un modelo: contrastar hipótesis, explorar, integrar, limpiar, imputar, filtrar ruido, equilibrar clases, discretizar y reducir atributos e instancias, también a escala big data.</p>
+
+  <h2>El preprocesamiento dentro del proceso KDD</h2>
+  <p class="prose">El temario se enmarca en el <b>KDD</b> (descubrimiento de conocimiento en bases de datos). Este módulo cubre las fases previas a la minería: seleccionar, preparar y transformar.</p>
+  <figure class="diagram">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">ENTENDER</span><b>Estadística y EDA</b>Inferencia, tipos de atributos, visualización.<div class="topics"><a href="#tema-1">T1</a><a href="#tema-2">T2</a></div></div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">LIMPIAR</span><b>Integrar y limpiar</b>ETL, redundancia, normalización.<div class="topics"><a href="#tema-3">T3</a></div></div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">REPARAR</span><b>Perdidos y ruido</b>Imputación, suavizado y filtros.<div class="topics"><a href="#tema-4">T4</a><a href="#tema-5">T5</a></div></div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">TRANSFORMAR</span><b>Equilibrar y discretizar</b>SMOTE, Tomek, PCA, ChiMerge.<div class="topics"><a href="#tema-6">T6</a><a href="#tema-7">T7</a></div></div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">REDUCIR</span><b>Seleccionar</b>Características, instancias y big data.<div class="topics"><a href="#tema-8">T8</a><a href="#tema-9">T9</a><a href="#tema-10">T10</a></div></div>
+    </div>
+    <p class="loopback">Idea transversal: datos de baja calidad producen conocimiento de baja calidad, por bueno que sea el algoritmo.</p>
+    <figcaption>Las fases del preprocesamiento y qué tema desarrolla cada una.</figcaption>
+  </figure>
+
+  <h2>Temas</h2>
+  <div class="tcards" id="tcards"></div>
+
+  <div class="callout exam">
+    <span class="tag">Cómo usar esta guía</span>
+    <ul>
+      <li>Cada tema empieza con una frase resumen y acaba con un test de 5 preguntas.</li>
+      <li>Los recuadros naranjas son <b>ejemplos en mercados</b>; los azules, lo que más se pregunta en el <b>examen</b>.</li>
+      <li>Simuladores: contraste de hipótesis, normalización, imputación, suavizado por bins, enlaces Tomek, discretización y ENN.</li>
+      <li>Tu progreso se guarda en este navegador.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== TEMA 1 ===================== -->
+<section class="view" data-view="tema-1" hidden>
+  <p class="eyebrow">Tema 1</p>
+  <h1>La inferencia estadística</h1>
+  <p class="oneline">La estadística <b>descriptiva</b> resume los datos (frecuencias, centralidad, dispersión, posición). La <b>inferencia</b> saca conclusiones sobre la población a partir de una muestra, mediante <b>estimación</b> y <b>contraste de hipótesis</b>, con tests paramétricos o no paramétricos.</p>
+  <ul class="objs"><li>Descriptiva vs. inferencia</li><li>Estimación y contraste</li><li>Tests paramétricos</li><li>Tests no paramétricos</li></ul>
+
+  <h2>Estadística descriptiva</h2>
+  <div class="grid g2">
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th>Peso</th><th class="num">Frec.</th><th class="num">Acumulada</th><th class="num">Relativa</th></tr></thead>
+      <tbody>
+        <tr><td>40–50 kg</td><td class="num">25</td><td class="num">25</td><td class="num">0,25</td></tr>
+        <tr><td>50–60 kg</td><td class="num">29</td><td class="num">54</td><td class="num">0,29</td></tr>
+        <tr><td>60–70 kg</td><td class="num">15</td><td class="num">69</td><td class="num">0,15</td></tr>
+        <tr><td>70–80 kg</td><td class="num">18</td><td class="num">87</td><td class="num">0,18</td></tr>
+        <tr><td>80–90 kg</td><td class="num">5</td><td class="num">92</td><td class="num">0,05</td></tr>
+        <tr><td>90–100 kg</td><td class="num">8</td><td class="num">100</td><td class="num">0,08</td></tr>
+      </tbody>
+    </table></div>
+    <div class="grid" style="gap:10px">
+      <div class="box"><h4>Frecuencias</h4>De clase (cuántas), acumulada (suma hasta esa clase) y relativa (clase / total). Se dibujan en un histograma.</div>
+      <div class="box"><h4>Centralidad</h4>Media, mediana (valor central de los datos ordenados) y moda (el más frecuente).</div>
+      <div class="box"><h4>Dispersión y posición</h4>Varianza <span class="mono">S² = Σ(xᵢ − x̄)² / (n − 1)</span>, desviación típica S = √S² (mismas unidades que los datos), cuartiles, percentiles e IQR = P75 − P25.</div>
+    </div>
+  </div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">Tabla del temario: pesos de 100 pacientes de medicina interna.</p>
+
+  <h2>Inferencia estadística</h2>
+  <p class="prose">Generaliza a partir de una <b>muestra aleatoria</b>: cada elemento con la misma probabilidad de ser elegido y selecciones independientes entre sí.</p>
+  <div class="grid g2">
+    <div class="box"><h4>Estimación</h4>Predecir parámetros desconocidos. Ejemplo: <b>regresión lineal</b> <span class="mono">Y = β₀ + β₁X</span> (β₀ intersección, β₁ pendiente). Si no hay dependencia sino relación mutua, se usa la <b>correlación</b> (manos grandes ↔ pies grandes). Con incertidumbre sobre la distribución: métodos <b>bayesianos</b>.</div>
+    <div class="box accent"><h4>Contraste de hipótesis</h4>Se parte de una <b>hipótesis nula H₀</b>, que se da por cierta salvo evidencia en contra; si se rechaza, se acepta la <b>alternativa H₁</b>. Si <b>p-valor &lt; α</b> (nivel de significación), el resultado es significativo y se rechaza H₀.</div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>H₀ es cierta</th><th>H₀ es falsa</th></tr></thead>
+    <tbody>
+      <tr><td><b>Se rechaza H₀</b></td><td><span class="pill bad">Error tipo I</span> (probabilidad α)</td><td><span class="pill ok">Correcto</span></td></tr>
+      <tr><td><b>No se rechaza H₀</b></td><td><span class="pill ok">Correcto</span></td><td><span class="pill bad">Error tipo II</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Simulador: ¿la estrategia gana dinero de verdad?</h3>
+  <p class="prose">Contraste z sobre la media (varianza conocida). H₀: la rentabilidad media diaria es μ₀ = 0. Cambia los datos:</p>
+  <figure class="diagram">
+    <div class="grid g4">
+      <div><label for="zMean">Media muestral x̄ (%)</label><input type="number" id="zMean" value="0.08" step="0.01"></div>
+      <div><label for="zMu">μ₀ (%)</label><input type="number" id="zMu" value="0" step="0.01"></div>
+      <div><label for="zSd">σ (%)</label><input type="number" id="zSd" value="1.2" step="0.1" min="0.01"></div>
+      <div><label for="zN">n (días)</label><input type="number" id="zN" value="250" min="2"></div>
+    </div>
+    <div class="btnrow" role="group" aria-label="Nivel de significación">
+      <button class="btn" data-alpha="0.10" aria-pressed="false">α = 0,10</button>
+      <button class="btn" data-alpha="0.05" aria-pressed="true">α = 0,05</button>
+      <button class="btn" data-alpha="0.01" aria-pressed="false">α = 0,01</button>
+    </div>
+    <svg id="zSvg" viewBox="0 0 600 200" width="100%" style="display:block" role="img" aria-label="Distribución normal con región crítica"></svg>
+    <p class="out" id="zOut"></p>
+    <figcaption>Estadístico <span class="mono">Z = (x̄ − μ₀) / (σ / √n)</span>, contraste bilateral. En rojo, la región crítica. Con un año de datos (250 días), un +0,08 % diario no basta para descartar el azar; prueba con n = 1000.</figcaption>
+  </figure>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un <b>error tipo I</b> es lanzar con dinero real una estrategia que en realidad no tiene ventaja (el backtest salió bien por azar). Un <b>error tipo II</b> es descartar una estrategia que sí funcionaba. Como en finanzas se prueban cientos de estrategias, el riesgo de error tipo I se multiplica: muchos gestores cuantitativos exigen α muy pequeños.</p></div>
+
+  <h2>Tests paramétricos</h2>
+  <p class="prose">Se usan cuando la distribución es <b>conocida</b> (p. ej. normal) y se contrastan sus parámetros.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Caso</th><th>Estadístico</th><th>Distribución</th></tr></thead>
+    <tbody>
+      <tr><td>Media, varianza poblacional <b>conocida</b></td><td class="mono">Z = (x̄ − μ₀) / √(σ²/n)</td><td>Normal</td></tr>
+      <tr><td>Media, varianza <b>desconocida</b> (solo la muestral)</td><td class="mono">t = (x̄ − μ₀) / √(S²/n)</td><td>t de Student (n − 1)</td></tr>
+      <tr><td>Varianza</td><td class="mono">χ² = (n − 1)·S² / σ²</td><td>Chi cuadrado</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Tests no paramétricos</h2>
+  <p class="prose">Cuando la distribución <b>no se conoce</b>. Según el temario, requieren al menos <b>homocedasticidad</b> (misma varianza en cada grupo); si no, hay que transformar los datos.</p>
+  <div class="grid g2">
+    <div class="box"><h4>Kolmogorov-Smirnov</h4>¿La muestra sigue una distribución dada, o dos muestras la misma? Útil para comprobar normalidad. Solo para variables continuas.</div>
+    <div class="box"><h4>Wilcoxon</h4>Supone simetría (media = mediana); contrasta la media.</div>
+    <div class="box"><h4>Mann-Whitney</h4>Dos muestras independientes: ¿tienen la misma mediana?</div>
+    <div class="box"><h4>Kruskal-Wallis</h4>ANOVA por rangos: extiende Mann-Whitney a dos o más grupos; más potente con muestras grandes.</div>
+  </div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Inferencia = estimación + contraste de hipótesis.</li>
+    <li>Error tipo I: rechazar H₀ siendo cierta (α). Error tipo II: no rechazarla siendo falsa. p &lt; α → se rechaza H₀.</li>
+    <li>Paramétricos: Z (σ conocida), t de Student (σ desconocida), χ² (varianza).</li>
+    <li>No paramétricos: Kolmogorov-Smirnov, Wilcoxon, Mann-Whitney, Kruskal-Wallis.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-1"></div>
+</section>
+
+<!-- ===================== TEMA 2 ===================== -->
+<section class="view" data-view="tema-2" hidden>
+  <p class="eyebrow">Tema 2</p>
+  <h1>Análisis exploratorio</h1>
+  <p class="oneline">El <b>análisis exploratorio de datos (EDA)</b> resume las características de un conjunto, a menudo con gráficos, para elegir el preprocesamiento adecuado. Empieza por conocer el <b>tipo de cada atributo</b> y acaba detectando los errores típicos: ruido, anomalías, perdidos, inconsistencias y duplicados.</p>
+  <ul class="objs"><li>Tipos de atributos</li><li>Visualización uni, bi y multivariable</li><li>Correlación y homocedasticidad</li><li>Errores en los datos</li></ul>
+
+  <h2>Tipos de atributos</h2>
+  <p class="prose">Un <b>atributo</b> (dimensión, característica o variable) describe una característica; cada valor es una <b>observación</b>; varios atributos juntos forman un <b>vector de características</b>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Qué es</th><th>Ejemplo en una operación de bolsa</th></tr></thead>
+    <tbody>
+      <tr><td><b>Nominal</b> (categórico)</td><td>Nombres o símbolos, sin orden</td><td>Ticker: SAN, ITX, IBE</td></tr>
+      <tr><td><b>Binario</b></td><td>Nominal con dos categorías (0/1); clase positiva/negativa</td><td>Compra / venta</td></tr>
+      <tr><td><b>Ordinal</b></td><td>Categorías con orden, finitas</td><td>Rating: AAA &gt; AA &gt; A &gt; BBB</td></tr>
+      <tr><td><b>Cuantitativo de intervalo</b></td><td>Unidad de medida; puede ser negativo o 0</td><td>Fecha de la operación, temperatura</td></tr>
+      <tr><td><b>Cuantitativo de razón</b></td><td>Nunca por debajo de 0</td><td>Precio, volumen negociado</td></tr>
+      <tr><td><b>Discreto</b> / <b>continuo</b></td><td>Valores contables (enteros) / reales (punto flotante)</td><td>Nº de acciones / precio de ejecución</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Visualización según el número de atributos</h2>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div class="box"><h4>Univariable</h4>Distribución y dispersión.<br><b>Histograma</b> (continuas), <b>gráfico de cajas</b> (dispersión y outliers), <b>barras</b> (categóricas), <b>QQ</b> (¿sigue una distribución dada?).</div>
+      <div class="box"><h4>Bivariable</h4><b>Barras</b> (categórica + continua, o apiladas para dos categóricas), <b>cajas por categoría</b>, <b>dispersión</b> (dos continuas).</div>
+      <div class="box"><h4>Multivariable</h4><b>Matriz de gráficos de dispersión</b> y <b>gráfico de correlaciones</b> (colores, números o figuras).</div>
+    </div>
+  </figure>
+
+  <h3>Lo que revela un gráfico de dispersión</h3>
+  <figure class="diagram">
+    <svg id="scatTypes" viewBox="0 0 640 170" width="100%" role="img" aria-label="Correlación positiva, negativa, nula y heterocedasticidad"></svg>
+    <figcaption>Correlación positiva (directa), negativa (inversa), incorrelación y heterocedasticidad: la dispersión en Y crece con X en lugar de ser constante (homocedasticidad).</figcaption>
+  </figure>
+  <p class="prose">También muestra el <b>tipo de relación</b> (lineal, cuadrática, exponencial), lo que orienta el algoritmo: si es lineal, una regresión lineal; si los puntos se agrupan por zonas, clustering.</p>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Las rentabilidades financieras son un caso clásico de <b>heterocedasticidad</b>: la volatilidad no es constante, sino que llega en rachas (periodos tranquilos seguidos de periodos agitados). Por eso los modelos de riesgo no suelen asumir varianza fija.</p></div>
+
+  <h2>Errores típicos en los datos</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Ruido</h4>Error aleatorio de medición o captura. A menudo se opta por algoritmos robustos en lugar de eliminarlo.</div>
+    <div class="box"><h4>Anomalías (outliers)</h4>Distintas de la mayoría. A diferencia del ruido, pueden ser el objetivo: fraude, intrusiones.</div>
+    <div class="box"><h4>Valores perdidos</h4>Fallos de captura, preguntas sin responder, datos protegidos. Imputar o eliminar.</div>
+    <div class="box"><h4>Inconsistentes</h4>Imposibles en el dominio: peso negativo, un mamífero con 8 patas, un código postal en el campo ciudad. Suele hacer falta un experto.</div>
+    <div class="box"><h4>Duplicados</h4>Instancias repetidas, o atributos que describen lo mismo (alta correlación → eliminar uno).</div>
+  </div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Categóricos: nominal, binario, ordinal. Cuantitativos: intervalo y razón; discretos y continuos.</li>
+    <li>Univariable: histograma, cajas, barras, QQ. Bivariable: barras, cajas, dispersión. Multivariable: matriz de dispersión y de correlaciones.</li>
+    <li>Homocedasticidad = varianza constante alrededor de la regresión; heterocedasticidad = no constante.</li>
+    <li>Errores: ruido, anomalías, perdidos, inconsistentes, duplicados.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-2"></div>
+</section>
+
+<!-- ===================== TEMA 3 ===================== -->
+<section class="view" data-view="tema-3" hidden>
+  <p class="eyebrow">Tema 3</p>
+  <h1>Preparación de datos</h1>
+  <p class="oneline">Preparar los datos es <b>integrarlos</b> (ETL, eliminando redundancias y duplicados), <b>limpiarlos</b> (perdidos y ruido), <b>normalizarlos</b> a un rango común y <b>transformar</b> atributos para reducir complejidad.</p>
+  <ul class="objs"><li>Integración y ETL</li><li>Redundancia: Pearson, covarianza, χ²</li><li>Limpieza y binning</li><li>Normalización y transformación</li></ul>
+
+  <h2>Integración de datos</h2>
+  <p class="prose">En la fase de <b>selección</b> del KDD los datos suelen llegar de varias fuentes heterogéneas. Integrarlos mal crea redundancias e incoherencias que bajan la precisión y la velocidad de la minería.</p>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>Extracción</b>SQL, NoSQL, .csv, .xlsx → zona de preparación</div><div class="arrow">→</div>
+      <div class="node"><b>Transformación</b>Hacer coincidir esquemas: quitar duplicados, validar, traducir, cambiar encabezados, convertir unidades, proteger atributos sensibles</div><div class="arrow">→</div>
+      <div class="node hl"><b>Carga</b>Al almacén de destino: un único origen integrado</div>
+    </div>
+  </figure>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Unir cotizaciones de dos proveedores de datos: uno da fechas en formato europeo y precios en euros; otro, fechas americanas, precios en dólares y sin ajustar por <i>splits</i>. Sin una buena transformación, la misma acción aparece dos veces con precios incompatibles.</p></div>
+
+  <h3>Detectar redundancia</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Datos</th><th>Medida</th><th>Interpretación</th></tr></thead>
+    <tbody>
+      <tr><td>Numéricos</td><td><b>Pearson</b> <span class="mono">ρ = cov(X,Y) / (σₓσᵧ)</span></td><td>[−1, 1]. Exige normalidad; si no, <b>Spearman</b> (variables ordinales)</td></tr>
+      <tr><td>Numéricos</td><td><b>Covarianza</b></td><td>&gt; 0 cambian en el mismo sentido; &lt; 0 en sentido contrario; 0 puede indicar independencia (no siempre)</td></tr>
+      <tr><td>Nominales</td><td><b>Test χ²</b> <span class="mono">Σ (oᵢⱼ − eᵢⱼ)² / eᵢⱼ</span></td><td>H₀: independientes. Si se rechaza, están relacionados (redundantes)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g2">
+    <div class="box"><h4>Duplicados en atributos</h4>Misma información con otra escala o código: °C y °F, sistema métrico e imperial, binario y hexadecimal. En texto: <b>edit distance</b>, <b>Smith-Waterman</b>, <b>Jaro</b>; orden de nombre y apellido: <b>WHIRL</b>.</div>
+    <div class="box"><h4>Duplicados en instancias</h4>Enfoque probabilístico (inferencia bayesiana), aprendizaje automático (supervisado o no) o distancias.</div>
+  </div>
+
+  <h2>Limpieza de datos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Valores perdidos</h4>Eliminar instancias o atributos, o imputar con estadística o aprendizaje automático (<a href="#tema-4">tema 4</a>).</div>
+    <div class="box"><h4>Ruido</h4>De clase (mal etiquetado: hay que eliminarlo) o de atributo (eliminar la instancia puede tirar información útil). Se suaviza con <b>binning</b> o <b>regresión</b> (<a href="#tema-5">tema 5</a>).</div>
+  </div>
+
+  <h2>Normalización</h2>
+  <p class="prose">Un atributo en [0, 1000] pesaría más que otro en [0, 10]. Normalizar da a todos el mismo peso.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Min-max</h4><span class="mono">v' = (v − mín)/(máx − mín)·(nuevo_máx − nuevo_mín) + nuevo_mín</span>. Rango típico [0, 1] o [−1, 1].</div>
+    <div class="box"><h4>Z-score</h4><span class="mono">v' = (v − x̄)/σ</span>. Cuando no se conocen máx/mín o estos son outliers.</div>
+    <div class="box"><h4>Escala decimal</h4><span class="mono">v' = v / 10ʲ</span>, con j el menor entero que deja todos los |v'| &lt; 1.</div>
+  </div>
+  <figure class="diagram">
+    <label for="normIn">Valores (separados por comas)</label>
+    <input type="text" id="normIn" value="-450, 120, 310, 640, 986">
+    <div class="table-wrap" style="margin-top:12px"><table id="normTable"></table></div>
+    <figcaption>Ejemplo: beneficio por operación en euros. Con escala decimal, j = 3 porque el máximo absoluto es 986.</figcaption>
+  </figure>
+  <div class="callout warn"><span class="tag">No confundir</span><p>Normalizar en <b>preprocesamiento</b> es reescalar. Normalizar en <b>estadística</b> es transformar los datos para que sigan una distribución normal.</p></div>
+
+  <h2>Transformar atributos</h2>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="box"><h4>Selección de características</h4>Subconjunto óptimo de atributos (<a href="#tema-8">tema 8</a>).</div>
+    <div class="box"><h4>Selección de instancias</h4>Subconjunto de ejemplos (<a href="#tema-9">tema 9</a>).</div>
+    <div class="box"><h4>Discretización</h4>Numérico → intervalos o etiquetas "bajo, medio, alto" (<a href="#tema-7">tema 7</a>).</div>
+    <div class="box"><h4>Generalización de conceptos</h4>Subir de nivel: pastor alemán, labrador → "perro". En bolsa: ticker → sector.</div>
+  </div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>ETL: extracción, transformación, carga.</li>
+    <li>Redundancia: Pearson/covarianza (numéricos), χ² (nominales). Spearman si no hay normalidad.</li>
+    <li>Normalización: min-max, z-score, escala decimal.</li>
+    <li>Transformación: selección de características e instancias, discretización, generalización de conceptos.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-3"></div>
+</section>
+
+<!-- ===================== TEMA 4 ===================== -->
+<section class="view" data-view="tema-4" hidden>
+  <p class="eyebrow">Tema 4</p>
+  <h1>Los valores perdidos</h1>
+  <p class="oneline">Un valor perdido es un dato no disponible que sería útil para el modelo. Según su mecanismo son <b>MCAR</b>, <b>MAR</b> o <b>MNAR</b>. Se tratan <b>eliminando</b> (instancias o atributos) o <b>imputando</b>, con métodos basados en los datos, en modelos estadísticos (máxima verosimilitud, EM) o en aprendizaje automático (KNN, SVM, k-medias).</p>
+  <ul class="objs"><li>Tipos de perdidos</li><li>Eliminar o imputar</li><li>Máxima verosimilitud y EM</li><li>Imputación con aprendizaje automático</li></ul>
+
+  <h2>¿Por qué faltan los datos?</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Significado</th><th>Ejemplo en mercados</th></tr></thead>
+    <tbody>
+      <tr><td><b>MCAR</b><br><small>missing completely at random</small></td><td>Misma probabilidad para todos; la causa no tiene que ver con los datos</td><td>Un corte aleatorio del feed de precios</td></tr>
+      <tr><td><b>MAR</b><br><small>missing at random</small></td><td>La probabilidad depende de grupos definidos por los datos observados</td><td>Faltan cotizaciones de las acciones de un mercado en sus días festivos</td></tr>
+      <tr><td><b>MNAR</b><br><small>missing not at random</small></td><td>Faltan por motivos desconocidos, ligados al propio valor</td><td>Empresas que no publican una métrica precisamente porque es mala</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Eliminar suele reservarse para <b>MCAR</b> o para atributos con tantos perdidos que imputar sería inútil. Los métodos de aprendizaje automático solo funcionan si los perdidos son <b>MAR</b> (relacionados con los datos observables).</p>
+
+  <h2>Imputación</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Basada en datos</h4><b>Media</b> (no condicional o condicional), <b>moda</b> para categóricos, <b>mediana</b> con distribución asimétrica. <b>Hot-deck</b>: copiar de la instancia más parecida del mismo conjunto. <b>Cold-deck</b>: de otra base de datos.</div>
+    <div class="box"><h4>Modelos estadísticos</h4><b>Regresión</b> (lineal, polinómica, logística): un modelo por atributo con perdidos, caro. <b>Máxima verosimilitud</b>, sobre todo para variables discretas.</div>
+    <div class="box"><h4>Aprendizaje automático</h4><b>KNN</b> (media o voto de los k vecinos; <code>KNNImputer</code> de scikit-learn, solo numéricos), <b>SVM de regresión</b>, <b>k-medias</b> + vecinos dentro del clúster, Naïve Bayes.</div>
+  </div>
+  <p class="prose"><b>Imputación simple</b>: un único valor. <b>Múltiple</b>: varias opciones ordenadas por probabilidad.</p>
+
+  <h3>Simulador de imputación</h3>
+  <figure class="diagram">
+    <div class="btnrow" role="group" aria-label="Método de imputación">
+      <button class="btn" data-imp="mean" aria-pressed="true">Media</button>
+      <button class="btn" data-imp="median" aria-pressed="false">Mediana</button>
+      <button class="btn" data-imp="knn" aria-pressed="false">KNN (k = 2, por edad)</button>
+    </div>
+    <div class="table-wrap" style="margin:0"><table id="impTable"></table></div>
+    <p class="out" id="impOut"></p>
+    <figcaption>Clientes de un banco (datos de ejemplo). Falta el ingreso de Elena, 29 años. La media se dispara por el cliente de 150.000 €; KNN la compara con los dos clientes de edad más parecida.</figcaption>
+  </figure>
+
+  <h2>Máxima verosimilitud y EM</h2>
+  <p class="prose">La <b>máxima verosimilitud</b> busca los parámetros de una distribución que mejor explican los datos observados. Para alturas normales con σ fija, el máximo se alcanza cuando la curva está centrada en la media: <span class="mono">μ = (x₁ + … + xₙ)/n</span>.</p>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>1. Asumir</b>una distribución (normal: media y σ)</div><div class="arrow">→</div>
+      <div class="node"><b>2. Estimar</b>μ y σ con los datos observados</div><div class="arrow">→</div>
+      <div class="node"><b>3. Esperanza (E)</b>Imputar los perdidos con la esperanza condicional (regresión sobre los completos)</div><div class="arrow">→</div>
+      <div class="node"><b>4. Maximización (M)</b>Reestimar μ y σ con máxima verosimilitud</div><div class="arrow">→</div>
+      <div class="node hl"><b>5. Repetir</b>hasta que μ y σ no cambien (umbral)</div>
+    </div>
+    <figcaption>Algoritmo de esperanza-maximización (EM). Sirve también para imputación múltiple.</figcaption>
+  </figure>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>MCAR (azar total), MAR (depende de lo observado), MNAR (motivos desconocidos).</li>
+    <li>Eliminar → riesgo de perder información; adecuado en MCAR.</li>
+    <li>Imputación: basada en datos (media, moda, mediana, hot-deck, cold-deck), estadística (regresión, máxima verosimilitud, EM) y aprendizaje automático (KNN, SVM, k-medias), válida solo con MAR.</li>
+    <li>EM: esperanza + maximización hasta converger.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-4"></div>
+</section>
+
+<!-- ===================== TEMA 5 ===================== -->
+<section class="view" data-view="tema-5" hidden>
+  <p class="eyebrow">Tema 5</p>
+  <h1>El ruido en los datos</h1>
+  <p class="oneline">El ruido es un <b>error aleatorio</b> en una variable: <span class="mono">X̃ = X + e</span>. Puede estar en la <b>clase</b> (más dañino) o en los <b>atributos</b>. Se combate con <b>suavizado</b>, con <b>filtros de ruido</b> o usando <b>algoritmos robustos</b> (C4.5, bagging, Random Forest).</p>
+  <ul class="objs"><li>Ruido de clase y de atributo</li><li>Ruido vs. anomalías</li><li>Suavizado y filtros</li><li>Algoritmos robustos</li></ul>
+
+  <h2>Dos tipos de ruido</h2>
+  <div class="grid g2">
+    <div class="box accent"><h4>Ruido de clase (etiqueta)</h4>Instancia mal etiquetada. Afecta más que el de atributo.<br>• <b>Contradictorias</b>: duplicados con distinta etiqueta.<br>• <b>Mal etiquetadas</b>: clase equivocada.</div>
+    <div class="box"><h4>Ruido de atributo</h4>Valores erróneos, perdidos o incompletos en uno o más atributos. Cuanto más correlacionado esté el atributo con la clase, más daño hace su ruido.</div>
+  </div>
+  <div class="callout warn"><span class="tag">Ruido no es lo mismo que anomalía</span><p>Las anomalías son datos distintos al resto que pueden ser justo lo que buscas: transacciones fraudulentas, un análisis de sangre atípico, una zona anómala en una mamografía. Tratarlas como ruido sería perder la información más valiosa.</p></div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p><b>Ruido de atributo</b>: un "fat finger", un precio con un cero de más por un error de tecleo que aparece un instante en el registro de operaciones. <b>Ruido de clase</b>: en un histórico de fraude, operaciones legítimas marcadas como fraudulentas por un analista. Un salto real de precio tras una noticia, en cambio, es una anomalía legítima.</p></div>
+
+  <h2>Suavizado por bins (binning)</h2>
+  <p class="prose">Se ordenan los valores, se reparten en lotes y cada valor se sustituye por la <b>media</b> (o mediana) del lote o por el <b>límite</b> más cercano.</p>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="binIn">Valores</label><input type="text" id="binIn" value="4, 7, 10, 24, 28, 29, 31, 34, 34"></div>
+      <div><label for="binSize">Valores por lote</label><input type="number" id="binSize" value="3" min="1" max="10"></div>
+    </div>
+    <div class="table-wrap" style="margin-top:12px"><table id="binTable"></table></div>
+    <figcaption>Ejemplo del temario. Por media: lote 1 → 7, 7, 7. Por límites: en el lote 2, el 28 está más cerca de 29 que de 24. Si un valor está a igual distancia de los dos límites (el 7 del lote 1), aquí se toma el inferior.</figcaption>
+  </figure>
+  <p class="prose">También se suaviza con <b>regresión</b>, ajustando a la recta los valores que se alejan más de un umbral (pero la regresión es sensible a ruido y anomalías). El suavizado no distingue ruido de anomalía.</p>
+
+  <h2>Filtros de ruido (a nivel de clase)</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Clasificador único</h4>Entrenar, validar y eliminar lo que se clasifica mal en test. Problemas: supone ruido solo en test, confía en un único modelo y asume una muestra representativa.</div>
+    <div class="box"><h4>Clasificador único + validación cruzada</h4>k partes → k clasificadores entrenados con k−1 → clasificar todo → <b>voto por mayoría</b> de las instancias mal clasificadas → eliminarlas.</div>
+    <div class="box accent"><h4>Multiclasificador</h4>Lo mismo con m algoritmos: cada instancia se clasifica k·m veces y se eliminan por <b>consenso</b>.</div>
+    <div class="box"><h4>Basados en distancia (KNN)</h4>Construir un subconjunto que etiquete bien al resto, o eliminar instancias cuya ausencia no empeore la clasificación de otras.</div>
+  </div>
+  <figure class="diagram">
+    <div class="kfold" id="kfold4"></div>
+    <figcaption>Validación cruzada con k = 4, como en la figura del temario: cada parte se clasifica con un modelo entrenado sin ella.</figcaption>
+  </figure>
+
+  <h2>Algoritmos robustos al ruido</h2>
+  <div class="grid g3">
+    <div class="box"><h4>C4.5</h4>Árbol de decisión de Ross Quinlan (1993) con <b>poda</b>: corta las ramas creadas por ejemplos aislados (a menudo ruidosos).</div>
+    <div class="box"><h4>Bagging</h4>Bootstrap: n muestras con reemplazo del mismo tamaño, un modelo por muestra, y media (regresión) o voto (clasificación).</div>
+    <div class="box"><h4>Random Forest</h4>Bagging + subconjunto aleatorio de atributos en cada árbol: baja correlación entre árboles, robusto al sobreajuste y al ruido.</div>
+  </div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">Los filtros no son infalibles: pueden borrar instancias buenas o dejar ruidosas. Y si el ruido es muy alto, ni el algoritmo más robusto rinde bien.</p>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>X̃ = X + e. El ruido de clase es más dañino que el de atributo.</li>
+    <li>Clase: instancias contradictorias y mal etiquetadas.</li>
+    <li>Suavizado: binning (media, mediana, límites) y regresión. Filtros: clasificador único, con validación cruzada, multiclasificador, KNN.</li>
+    <li>Robustos: C4.5 (poda), bagging, Random Forest.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-5"></div>
+</section>
+
+<!-- ===================== TEMA 6 ===================== -->
+<section class="view" data-view="tema-6" hidden>
+  <p class="eyebrow">Tema 6</p>
+  <h1>Desbalanceo y maldición de la dimensionalidad</h1>
+  <p class="oneline">Dos problemas que no son "suciedad" pero arruinan un modelo: el <b>desbalanceo de clases</b> (se corrige con oversampling como SMOTE o undersampling como Tomek o NearMiss) y la <b>alta dimensionalidad</b> (se reduce con selección o extracción de características, como PCA).</p>
+  <ul class="objs"><li>Desbalanceo</li><li>Oversampling: SMOTE, Borderline, ADASYN</li><li>Undersampling: CNN, Tomek, NearMiss</li><li>Maldición de la dimensionalidad y PCA</li></ul>
+
+  <h2>Desbalanceo de clases</h2>
+  <p class="prose">En la literatura, la clase infrarrepresentada se llama <b>positiva</b> y la mayoritaria <b>negativa</b>. El clasificador se sesga hacia la mayoritaria y puede ignorar la minoritaria.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Muestreo de datos</h4>Modificar las instancias de entrenamiento para equilibrar.</div>
+    <div class="box"><h4>Nivel de algoritmo</h4>Adaptar el algoritmo para que sea robusto al desbalanceo.</div>
+    <div class="box"><h4>Cost-sensitive</h4>Híbrido: un error en la clase minoritaria "cuesta" más; se minimiza el coste total.</div>
+  </div>
+
+  <h3>Oversampling (sobremuestreo)</h3>
+  <div class="grid g2">
+    <div class="box"><h4>Aleatorio</h4>Duplicar al azar instancias minoritarias. Sencillo, pero copias exactas → sobreajuste y más coste.</div>
+    <div class="box accent"><h4>SMOTE</h4>1) Elegir una instancia minoritaria · 2) buscar sus k vecinos (KNN) · 3) elegir vecinos al azar · 4) calcular la distancia · 5) multiplicarla por un número aleatorio entre 0 y 1 · 6) crear el punto sintético sobre la línea.</div>
+    <div class="box"><h4>Borderline SMOTE</h4>Solo sobremuestrea los ejemplos minoritarios fronterizos, los más fáciles de clasificar mal.</div>
+    <div class="box"><h4>ADASYN</h4>Genera más ejemplos donde la clase minoritaria es menos densa (más difícil de aprender).</div>
+  </div>
+
+  <h3>Undersampling (submuestreo)</h3>
+  <div class="grid g2">
+    <div class="box"><h4>Aleatorio</h4>Borrar al azar instancias mayoritarias. Los límites de decisión son más difíciles de aprender; solo sirve si hay suficientes ejemplos minoritarios.</div>
+    <div class="box"><h4>Condensed Nearest Neighbor</h4>A = 1 mayoritario + todos los minoritarios; B = resto. Se clasifica B con 1-NN sobre A y los mal clasificados pasan a A. Lo que queda en B se elimina.</div>
+    <div class="box accent"><h4>Enlaces Tomek</h4>Pares (A, B) de clases distintas que son vecinos más cercanos mutuos: no hay ningún C más cerca de ninguno de los dos. Se eliminan.</div>
+    <div class="box"><h4>NearMiss 1–4</h4>Selección por distancia: <b>1</b>, mayoritarias con menor distancia media a las 3 minoritarias más cercanas; <b>2</b>, las 3 más alejadas; <b>3</b>, un número fijo de mayoritarias cerca de cada minoritaria; <b>4</b>, mayor distancia media a las 3 más cercanas.</div>
+  </div>
+  <figure class="diagram">
+    <div class="btnrow">
+      <button class="btn" id="tomekShow">Marcar enlaces Tomek</button>
+      <button class="btn" id="tomekRemove">Eliminar mayoritarias enlazadas</button>
+      <button class="btn" id="tomekReset">Reiniciar</button>
+    </div>
+    <svg id="tomekSvg" viewBox="0 0 520 280" width="100%" style="max-width:560px;display:block;margin:0 auto" role="img" aria-label="Enlaces Tomek entre dos clases"></svg>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Clase mayoritaria (no impago)</span><span><i style="background:var(--example)"></i>Clase minoritaria (impago)</span></div>
+    <p class="out" id="tomekOut"></p>
+    <figcaption>Simulación con datos de ejemplo. Los enlaces Tomek están en la frontera o son ruido. Aquí se elimina solo la instancia mayoritaria de cada par, la variante habitual para submuestrear; el temario dice eliminar el enlace.</figcaption>
+  </figure>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>En scoring de crédito los impagos son pocos frente a los préstamos que se devuelven. Un enfoque <b>cost-sensitive</b> encaja de forma natural: no detectar un impago cuesta el capital prestado; rechazar a un buen cliente cuesta solo el margen que se deja de ganar.</p></div>
+
+  <h2>La maldición de la dimensionalidad</h2>
+  <p class="prose">Término de <b>Richard Bellman (1961)</b>: cada atributo añadido hace crecer el espacio de búsqueda de forma exponencial. Para no sobreajustar, el número de instancias tendría que crecer también exponencialmente. Con más atributos que instancias, el sobreaprendizaje está casi asegurado.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Clustering</h4>Las instancias son más difíciles de agrupar.</div>
+    <div class="box"><h4>Árboles de decisión</h4>Resultados subóptimos por la cantidad de separadores posibles.</div>
+    <div class="box"><h4>Basados en instancias (KNN)</h4>Los más dependientes de la dimensionalidad.</div>
+  </div>
+
+  <h3>PCA (análisis de componentes principales)</h3>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>1</b>Estandarizar los atributos</div><div class="arrow">→</div>
+      <div class="node"><b>2</b>Matriz de covarianza</div><div class="arrow">→</div>
+      <div class="node"><b>3</b>k primeros autovectores (los k mayores autovalores)</div><div class="arrow">→</div>
+      <div class="node"><b>4</b>Extraer los componentes principales</div><div class="arrow">→</div>
+      <div class="node"><b>5</b>Elegir los de mayor % de varianza</div><div class="arrow">→</div>
+      <div class="node hl"><b>6</b>Transformar al nuevo subespacio de dimensión k</div>
+    </div>
+    <figcaption>PCA es extracción de características (combinaciones lineales). También sirve para visualizar: de n dimensiones a 2.</figcaption>
+  </figure>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Soluciones al desbalanceo: muestreo, nivel de algoritmo, cost-sensitive.</li>
+    <li>Oversampling: aleatorio, SMOTE (interpolación entre vecinos), Borderline SMOTE, ADASYN.</li>
+    <li>Undersampling: aleatorio, CNN, enlaces Tomek, NearMiss 1–4.</li>
+    <li>Maldición de la dimensionalidad: Bellman 1961. PCA: estandarizar → covarianza → autovectores → componentes.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-6"></div>
+</section>
+
+<!-- ===================== TEMA 7 ===================== -->
+<section class="view" data-view="tema-7" hidden>
+  <p class="eyebrow">Tema 7</p>
+  <h1>De atributos continuos a discretos</h1>
+  <p class="oneline">La <b>discretización</b> divide un atributo continuo en intervalos. Todos los métodos siguen 4 pasos: <b>ordenar</b>, elegir <b>punto de corte</b>, <b>dividir o fusionar</b> y aplicar un <b>criterio de parada</b>. Métodos de división: binning, MDLP, Mantaras. De fusión: ChiMerge y Chi2.</p>
+  <ul class="objs"><li>Continuo vs. discreto</li><li>Los 4 pasos</li><li>Binning, MDLP, Mantaras</li><li>ChiMerge y Chi2</li></ul>
+
+  <h2>¿Por qué discretizar?</h2>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="box">Se parece más a cómo representamos el conocimiento: más interpretable.</div>
+    <div class="box">Reduce datos: aprendizaje más rápido y compacto.</div>
+    <div class="box">Reduce el ruido.</div>
+    <div class="box">Muchos algoritmos (p. ej. árboles para elegir separadores) funcionan mejor o solo con discretos.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>El indicador técnico <b>RSI</b> va de 0 a 100, pero los operadores lo leen discretizado: por debajo de 30 "sobreventa", entre 30 y 70 "neutral" y por encima de 70 "sobrecompra". Es una discretización por conocimiento experto. Los métodos supervisados buscan esos cortes automáticamente a partir de la clase (p. ej. "el precio sube o baja a 5 días").</p></div>
+
+  <h2>Los 4 pasos</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>1. Ordenar</b>Coste ≤ O(N log N): Quick Sort, Merge Sort</div><div class="arrow">→</div>
+      <div class="node"><b>2. Punto de corte</b>Valor que divide el rango en dos; se evalúa con correlación con la clase, ganancia, estadísticos…</div><div class="arrow">→</div>
+      <div class="node"><b>3. Dividir o fusionar</b>De arriba abajo se divide; de abajo arriba se fusionan intervalos adyacentes</div><div class="arrow">→</div>
+      <div class="node hl"><b>4. Parar</b>Compromiso entre aridad baja (pocos intervalos) y precisión</div>
+    </div>
+    <figcaption><b>Aridad</b> = número de intervalos. Muy baja → peor precisión; muy alta → mala discretización.</figcaption>
+  </figure>
+
+  <h2>Binning: igual amplitud vs. igual frecuencia</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="discIn">Rentabilidades mensuales (%)</label><input type="text" id="discIn" value="-12, -6.5, -3, -2.1, -1.5, -0.8, 0.2, 0.5, 1.1, 1.4, 1.9, 2.3, 2.8, 3.5, 4.2, 9.8"></div>
+      <div><label for="discK">Número de intervalos</label><input type="number" id="discK" value="4" min="2" max="8"></div>
+    </div>
+    <div class="grid g2" style="margin-top:12px">
+      <div><h4 style="font-size:.95rem;margin-bottom:6px">Igual amplitud</h4><div id="discW"></div></div>
+      <div><h4 style="font-size:.95rem;margin-bottom:6px">Igual frecuencia</h4><div id="discF"></div></div>
+    </div>
+    <figcaption>Con igual amplitud, los extremos (−12 % y +9,8 %) estiran los intervalos y casi todo cae en uno o dos: por eso el temario recomienda eliminar antes los outliers. Con igual frecuencia, cada intervalo tiene el mismo número de valores.</figcaption>
+  </figure>
+
+  <h2>Métodos de división y de fusión</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Método</th><th>Tipo</th><th>Evalúa el corte con</th><th>Parada</th></tr></thead>
+    <tbody>
+      <tr><td><b>Binning</b></td><td>División, no supervisado</td><td>Amplitud o frecuencia iguales</td><td>No necesita: k se fija al inicio</td></tr>
+      <tr><td><b>MDLP</b></td><td>División, supervisado</td><td>Entropía de Shannon <span class="mono">H(X) = −Σ pₓ log pₓ</span></td><td>Principio de longitud mínima de descripción</td></tr>
+      <tr><td><b>Distancia de Mantaras</b></td><td>División, supervisado</td><td>Distancia entre particiones (se elige la mínima)</td><td>MDLP</td></tr>
+      <tr><td><b>ChiMerge</b></td><td>Fusión, supervisado</td><td>χ² entre intervalos adyacentes: si son independientes de la clase, se fusionan</td><td>Todos los χ² por encima del umbral (según α)</td></tr>
+      <tr><td><b>Chi2</b></td><td>Fusión, supervisado</td><td>χ² con nivel de significación que cambia en cada iteración</td><td>Inconsistencia ≤ límite (por defecto 0)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g2">
+    <div class="box"><h4>Entropía</h4>Máxima cuando todos los sucesos son equiprobables; mínima (0) cuando uno tiene probabilidad 1. Información de un suceso: <span class="mono">I(x) = −log pₓ</span>.</div>
+    <div class="box"><h4>Inconsistencia</h4>Dos instancias iguales con distinta clase. Chi2 sigue fusionando mientras no aparezcan.</div>
+  </div>
+  <h3>Otras categorías</h3>
+  <p class="prose"><b>Supervisados</b> (usan la clase; la mayoría, dan intervalos más adecuados) vs. <b>no supervisados</b> · <b>univariantes</b> vs. <b>multivariantes</b> · estáticos vs. dinámicos · locales vs. globales · directos vs. incrementales.</p>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>4 pasos: ordenar, punto de corte, dividir/fusionar, parar. Aridad = nº de intervalos.</li>
+    <li>División: binning (igual amplitud / igual frecuencia), MDLP (entropía), Mantaras.</li>
+    <li>Fusión: ChiMerge (χ² con umbral) y Chi2 (α variable + inconsistencia).</li>
+    <li>Binning es sensible a outliers.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-7"></div>
+</section>
+
+<!-- ===================== TEMA 8 ===================== -->
+<section class="view" data-view="tema-8" hidden>
+  <p class="eyebrow">Tema 8</p>
+  <h1>Los datos: selección de características</h1>
+  <p class="oneline">Seleccionar características es elegir el <b>subconjunto óptimo de atributos</b> según un criterio. Es un problema de búsqueda entre 2ⁿ subconjuntos: se define una <b>dirección</b>, una <b>estrategia</b>, un <b>criterio de evaluación</b> y un <b>método</b> (filter, wrapper o embedded).</p>
+  <ul class="objs"><li>Beneficios</li><li>Direcciones y estrategias de búsqueda</li><li>Criterios de evaluación</li><li>Filters, wrappers y embedded</li></ul>
+
+  <h2>Tres familias para reducir dimensionalidad</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Extracción de características</h4>Combinaciones lineales nuevas (PCA).</div>
+    <div class="box accent"><h4>Selección de características</h4>Quedarse con algunos atributos originales. Este tema.</div>
+    <div class="box"><h4>Selección de instancias</h4>Quedarse con algunos ejemplos (<a href="#tema-9">tema 9</a>).</div>
+  </div>
+  <p class="prose"><b>Beneficios</b>: menos sobreaprendizaje, menos ruido, más precisión, entrenamiento más rápido, menos almacenamiento y más interpretabilidad.</p>
+
+  <h2>El espacio de búsqueda</h2>
+  <figure class="diagram">
+    <label for="fsN">Número de características: <b class="out" id="fsNv">4</b></label>
+    <input type="range" id="fsN" min="1" max="60" value="4" style="width:100%">
+    <div class="grid g3" id="fsOut" style="margin-top:12px"></div>
+    <div id="fsLattice" style="margin-top:12px"></div>
+    <figcaption>Cada subconjunto es un vector binario: (1, 0, 0, 1) = se eligen S₁ y S₄. Con n atributos hay 2ⁿ subconjuntos; con 40 indicadores técnicos, más de un billón.</figcaption>
+  </figure>
+
+  <h3>Direcciones de búsqueda</h3>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="box"><h4>SFG (hacia adelante)</h4>Empieza vacío y añade características.</div>
+    <div class="box"><h4>SBG (hacia atrás)</h4>Empieza con todas y quita la menos relevante.</div>
+    <div class="box"><h4>BG (bidireccional)</h4>Las dos a la vez, hasta encontrarse en el centro.</div>
+    <div class="box"><h4>RG (aleatoria)</h4>Arranca al azar y añade o quita al azar: evita mínimos locales.</div>
+  </div>
+  <h3>Estrategias de búsqueda</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Exhaustiva</h4>Explora todo. Se acelera con branch and bound o backtracking, pero sigue sin escalar.</div>
+    <div class="box"><h4>Heurística</h4>Recorre un camino entre los extremos: de O(2ⁿ) a O(n). Depende de la heurística.</div>
+    <div class="box"><h4>No determinística</h4>Aleatoria: no espera a recorrer todo; no sabes cuándo llega el óptimo, pero sí cuán buenos son los vistos.</div>
+  </div>
+
+  <h2>Criterios de evaluación</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Criterio</th><th>Se elige la característica que…</th><th>Ejemplos</th></tr></thead>
+    <tbody>
+      <tr><td><b>Información</b></td><td>Más reduce la incertidumbre sobre la clase (mayor ganancia de información)</td><td><span class="mono">IG(V) = U(P(Cᵢ)) − E[U(P(Cᵢ|V))]</span></td></tr>
+      <tr><td><b>Distancia</b> (discriminación)</td><td>Más separa las densidades de las clases</td><td>Euclídea, Minkowski, Kullback-Leibler</td></tr>
+      <tr><td><b>Dependencia</b> (correlación)</td><td>Más correlacionada con la clase</td><td>Pearson</td></tr>
+      <tr><td><b>Consistencia</b></td><td>Forma el conjunto mínimo que separa las clases igual que todas; detecta redundantes</td><td>—</td></tr>
+      <tr><td><b>Precisión</b></td><td>Mejora más el clasificador (riesgo de sobreajuste)</td><td>Precisión, recall, F1, tasa de error</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Métodos: filter, wrapper, embedded</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Filter</th><th>Wrapper</th><th>Embedded</th></tr></thead>
+    <tbody>
+      <tr><td><b>Cómo</b></td><td>Ranking con información, distancia, dependencia o consistencia, antes de aprender</td><td>Un clasificador evalúa cada subconjunto (caja negra) con validación cruzada</td><td>La selección ocurre durante el aprendizaje</td></tr>
+      <tr><td><b>Velocidad</b></td><td>La más rápida; escala a datasets grandes</td><td>Lenta; con muchos atributos se usan algoritmos genéticos</td><td>Intermedia: no reentrena desde cero</td></tr>
+      <tr><td><b>Sobreajuste</b></td><td>Lo evita</td><td>Riesgo</td><td>Moderado</td></tr>
+      <tr><td><b>Ejemplo</b></td><td>Quedarse con los 10 atributos más correlacionados con la clase</td><td>SFG + Random Forest</td><td>Árboles CART y C4.5</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Para predecir la dirección de un índice puedes calcular decenas de indicadores (medias móviles, RSI, MACD, volatilidad, volumen…). Muchos son redundantes: varias medias móviles casi se solapan. Un <b>filter</b> por correlación los poda rápido; un <b>wrapper</b> afina el conjunto final, pero con alto riesgo de sobreajustar al periodo histórico.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>2ⁿ subconjuntos posibles. Direcciones: SFG, SBG, BG, RG.</li>
+    <li>Estrategias: exhaustiva, heurística (O(n)), no determinística.</li>
+    <li>Criterios: información, distancia, dependencia, consistencia, precisión.</li>
+    <li>Filter (independiente del modelo, rápido), wrapper (usa un clasificador), embedded (dentro del aprendizaje: CART, C4.5).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-8"></div>
+</section>
+
+<!-- ===================== TEMA 9 ===================== -->
+<section class="view" data-view="tema-9" hidden>
+  <p class="eyebrow">Tema 9</p>
+  <h1>Selección de instancias</h1>
+  <p class="oneline">Elegir el subconjunto de ejemplos más pequeño posible con el que el algoritmo rinda igual que con todos: <span class="mono">R(MDₘ) = R(MDₜ)</span>. Es complementaria a la selección de características. La <b>selección de prototipos</b> busca el mejor equilibrio entre reducción y precisión.</p>
+  <ul class="objs"><li>Para qué sirve</li><li>Marco de Reinartz</li><li>Selección de prototipos</li><li>Métodos avanzados</li></ul>
+
+  <h2>Para qué sirve</h2>
+  <div class="grid g3">
+    <div class="box">Hace posible ejecutar la minería con conjuntos enormes.</div>
+    <div class="box">Se queda con lo relevante para el objetivo.</div>
+    <div class="box">Elimina instancias irrelevantes, ruidosas y redundantes.</div>
+  </div>
+
+  <h2>Marco unificado (Reinartz)</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>Muestreo</b>Aleatorio, estratificado, por agrupación (1 o 2 etapas), sistemático</div><div class="arrow">→</div>
+      <div class="node"><b>Agrupamiento</b>Clustering de la muestra en grupos similares</div><div class="arrow">→</div>
+      <div class="node"><b>Prototipado</b>Instancias representativas de cada grupo (reales o sintéticas)</div><div class="arrow">→</div>
+      <div class="node hl"><b>Evaluación</b>Directa (parecido al original: entropía, momentos) o indirecta (precisión de un clasificador)</div>
+    </div>
+    <figcaption>Muestreo sistemático: para sacar 20 de 100 se toma 1 de cada 5 (intervalo regular).</figcaption>
+  </figure>
+
+  <h2>Selección de prototipos: direcciones de búsqueda</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Dirección</th><th>Cómo funciona</th><th>Pros / contras</th><th>Algoritmos</th></tr></thead>
+    <tbody>
+      <tr><td><b>Incremental</b></td><td>Empieza vacío y añade si cumple el criterio</td><td>Rápida; se pueden añadir más después. Elige al principio con poca información</td><td>CNN, PSC, IB3</td></tr>
+      <tr><td><b>Decreciente</b></td><td>Empieza con todo y elimina</td><td>Buenos resultados; más coste computacional</td><td>MCS, ENN, DROP</td></tr>
+      <tr><td><b>Por lotes</b></td><td>Evalúa todo y elimina de golpe lo que cumple el criterio</td><td>Mismo coste que la decreciente</td><td>POP, MoCS, ICF</td></tr>
+      <tr><td><b>Mixta</b></td><td>Parte de un subconjunto aleatorio; añade y quita</td><td>Corrige decisiones; alta precisión</td><td>CoCoIS</td></tr>
+      <tr><td><b>Fija</b></td><td>Mixta con igual nº de altas y bajas</td><td>—</td><td>RMHC</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose"><b>Criterios</b>: reducción del almacenamiento, tolerancia al ruido (conviene limpiar el ruido antes), precisión y requisitos de tiempo.</p>
+
+  <h3>Simulador: Edited Nearest Neighbor (ENN)</h3>
+  <figure class="diagram">
+    <div class="btnrow">
+      <button class="btn" id="ennRun">Aplicar ENN (k = 3)</button>
+      <button class="btn" id="ennReset">Reiniciar</button>
+    </div>
+    <svg id="ennSvg" viewBox="0 0 520 280" width="100%" style="max-width:560px;display:block;margin:0 auto" role="img" aria-label="Edited Nearest Neighbor"></svg>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Sube</span><span><i style="background:var(--example)"></i>Baja</span></div>
+    <p class="out" id="ennOut"></p>
+    <figcaption>Días de mercado simulados según dos indicadores, con algunas etiquetas ruidosas. ENN elimina cada instancia cuya clase no coincide con la mayoría de sus 3 vecinos más cercanos: limpia ruido y suaviza la frontera.</figcaption>
+  </figure>
+
+  <h2>Métodos avanzados</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Razonamiento basado en casos</h4>Resuelve problemas reutilizando casos parecidos. Se optimiza la base de casos con el <b>footprint</b>: se conservan los casos que cubren pocos ejemplos (los difíciles).</div>
+    <div class="box"><h4>Algoritmos genéticos</h4>Propuestos por <b>Holland (1975)</b>. Codifican el subconjunto y aplican operadores genéticos para encontrar conjuntos compactos que generalicen bien (p. ej. con KNN).</div>
+    <div class="box"><h4>Series temporales</h4>Modelo <b>Landmark</b>: puntos de referencia de la serie para medir similitud con menos información, pudiendo reconstruir cualquier segmento.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Años de datos tick de un activo son miles de millones de registros. Para entrenar un KNN o buscar patrones parecidos al actual no hace falta todo: se seleccionan prototipos o puntos de referencia (picos, valles, cambios de tendencia), como en el modelo Landmark, para comparar series rápido sin perder su forma.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Objetivo: R(MDₘ) = R(MDₜ) con la menor m posible.</li>
+    <li>Reinartz: muestreo → agrupamiento → prototipado → evaluación (directa o indirecta).</li>
+    <li>Incremental (CNN, PSC, IB3), decreciente (MCS, ENN, DROP), lotes (POP, MoCS, ICF), mixta (CoCoIS), fija (RMHC).</li>
+    <li>Avanzados: footprint (CBR), algoritmos genéticos (Holland 1975), Landmark (series temporales).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-9"></div>
+</section>
+
+<!-- ===================== TEMA 10 ===================== -->
+<section class="view" data-view="tema-10" hidden>
+  <p class="eyebrow">Tema 10</p>
+  <h1>Preprocesamiento de datos en entornos big data</h1>
+  <p class="oneline">Con volúmenes masivos las técnicas clásicas no escalan: se adaptan al paradigma <b>MapReduce</b> y a <b>Spark</b> (KNN-LI, HME-BD, ROS-BD, SMOTE-BD, DChi2…). El objetivo es pasar de big data a <b>smart data</b>: datos precisos que aportan valor.</p>
+  <ul class="objs"><li>Las V del big data</li><li>Clásico vs. masivo</li><li>MapReduce y Spark</li><li>Smart data</li></ul>
+
+  <h2>¿Qué es big data?</h2>
+  <div class="flow stack">
+    <div class="node"><b>2001</b>Modelo de las 3 V: volumen, velocidad, variedad</div><div class="arrow">→</div>
+    <div class="node"><b>2010</b>Apache Hadoop: datos que no pueden obtenerse, gestionarse ni procesarse con ordenadores de propósito general</div><div class="arrow">→</div>
+    <div class="node hl"><b>2011</b>IDC añade la 4.ª V, el <b>valor</b>. Ese año se generaron más de 1,8 zettabytes (10²¹ bytes)</div>
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="box"><h4>Volumen</h4>Cantidad de datos: Internet, móviles, IoT, redes sociales.</div>
+    <div class="box"><h4>Velocidad</h4>Analizarlos en un tiempo razonable para que aporten valor.</div>
+    <div class="box"><h4>Variedad</h4>Estructurados, semiestructurados, texto, audio, vídeo, imagen.</div>
+    <div class="box accent"><h4>Valor</h4>Deben aportar valor a la organización con un coste asumible.</div>
+    <div class="box"><h4>Veracidad</h4>Datos de calidad: limpiados en el preprocesamiento.</div>
+    <div class="box"><h4>Visualización</h4>Resultados legibles para decidir.</div>
+  </div>
+
+  <h2>MapReduce: divide y vencerás</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>Dividir</b>El dataset se reparte en bloques entre nodos</div><div class="arrow">→</div>
+      <div class="node"><b>Map</b>Cada nodo procesa su bloque en paralelo (p. ej. imputa con KNN local)</div><div class="arrow">→</div>
+      <div class="node hl"><b>Reduce</b>Se combinan los resultados parciales en el resultado final</div>
+    </div>
+    <figcaption>Así funciona, por ejemplo, la imputación local KNN-LI.</figcaption>
+  </figure>
+
+  <h2>Preprocesamiento clásico vs. big data</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Problema</th><th>Clásico (temas 4–9)</th><th>Versión big data</th></tr></thead>
+    <tbody>
+      <tr><td><b>Valores perdidos</b></td><td>Regresión, máxima verosimilitud, KNN, SVM, k-medias</td><td><b>KNN-LI</b>: KNN local con MapReduce</td></tr>
+      <tr><td><b>Ruido</b></td><td>Suavizado y filtros</td><td><b>HME-BD</b> (ensamble homogéneo de Random Forest en Spark) · <b>HTE-BD</b> (heterogéneo: RF + KNN + regresión logística, por votación) · <b>ENN-BD</b></td></tr>
+      <tr><td><b>Desbalanceo</b></td><td>Oversampling y undersampling</td><td><b>ROS-BD</b> (sobremuestreo aleatorio con MapReduce) · <b>RUS-BD</b> (submuestreo) · <b>SMOTE-BD</b> (Spark + KNN)</td></tr>
+      <tr><td><b>Discretización</b></td><td>MDLP, Chi2…</td><td><b>DMDLP</b> (MDLP distribuido, entropía) · <b>DChi2</b> (dos fases MapReduce)</td></tr>
+      <tr><td><b>Reducción de datos</b></td><td>Selección/extracción de características e instancias</td><td><b>Estratificación</b>: subconjuntos con clases equilibradas que se procesan y se concatenan</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">En big data se prefieren los filtros de ruido porque, además de limpiar, reducen el tamaño. Las implementaciones están en Spark Packages.</p>
+
+  <h2>De big data a smart data</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Precisos</h4>No corruptos y veraces: preprocesamiento de calidad.</div>
+    <div class="box"><h4>Decisiones automatizadas</h4>Procesar de forma dinámica y en tiempo real.</div>
+    <div class="box"><h4>Escalables</h4>Preparados para el crecimiento del flujo de datos.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un procesador de pagos puede analizar miles de transacciones con tarjeta por segundo y decidir en milisegundos si bloquea una. Es big data por volumen y velocidad, pero solo es <b>smart data</b> si los datos llegan limpios, las clases están bien tratadas (el fraude es minoritario) y el modelo decide en tiempo real.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>3 V (2001), 4.ª V valor (IDC 2011), definición de Hadoop (2010). Hoy también veracidad y visualización.</li>
+    <li>MapReduce: dividir → map → reduce.</li>
+    <li>KNN-LI; HME-BD, HTE-BD, ENN-BD; ROS-BD, RUS-BD, SMOTE-BD; DMDLP, DChi2; estratificación.</li>
+    <li>Smart data = datos que aportan valor: precisos, en tiempo real, escalables.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-10"></div>
+</section>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section class="view" data-view="glosario" hidden>
+  <p class="eyebrow">Consulta rápida</p>
+  <h1>Glosario</h1>
+  <p class="lead">Los términos clave del módulo 4. Escribe para filtrar.</p>
+  <label for="glossQ" style="margin-top:16px">Buscar término</label>
+  <input type="text" id="glossQ" placeholder="Por ejemplo: MCAR, Tomek, ChiMerge…">
+  <div class="gloss" id="glossList"></div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  const TOPICS = [
+    {id:"tema-1", t:"La inferencia estadística", d:"Descriptiva, estimación, contraste de hipótesis y tests."},
+    {id:"tema-2", t:"Análisis exploratorio", d:"Tipos de atributos, gráficos y errores en los datos."},
+    {id:"tema-3", t:"Preparación de datos", d:"ETL, redundancia, limpieza, normalización y transformación."},
+    {id:"tema-4", t:"Los valores perdidos", d:"MCAR, MAR, MNAR, imputación, EM y KNN."},
+    {id:"tema-5", t:"El ruido en los datos", d:"Ruido de clase y atributo, binning, filtros y algoritmos robustos."},
+    {id:"tema-6", t:"Desbalanceo y dimensionalidad", d:"SMOTE, Tomek, NearMiss, Bellman y PCA."},
+    {id:"tema-7", t:"De continuos a discretos", d:"Binning, MDLP, Mantaras, ChiMerge y Chi2."},
+    {id:"tema-8", t:"Selección de características", d:"Búsqueda, criterios, filter, wrapper y embedded."},
+    {id:"tema-9", t:"Selección de instancias", d:"Reinartz, prototipos, ENN, genéticos y Landmark."},
+    {id:"tema-10", t:"Preprocesamiento en big data", d:"Las V, MapReduce, versiones -BD y smart data."}
+  ];
+  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (x,d=2) => isFinite(x) ? x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d}) : "—";
+  const parse = s => s.split(/[;\s]*,[;\s]*|\s+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(isFinite);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function gaussFrom(r){ return function(){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
+
+  // ---------- Storage ----------
+  const KEY = "mineria-m4-v1";
+  let state = {studied:{}, scores:{}};
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---------- Router ----------
+  const views = document.querySelectorAll(".view");
+  const navLinks = document.querySelectorAll("#navlist a");
+  function route(){
+    let h = (location.hash || "#inicio").slice(1);
+    if (!document.querySelector('.view[data-view="'+h+'"]')) h = "inicio";
+    views.forEach(v => v.hidden = v.dataset.view !== h);
+    navLinks.forEach(a => { if (a.dataset.v === h) { a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Quiz ----------
+  const QUIZ = {
+    "tema-1":[
+      {q:"Rechazar la hipótesis nula cuando en realidad es cierta es un…", o:["Error tipo I","Error tipo II","p-valor"], a:0, e:"Su probabilidad es el nivel de significación α."},
+      {q:"Si el p-valor es 0,03 y α = 0,05…", o:["No se rechaza H₀","Se rechaza H₀","El test no es válido"], a:1, e:"p < α: resultado estadísticamente significativo."},
+      {q:"Para contrastar la media con varianza poblacional desconocida se usa la distribución…", o:["Normal (Z)","t de Student","Chi cuadrado"], a:1, e:"Con solo la varianza muestral S², el estadístico sigue una t con n − 1 grados de libertad."},
+      {q:"¿Qué test no paramétrico compara las medianas de dos muestras independientes?", o:["Mann-Whitney","Kolmogorov-Smirnov","Chi cuadrado"], a:0, e:"Kruskal-Wallis lo extiende a dos o más grupos."},
+      {q:"La estimación y el contraste de hipótesis son las dos áreas de…", o:["La estadística descriptiva","La inferencia estadística","La visualización"], a:1, e:"La inferencia generaliza de la muestra a la población."}
+    ],
+    "tema-2":[
+      {q:"El rating de un bono (AAA, AA, A…) es un atributo…", o:["Nominal","Ordinal","Continuo"], a:1, e:"Categorías con un orden entre ellas."},
+      {q:"Si la dispersión de los puntos alrededor de la recta crece al aumentar X, hay…", o:["Homocedasticidad","Heterocedasticidad","Incorrelación"], a:1, e:"La varianza no es constante."},
+      {q:"¿Qué gráfico compara los cuantiles de la muestra con los de una distribución teórica?", o:["Gráfico QQ","Gráfico de barras","Matriz de dispersión"], a:0, e:"Si los puntos siguen la recta, los datos siguen esa distribución."},
+      {q:"Un cetáceo de 15 m que pesa 20 kg es un ejemplo de valor…", o:["Perdido","Inconsistente","Duplicado"], a:1, e:"Es imposible en el dominio."},
+      {q:"A diferencia del ruido, las anomalías…", o:["Siempre se eliminan","Pueden ser el objetivo del análisis","Solo aparecen en datos categóricos"], a:1, e:"Por ejemplo, en la detección de fraude o de intrusiones."}
+    ],
+    "tema-3":[
+      {q:"Para detectar redundancia entre dos atributos nominales se usa…", o:["Pearson","El test χ²","La covarianza"], a:1, e:"Pearson y la covarianza son para numéricos."},
+      {q:"Si dos variables numéricas no siguen una distribución normal, en lugar de Pearson se usa…", o:["Spearman","Mantaras","WHIRL"], a:0, e:"Spearman es la versión no paramétrica."},
+      {q:"Con normalización por escala decimal y máximo absoluto 986, ¿qué valor tiene j?", o:["2","3","4"], a:1, e:"986 / 10³ = 0,986 < 1."},
+      {q:"Suavizado por límites del lote 5, 6, 12:", o:["5, 5, 12","5, 12, 12","7,67 · 7,67 · 7,67"], a:0, e:"El 6 está más cerca del 5 que del 12."},
+      {q:"Transformar \"pastor alemán\" y \"labrador\" en \"perro\" es…", o:["Discretización","Generalización de conceptos","Selección de instancias"], a:1, e:"Se generalizan atributos nominales a conceptos de nivel superior."}
+    ],
+    "tema-4":[
+      {q:"Faltan precios de las acciones de un mercado en sus días festivos. Es…", o:["MCAR","MAR","MNAR"], a:1, e:"La ausencia depende de un grupo definido por los datos observados (el mercado)."},
+      {q:"Los métodos de imputación con aprendizaje automático solo son eficaces si los perdidos son…", o:["MCAR","MAR","MNAR"], a:1, e:"Necesitan relación entre lo que falta y lo observable."},
+      {q:"Imputar a partir de la instancia más parecida del mismo conjunto de datos es…", o:["Hot-deck","Cold-deck","EM"], a:0, e:"Cold-deck hace lo mismo con otra base de datos."},
+      {q:"El algoritmo EM alterna dos pasos:", o:["Extracción y modelado","Esperanza y maximización","Error y medición"], a:1, e:"Imputar con la esperanza condicional y reestimar con máxima verosimilitud."},
+      {q:"¿Qué clase de scikit-learn imputa con los k vecinos más cercanos?", o:["SimpleImputer","KNNImputer","KMeans"], a:1, e:"Solo para valores numéricos, según el temario."}
+    ],
+    "tema-5":[
+      {q:"¿Qué tipo de ruido afecta más a los algoritmos de aprendizaje?", o:["Ruido de atributo","Ruido de clase","Afectan igual"], a:1, e:"Una etiqueta errónea altera directamente lo que se aprende."},
+      {q:"Dos instancias idénticas con distinta etiqueta son…", o:["Instancias contradictorias","Valores perdidos","Outliers"], a:0, e:"Es un tipo de ruido de clase."},
+      {q:"Suavizado por media del lote 24, 28, 29:", o:["24, 29, 29","27, 27, 27","28, 28, 28"], a:1, e:"(24 + 28 + 29) / 3 = 27."},
+      {q:"¿Qué tiene C4.5 que lo hace robusto al ruido?", o:["Muestreo con reemplazo","Mecanismo de poda","Votación por consenso"], a:1, e:"La poda elimina ramas creadas por ejemplos aislados."},
+      {q:"Random Forest se diferencia del bagging en que…", o:["No usa bootstrap","Además elige al azar un subconjunto de atributos","Solo sirve para regresión"], a:1, e:"Eso reduce la correlación entre árboles."}
+    ],
+    "tema-6":[
+      {q:"SMOTE genera ejemplos sintéticos…", o:["Duplicando instancias minoritarias","Interpolando entre una instancia minoritaria y sus vecinos","Eliminando instancias mayoritarias"], a:1, e:"Distancia × número aleatorio entre 0 y 1."},
+      {q:"Un enlace Tomek es un par de instancias…", o:["De la misma clase y lejanas","De distinta clase que son vecinas más cercanas mutuas","Duplicadas"], a:1, e:"No existe ninguna C más cercana a A o a B."},
+      {q:"ADASYN genera más ejemplos sintéticos…", o:["En las zonas menos densas de la clase minoritaria","En el centro de la clase mayoritaria","De forma uniforme"], a:0, e:"Son las zonas más difíciles de aprender."},
+      {q:"¿Quién acuñó \"maldición de la dimensionalidad\" y cuándo?", o:["Holland, 1975","Bellman, 1961","Quinlan, 1993"], a:1, e:"Richard Bellman en 1961."},
+      {q:"¿Cuál es el primer paso de PCA?", o:["Calcular autovectores","Estandarizar los atributos","Elegir los componentes"], a:1, e:"Después: covarianza, autovectores, componentes."}
+    ],
+    "tema-7":[
+      {q:"La aridad en discretización es…", o:["El número de intervalos","La entropía del atributo","El nivel de significación"], a:0, e:"Hay que equilibrarla con la precisión."},
+      {q:"¿Qué método evalúa los puntos de corte con la entropía?", o:["ChiMerge","MDLP","Binning"], a:1, e:"Y usa el principio de longitud mínima de descripción como parada."},
+      {q:"ChiMerge fusiona dos intervalos adyacentes cuando…", o:["Son independientes de la clase según χ²","Tienen la misma amplitud","Contienen outliers"], a:0, e:"Fusiona los pares con menor χ² hasta superar el umbral."},
+      {q:"Un problema del binning de igual amplitud es que…", o:["Necesita la clase","Es sensible a valores anómalos","No tiene criterio de parada"], a:1, e:"Los extremos estiran los intervalos."},
+      {q:"Chi2 sigue fusionando mientras…", o:["La inconsistencia no supere un límite (por defecto 0)","Haya más de 2 intervalos","La entropía baje"], a:0, e:"Inconsistencia = instancias iguales con distinta clase."}
+    ],
+    "tema-8":[
+      {q:"Con 10 características, ¿cuántos subconjuntos posibles hay?", o:["100","1.024","10"], a:1, e:"2¹⁰ = 1.024."},
+      {q:"Empezar con todas las características e ir quitando la menos relevante es…", o:["SFG","SBG","RG"], a:1, e:"Generación secuencial hacia atrás."},
+      {q:"¿Qué método usa un clasificador como caja negra para evaluar subconjuntos?", o:["Filter","Wrapper","Embedded"], a:1, e:"Es el más costoso y con más riesgo de sobreajuste."},
+      {q:"Los árboles CART y C4.5 incorporan selección de características de tipo…", o:["Filter","Wrapper","Embedded"], a:2, e:"Seleccionan durante el propio aprendizaje."},
+      {q:"¿Qué criterio puede detectar que dos características son igual de buenas y una es redundante?", o:["Información","Consistencia","Distancia"], a:1, e:"Busca el conjunto mínimo que separa las clases."}
+    ],
+    "tema-9":[
+      {q:"El objetivo de la selección de instancias se formaliza como…", o:["R(MDₘ) = R(MDₜ)","2ⁿ subconjuntos","X̃ = X + e"], a:0, e:"Mismo rendimiento con un subconjunto m que con todo t."},
+      {q:"¿En qué orden van los pasos del marco de Reinartz?", o:["Agrupamiento, muestreo, evaluación, prototipado","Muestreo, agrupamiento, prototipado, evaluación","Prototipado, muestreo, agrupamiento, evaluación"], a:1, e:"Muestreo → agrupamiento → prototipado → evaluación."},
+      {q:"ENN y DROP pertenecen a la búsqueda…", o:["Incremental","Decreciente","Mixta"], a:1, e:"Parten de todas las instancias y eliminan."},
+      {q:"¿Quién propuso los algoritmos genéticos y en qué año?", o:["Holland, 1975","Bellman, 1961","Reinartz, 2002"], a:0, e:"Se usan como método de búsqueda de subconjuntos."},
+      {q:"El modelo Landmark se usa para seleccionar instancias en…", o:["Razonamiento basado en casos","Series temporales","Datos desbalanceados"], a:1, e:"Usa puntos de referencia de la serie para medir similitud."}
+    ],
+    "tema-10":[
+      {q:"¿Qué V añadió IDC en 2011 al modelo de las 3 V?", o:["Veracidad","Valor","Visualización"], a:1, e:"Volumen, velocidad, variedad y valor."},
+      {q:"KNN-LI es una técnica big data para…", o:["Filtrar ruido","Imputar valores perdidos","Discretizar"], a:1, e:"KNN local con el paradigma MapReduce."},
+      {q:"HTE-BD filtra ruido combinando…", o:["Varios Random Forest iguales","Random Forest, KNN y regresión logística","Solo KNN"], a:1, e:"Es un ensamble heterogéneo con votación."},
+      {q:"¿Qué técnica big data replica al azar instancias minoritarias con MapReduce?", o:["RUS-BD","ROS-BD","DChi2"], a:1, e:"Random oversampling for big data."},
+      {q:"Smart data son los datos que…", o:["Ocupan menos espacio","Aportan valor tras ser transformados: precisos, en tiempo real y escalables","Están en la nube"], a:1, e:"Se apoya en la veracidad y el valor."}
+    ]
+  };
+  function renderProgress(){
+    const n = TOPICS.filter(t => state.studied[t.id]).length;
+    document.getElementById("progText").textContent = n + " de 10 temas estudiados";
+    document.getElementById("progBar").style.width = (n*10) + "%";
+    navLinks.forEach(a => a.classList.toggle("done", !!state.studied[a.dataset.v]));
+    document.getElementById("tcards").innerHTML = TOPICS.map((t,i) => {
+      const sc = state.scores[t.id];
+      const st = state.studied[t.id] ? '<span class="pill ok">Estudiado</span>' : '<span class="pill neutral">Pendiente</span>';
+      const scs = sc!=null ? ' <span class="pill neutral">Test: '+sc+'/'+QUIZ[t.id].length+'</span>' : '';
+      return '<a class="tcard" href="#'+t.id+'"><span class="n">TEMA '+(i+1)+'</span><b>'+t.t+'</b><span class="d">'+t.d+'</span><span class="st">'+st+scs+'</span></a>';
+    }).join("");
+    document.querySelectorAll(".studied button").forEach(b => {
+      const on = !!state.studied[b.dataset.t];
+      b.setAttribute("aria-pressed", on);
+      b.textContent = on ? "✓ Estudiado" : "Marcar como estudiado";
+    });
+  }
+
+  document.querySelectorAll(".quiz").forEach(box => {
+    const id = box.dataset.quiz, qs = QUIZ[id];
+    let answered = 0, right = 0;
+    box.innerHTML = '<h2>Autoevaluación</h2><p style="color:var(--muted);font-size:.9rem;margin-top:4px">' + qs.length + ' preguntas. Elige una respuesta para ver la explicación.</p>' +
+      qs.map((q,i) => '<div class="qitem"><p class="q">'+(i+1)+'. '+q.q+'</p><div class="qopts">'+q.o.map((o,j)=>'<button class="qopt" data-i="'+i+'" data-j="'+j+'">'+o+'</button>').join("")+'</div><p class="qexp" hidden></p></div>').join("") +
+      '<div class="qscore"><span class="out" data-score>0 de '+qs.length+' respondidas</span><button class="btn" data-reset>Repetir test</button></div>' +
+      '<div class="studied"><button class="btn primary" data-t="'+id+'" aria-pressed="false">Marcar como estudiado</button></div>';
+    box.addEventListener("click", ev => {
+      const b = ev.target.closest(".qopt");
+      if (b){
+        const i = +b.dataset.i, j = +b.dataset.j, q = qs[i], item = b.closest(".qitem");
+        item.querySelectorAll(".qopt").forEach((x,k) => { x.disabled = true; if (k===q.a) x.classList.add("right"); });
+        if (j !== q.a) b.classList.add("wrong"); else right++;
+        answered++;
+        const exp = item.querySelector(".qexp");
+        exp.textContent = (j===q.a ? "Correcto. " : "No es correcto. ") + q.e; exp.hidden = false;
+        box.querySelector("[data-score]").textContent = answered < qs.length ? (answered+" de "+qs.length+" respondidas · "+right+" aciertos") : ("Resultado: "+right+" de "+qs.length+" aciertos");
+        if (answered === qs.length){ state.scores[id] = right; if (right >= qs.length-1) state.studied[id] = true; save(); renderProgress(); }
+        return;
+      }
+      if (ev.target.closest("[data-reset]")){
+        answered = 0; right = 0;
+        box.querySelectorAll(".qopt").forEach(x => { x.disabled=false; x.classList.remove("right","wrong"); });
+        box.querySelectorAll(".qexp").forEach(x => x.hidden = true);
+        box.querySelector("[data-score]").textContent = "0 de "+qs.length+" respondidas";
+        return;
+      }
+      if (ev.target.closest(".studied button")){ state.studied[id] = !state.studied[id]; save(); renderProgress(); }
+    });
+  });
+
+  TOPICS.forEach((t,i) => {
+    const sec = document.querySelector('.view[data-view="'+t.id+'"]');
+    const prev = i>0 ? TOPICS[i-1] : null, next = i<TOPICS.length-1 ? TOPICS[i+1] : null;
+    const div = document.createElement("div"); div.className = "pager";
+    div.innerHTML = (prev ? '<a href="#'+prev.id+'"><small>← Tema '+i+'</small>'+prev.t+'</a>' : '<a href="#inicio"><small>←</small>Mapa del módulo</a>') +
+                    (next ? '<a class="next" href="#'+next.id+'"><small>Tema '+(i+2)+' →</small>'+next.t+'</a>' : '<a class="next" href="#glosario"><small>→</small>Glosario</a>');
+    sec.appendChild(div);
+  });
+
+  function ncdf(x){ const t=1/(1+0.2316419*Math.abs(x)), d=0.3989422804*Math.exp(-x*x/2); const p=d*t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429)))); return x>0?1-p:p; }
+  function invN(p){ const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+    const q=p-0.5; if (Math.abs(q)<=0.425){const r=q*q; return q*(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);} const r=Math.sqrt(-Math.log(q<0?p:1-p)); const x=(((((c[0]*r+c[1])*r+c[2])*r+c[3])*r+c[4])*r+c[5])/((((d[0]*r+d[1])*r+d[2])*r+d[3])*r+1); return q<0?x:-x; }
+
+  // ---------- T1: contraste Z ----------
+  let alpha = 0.05;
+  function ztest(){
+    const g = id => +document.getElementById(id).value;
+    const m=g("zMean"), mu=g("zMu"), sd=Math.max(1e-9,g("zSd")), n=Math.max(2,Math.round(g("zN")));
+    const z=(m-mu)/(sd/Math.sqrt(n)), p=2*(1-ncdf(Math.abs(z))), zc=invN(1-alpha/2);
+    const X=v=>40+(v+4)/8*520, Y=v=>170-v/0.4*150;
+    let curve="", left="", right="";
+    for (let v=-4; v<=4.0001; v+=0.05){ const y=Math.exp(-v*v/2)/Math.sqrt(2*Math.PI); curve+=(curve?"L":"M")+X(v).toFixed(1)+" "+Y(y).toFixed(1); }
+    const area=(a,b)=>{ let s="M"+X(a).toFixed(1)+" "+Y(0); for(let v=a; v<=b+1e-9; v+=0.05){ const y=Math.exp(-v*v/2)/Math.sqrt(2*Math.PI); s+="L"+X(v).toFixed(1)+" "+Y(y).toFixed(1);} return s+"L"+X(b).toFixed(1)+" "+Y(0)+"Z"; };
+    const zcl=Math.min(zc,4);
+    let h='<path d="'+area(-4,-zcl)+'" fill="var(--bad)" fill-opacity=".35"/><path d="'+area(zcl,4)+'" fill="var(--bad)" fill-opacity=".35"/>';
+    h+='<path d="'+curve+'" fill="none" stroke="var(--accent)" stroke-width="2"/><line x1="40" y1="170" x2="560" y2="170" stroke="var(--line)"/>';
+    [-3,-2,-1,0,1,2,3].forEach(t=>{ h+='<text x="'+X(t)+'" y="186" text-anchor="middle" font-size="11">'+t+'</text>'; });
+    const zx=X(Math.max(-3.95,Math.min(3.95,z)));
+    h+='<line x1="'+zx+'" x2="'+zx+'" y1="22" y2="170" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3"/><text x="'+zx+'" y="16" text-anchor="middle" font-size="12" style="fill:var(--ink);font-weight:600">Z = '+fmt(z,2)+(Math.abs(z)>4?' (fuera)':'')+'</text>';
+    document.getElementById("zSvg").innerHTML=h;
+    const rej = p < alpha;
+    document.getElementById("zOut").innerHTML='Z = '+fmt(z,3)+' · p-valor = '+fmt(p,4)+' · z crítico = ±'+fmt(zc,2)+' · '+(rej?'<span class="pill ok">Se rechaza H₀: la media difiere de μ₀</span>':'<span class="pill neutral">No se rechaza H₀: no hay evidencia suficiente</span>');
+  }
+  ["zMean","zMu","zSd","zN"].forEach(id=>document.getElementById(id).addEventListener("input",ztest));
+  document.querySelectorAll("[data-alpha]").forEach(b=>b.addEventListener("click",()=>{ alpha=+b.dataset.alpha; document.querySelectorAll("[data-alpha]").forEach(x=>x.setAttribute("aria-pressed",x===b)); ztest(); }));
+  ztest();
+
+  // ---------- T2: tipos de dispersión ----------
+  (function(){
+    const r=mulberry32(3), g=gaussFrom(r); let h="";
+    const panels=[["Positiva",(x,e)=>x+e*0.35],["Negativa",(x,e)=>-x+e*0.35],["Incorrelación",(x,e)=>e*1.2],["Heterocedasticidad",(x,e)=>x+e*(0.1+0.9*(x+2)/4)]];
+    panels.forEach(([lab,f],k)=>{ const ox=10+k*158;
+      h+='<rect x="'+ox+'" y="8" width="148" height="130" rx="6" fill="var(--surface-2)"/>';
+      for(let i=0;i<45;i++){ const x=-2+r()*4, y=f(x,g()); const px=ox+8+(x+2)/4*132, py=73-Math.max(-2.6,Math.min(2.6,y))/2.6*60; h+='<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="2.6" fill="var(--accent)" fill-opacity=".75"/>'; }
+      h+='<text x="'+(ox+74)+'" y="158" text-anchor="middle" font-size="12" style="fill:var(--ink)">'+lab+'</text>'; });
+    document.getElementById("scatTypes").innerHTML=h;
+  })();
+
+  // ---------- T3: normalización ----------
+  function norm(){
+    const v=parse(document.getElementById("normIn").value), t=document.getElementById("normTable");
+    if (v.length<2){ t.innerHTML='<tbody><tr><td>Introduce al menos 2 números.</td></tr></tbody>'; return; }
+    const mn=Math.min(...v), mx=Math.max(...v), m=v.reduce((a,b)=>a+b,0)/v.length, sd=Math.sqrt(v.reduce((a,x)=>a+(x-m)**2,0)/v.length);
+    const amax=Math.max(...v.map(Math.abs)); let j=0; while (amax/10**j>=1) j++;
+    t.innerHTML='<thead><tr><th class="num">Valor</th><th class="num">Min-max [0,1]</th><th class="num">Min-max [−1,1]</th><th class="num">Z-score</th><th class="num">Escala decimal (j = '+j+')</th></tr></thead><tbody>'+
+      v.map(x=>{ const a=mx>mn?(x-mn)/(mx-mn):0; return '<tr><td class="num">'+fmt(x,2)+'</td><td class="num">'+fmt(a,3)+'</td><td class="num">'+fmt(a*2-1,3)+'</td><td class="num">'+fmt(sd?(x-m)/sd:0,3)+'</td><td class="num">'+fmt(x/10**j,3)+'</td></tr>'; }).join("")+'</tbody>';
+  }
+  document.getElementById("normIn").addEventListener("input",norm); norm();
+
+  // ---------- T4: imputación ----------
+  const CLI=[["Ana",24,21000],["Luis",27,24000],["Elena",29,null],["Marta",31,28000],["Jorge",35,32000],["Pablo",41,39000],["Rosa",52,47000],["Carlos",58,150000]];
+  let impM="mean";
+  function imp(){
+    const known=CLI.filter(c=>c[2]!=null), vals=known.map(c=>c[2]).sort((a,b)=>a-b);
+    const mean=vals.reduce((a,b)=>a+b,0)/vals.length, med=vals.length%2?vals[(vals.length-1)/2]:(vals[vals.length/2-1]+vals[vals.length/2])/2;
+    const target=CLI.find(c=>c[2]==null), nn=known.slice().sort((a,b)=>Math.abs(a[1]-target[1])-Math.abs(b[1]-target[1])).slice(0,2);
+    const knn=(nn[0][2]+nn[1][2])/2;
+    const val= impM==="mean"?mean : impM==="median"?med : knn;
+    document.getElementById("impTable").innerHTML='<thead><tr><th>Cliente</th><th class="num">Edad</th><th class="num">Ingresos (€)</th></tr></thead><tbody>'+
+      CLI.map(c=>{ const isT=c[2]==null, isN=impM==="knn"&&nn.includes(c); return '<tr'+(isN?' style="background:var(--accent-soft)"':'')+'><td>'+c[0]+'</td><td class="num">'+c[1]+'</td><td class="num">'+(isT?'<b style="color:var(--example)">'+fmt(val,0)+' (imputado)</b>':fmt(c[2],0))+'</td></tr>'; }).join("")+'</tbody>';
+    const txt={mean:"Media de los 7 conocidos: "+fmt(mean,0)+" €. El cliente de 150.000 € la infla.", median:"Mediana: "+fmt(med,0)+" €. Robusta frente al valor extremo.", knn:"Vecinos por edad (resaltados): "+nn.map(c=>c[0]+" ("+c[1]+")").join(" y ")+" → media "+fmt(knn,0)+" €."};
+    document.getElementById("impOut").textContent=txt[impM];
+  }
+  document.querySelectorAll("[data-imp]").forEach(b=>b.addEventListener("click",()=>{ impM=b.dataset.imp; document.querySelectorAll("[data-imp]").forEach(x=>x.setAttribute("aria-pressed",x===b)); imp(); }));
+  imp();
+
+  // ---------- T5: binning ----------
+  function bins(){
+    const v=parse(document.getElementById("binIn").value).sort((a,b)=>a-b), s=Math.max(1,Math.round(+document.getElementById("binSize").value||1)), t=document.getElementById("binTable");
+    if (!v.length){ t.innerHTML='<tbody><tr><td>Introduce algunos números.</td></tr></tbody>'; return; }
+    const rows=[];
+    for (let i=0;i<v.length;i+=s){ const b=v.slice(i,i+s), m=b.reduce((a,x)=>a+x,0)/b.length, med=b.length%2?b[(b.length-1)/2]:(b[b.length/2-1]+b[b.length/2])/2, lo=b[0], hi=b[b.length-1];
+      rows.push('<tr><td>Lote '+(rows.length+1)+'</td><td class="num">'+b.map(x=>fmt(x,x%1?1:0)).join(", ")+'</td><td class="num">'+b.map(()=>fmt(m,m%1?2:0)).join(", ")+'</td><td class="num">'+b.map(()=>fmt(med,med%1?1:0)).join(", ")+'</td><td class="num">'+b.map(x=>{const r=(x-lo)<=(hi-x)?lo:hi; return fmt(r,r%1?1:0);}).join(", ")+'</td></tr>'); }
+    t.innerHTML='<thead><tr><th></th><th class="num">Original (ordenado)</th><th class="num">Por media</th><th class="num">Por mediana</th><th class="num">Por límites</th></tr></thead><tbody>'+rows.join("")+'</tbody>';
+  }
+  ["binIn","binSize"].forEach(id=>document.getElementById(id).addEventListener("input",bins)); bins();
+  document.getElementById("kfold4").innerHTML=[0,1,2,3].map(i=>'<div class="kfrow" style="grid-template-columns:100px repeat(4,1fr)"><span class="out">Iteración '+(i+1)+'</span>'+[0,1,2,3].map(j=>'<span class="'+(i===j?'kt':'ktr')+'">'+(i===j?'Clasificar':'Entrenar')+'</span>').join("")+'</div>').join("");
+
+  // ---------- Utilidades 2D ----------
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  function drawPts(svgId, pts, extra){
+    const X=v=>20+v*480, Y=v=>260-v*240;
+    let h='<rect x="15" y="15" width="490" height="250" rx="6" fill="var(--surface-2)"/>'+(extra?extra(X,Y):"");
+    pts.forEach(p=>{ const col=p.c?'var(--example)':'var(--s1)';
+      if (p.gone) h+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="4.5" fill="none" stroke="'+col+'" stroke-opacity=".5" stroke-dasharray="2 2"/>';
+      else h+='<circle cx="'+X(p.x).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="'+(p.ring?6:4.5)+'" fill="'+col+'"'+(p.ring?' stroke="var(--ink)" stroke-width="2"':'')+'/>'; });
+    document.getElementById(svgId).innerHTML=h;
+  }
+
+  // ---------- T6: Tomek ----------
+  let TP=[], links=[];
+  function tomekInit(){
+    const r=mulberry32(21), g=gaussFrom(r); TP=[];
+    for(let i=0;i<55;i++) TP.push({x:Math.min(.97,Math.max(.03,0.38+g()*0.14)), y:Math.min(.97,Math.max(.03,0.5+g()*0.17)), c:0});
+    for(let i=0;i<14;i++) TP.push({x:Math.min(.97,Math.max(.03,0.66+g()*0.08)), y:Math.min(.97,Math.max(.03,0.5+g()*0.12)), c:1});
+    links=[]; drawPts("tomekSvg",TP); document.getElementById("tomekOut").textContent="55 mayoritarias y 14 minoritarias. Pulsa «Marcar enlaces Tomek».";
+  }
+  function nnOf(i,arr){ let bj=-1,bd=Infinity; arr.forEach((q,j)=>{ if(j!==i&&!q.gone){ const d=dist(arr[i],q); if(d<bd){bd=d;bj=j;} } }); return bj; }
+  function tomekFind(){
+    const nn=TP.map((p,i)=>p.gone?-1:nnOf(i,TP)); links=[];
+    TP.forEach((p,i)=>{ p.ring=false; const j=nn[i]; if(j>i && nn[j]===i && TP[j].c!==p.c) links.push([i,j]); });
+    links.forEach(([i,j])=>{ TP[i].ring=TP[j].ring=true; });
+    drawPts("tomekSvg",TP,(X,Y)=>links.map(([i,j])=>'<line x1="'+X(TP[i].x)+'" y1="'+Y(TP[i].y)+'" x2="'+X(TP[j].x)+'" y2="'+Y(TP[j].y)+'" stroke="var(--ink)" stroke-width="2"/>').join(""));
+    document.getElementById("tomekOut").textContent=links.length+" enlaces Tomek encontrados (pares rodeados y unidos).";
+  }
+  document.getElementById("tomekShow").addEventListener("click",tomekFind);
+  document.getElementById("tomekRemove").addEventListener("click",()=>{ if(!links.length) tomekFind(); let n=0; links.forEach(([i,j])=>{ [i,j].forEach(k=>{ if(TP[k].c===0&&!TP[k].gone){TP[k].gone=true;n++;} }); }); TP.forEach(p=>p.ring=false); links=[]; drawPts("tomekSvg",TP); const left=TP.filter(p=>!p.gone&&p.c===0).length; document.getElementById("tomekOut").textContent="Eliminadas "+n+" instancias mayoritarias (círculos discontinuos). Quedan "+left+" mayoritarias y 14 minoritarias. Puedes repetir."; });
+  document.getElementById("tomekReset").addEventListener("click",tomekInit);
+  tomekInit();
+
+  // ---------- T7: discretización ----------
+  function disc(){
+    const v=parse(document.getElementById("discIn").value).sort((a,b)=>a-b), k=Math.max(2,Math.min(8,Math.round(+document.getElementById("discK").value||2)));
+    const W=document.getElementById("discW"), F=document.getElementById("discF");
+    if (v.length<k){ W.innerHTML=F.innerHTML='<p class="out">Introduce al menos tantos valores como intervalos.</p>'; return; }
+    const lo=v[0], hi=v[v.length-1], w=(hi-lo)/k, n=v.length;
+    const row=(lab,c)=>'<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 28px;gap:8px;align-items:center;font-size:.82rem;margin:4px 0"><span class="mono">'+lab+'</span><div class="mini" style="height:12px"><i style="width:'+(c/n*100)+'%;background:var(--accent)"></i></div><span class="mono">'+c+'</span></div>';
+    let hw=""; for(let i=0;i<k;i++){ const a=lo+i*w, b=i===k-1?hi:lo+(i+1)*w; const c=v.filter(x=>i===k-1? x>=a&&x<=b : x>=a&&x<b).length; hw+=row('['+fmt(a,1)+', '+fmt(b,1)+(i===k-1?']':')'),c); }
+    let hf="", st=0; for(let i=0;i<k;i++){ const size=Math.floor(n/k)+(i<n%k?1:0), g=v.slice(st,st+size); st+=size; hf+=row('['+fmt(g[0],1)+', '+fmt(g[g.length-1],1)+']',g.length); }
+    W.innerHTML=hw; F.innerHTML=hf;
+  }
+  ["discIn","discK"].forEach(id=>document.getElementById(id).addEventListener("input",disc)); disc();
+
+  // ---------- T8: espacio de búsqueda ----------
+  function fs(){
+    const n=+document.getElementById("fsN").value; document.getElementById("fsNv").textContent=n;
+    const total=2n**BigInt(n), secs=Number(total)/1e6;
+    const human = secs<1?"menos de 1 segundo": secs<60? fmt(secs,0)+" segundos" : secs<86400? fmt(secs/3600,1)+" horas" : secs<3.15e7*2? fmt(secs/86400,0)+" días" : fmt(secs/3.15e7,0)+" años";
+    const box=(l,v,s)=>'<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.25rem;word-break:break-all">'+v+'</div><small>'+s+'</small></div>';
+    document.getElementById("fsOut").innerHTML=box("Subconjuntos (2ⁿ)",total.toLocaleString("es-ES"),"búsqueda exhaustiva")+box("Tiempo exhaustivo",human,"a 1 millón de evaluaciones/s")+box("SFG (heurística)",fmt(n*(n+1)/2,0)+" evaluaciones","añade de una en una");
+    const L=document.getElementById("fsLattice");
+    if (n<=4){ let h='<div style="display:flex;flex-direction:column;gap:6px;align-items:center">';
+      for(let s=0;s<=n;s++){ h+='<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">'; for(let m=0;m<2**n;m++){ const bits=m.toString(2).padStart(n,"0"); if([...bits].filter(b=>b==="1").length===s) h+='<span class="pill '+(s===0||s===n?'neutral':'ok')+'" style="font-family:var(--font-mono)">('+bits.split("").join(", ")+')</span>'; } h+='</div>'; }
+      L.innerHTML=h+'</div>'; } else L.innerHTML='<p class="out" style="text-align:center">Con más de 4 características la red de subconjuntos ya no cabe en pantalla.</p>';
+  }
+  document.getElementById("fsN").addEventListener("input",fs); fs();
+
+  // ---------- T9: ENN ----------
+  let EP=[];
+  function ennInit(){
+    const r=mulberry32(77); EP=[];
+    for(let i=0;i<130;i++){ const x=0.04+r()*0.92, y=0.04+r()*0.92, c=(y>0.5+0.18*Math.sin(x*6))?1:0, noisy=r()<0.1; EP.push({x,y,c:noisy?1-c:c,noisy}); }
+    drawPts("ennSvg",EP); document.getElementById("ennOut").textContent="130 días, 10 % con etiqueta cambiada al azar. Pulsa «Aplicar ENN».";
+  }
+  document.getElementById("ennRun").addEventListener("click",()=>{
+    const alive=EP.map((p,i)=>i).filter(i=>!EP[i].gone), rm=[];
+    alive.forEach(i=>{ const nb=alive.filter(j=>j!==i).sort((a,b)=>dist(EP[i],EP[a])-dist(EP[i],EP[b])).slice(0,3); const same=nb.filter(j=>EP[j].c===EP[i].c).length; if(same<2) rm.push(i); });
+    rm.forEach(i=>EP[i].gone=true); drawPts("ennSvg",EP);
+    const nz=rm.filter(i=>EP[i].noisy).length;
+    document.getElementById("ennOut").textContent=rm.length?("Eliminadas "+rm.length+" instancias; "+nz+" de ellas eran etiquetas ruidosas. Puedes aplicarlo otra vez."):"No queda ninguna instancia que contradiga a sus vecinos.";
+  });
+  document.getElementById("ennReset").addEventListener("click",ennInit);
+  ennInit();
+  // ---------- Glosario ----------
+  const GL = [
+    ["ADASYN","Sobremuestreo que genera más ejemplos donde la clase minoritaria es menos densa.",6],
+    ["Aridad","Número de intervalos de una discretización.",7],
+    ["Bagging","Ensamble con muestras bootstrap y media o voto; robusto al ruido.",5],
+    ["Binning","Agrupar valores ordenados en lotes; sirve para suavizar y discretizar.",5],
+    ["Borderline SMOTE","SMOTE aplicado solo a los ejemplos minoritarios de la frontera.",6],
+    ["C4.5","Árbol de decisión de Quinlan (1993) con poda; robusto al ruido.",5],
+    ["ChiMerge","Discretización por fusión de intervalos adyacentes según χ².",7],
+    ["Cold-deck","Imputación copiando de una instancia similar de otra base de datos.",4],
+    ["Condensed Nearest Neighbor","Submuestreo que conserva solo las instancias necesarias para clasificar bien con 1-NN.",6],
+    ["Cost-sensitive","Aprendizaje que penaliza más los errores en la clase minoritaria.",6],
+    ["Discretización","Transformar un atributo continuo en intervalos.",7],
+    ["EM (esperanza-maximización)","Imputación iterativa basada en máxima verosimilitud.",4],
+    ["Embedded","Selección de características dentro del aprendizaje (CART, C4.5).",8],
+    ["ENN","Edited Nearest Neighbor: elimina instancias cuya clase difiere de la de sus vecinos.",9],
+    ["Entropía","H(X) = −Σ p log p; incertidumbre de una variable.",7],
+    ["Error tipo I / tipo II","Rechazar H₀ siendo cierta / no rechazarla siendo falsa.",1],
+    ["ETL","Extracción, transformación y carga para integrar fuentes.",3],
+    ["Filter","Selección de características por ranking, independiente del modelo.",8],
+    ["Heterocedasticidad","Varianza no constante alrededor de la recta de regresión.",2],
+    ["Hipótesis nula (H₀)","Afirmación que se da por cierta salvo evidencia en contra.",1],
+    ["Hot-deck","Imputación copiando de la instancia más similar del mismo conjunto.",4],
+    ["KDD","Descubrimiento de conocimiento en bases de datos; el preprocesamiento es una de sus fases.",3],
+    ["KNN-LI","Imputación KNN local para big data con MapReduce.",10],
+    ["Kruskal-Wallis","Test no paramétrico de comparación de dos o más grupos.",1],
+    ["Landmark","Selección de instancias en series temporales mediante puntos de referencia.",9],
+    ["Mann-Whitney","Test no paramétrico de medianas de dos muestras independientes.",1],
+    ["MapReduce","Paradigma de procesamiento distribuido: dividir, map y reduce.",10],
+    ["MCAR / MAR / MNAR","Perdidos completamente al azar / al azar condicionado / no al azar.",4],
+    ["MDLP","Discretización por entropía con principio de longitud mínima de descripción.",7],
+    ["NearMiss","Familia de 4 métodos de submuestreo basados en distancias.",6],
+    ["Normalización min-max","Reescalar a un rango [mín, máx], normalmente [0, 1].",3],
+    ["p-valor","Probabilidad de obtener un resultado tan extremo bajo H₀.",1],
+    ["PCA","Extracción de características con autovectores de la matriz de covarianza.",6],
+    ["Random Forest","Bagging de árboles con atributos aleatorios.",5],
+    ["Ruido","Error aleatorio en una variable: X̃ = X + e.",5],
+    ["SBG / SFG","Generación secuencial hacia atrás / hacia adelante.",8],
+    ["Selección de prototipos","Selección de instancias que equilibra reducción y precisión.",9],
+    ["Smart data","Datos que aportan valor: precisos, en tiempo real y escalables.",10],
+    ["SMOTE","Sobremuestreo por interpolación entre vecinos minoritarios.",6],
+    ["Spearman","Correlación no paramétrica para variables ordinales.",3],
+    ["t de Student","Distribución del contraste de medias con varianza desconocida.",1],
+    ["Tomek (enlace)","Par de instancias de distinta clase que son vecinas más cercanas mutuas.",6],
+    ["Wrapper","Selección de características evaluada con un clasificador.",8]
+  ];
+  function gloss(){
+    const q = document.getElementById("glossQ").value.trim().toLowerCase();
+    const items = GL.filter(g => !q || (g[0]+" "+g[1]).toLowerCase().includes(q));
+    document.getElementById("glossList").innerHTML = items.length ? items.map(g => '<div class="gi"><dl style="margin:0"><dt>'+g[0]+'</dt><dd>'+g[1]+'</dd></dl><small><a href="#tema-'+g[2]+'">Tema '+g[2]+'</a></small></div>').join("") : '<p style="color:var(--muted)">No hay términos que coincidan. Prueba con otra palabra.</p>';
+  }
+  document.getElementById("glossQ").addEventListener("input", gloss); gloss();
+
+  renderProgress();
+  route();
+})();
+</script>
+
+</body>
+</html>

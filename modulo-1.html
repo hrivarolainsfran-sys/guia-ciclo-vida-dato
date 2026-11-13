@@ -1,0 +1,1516 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fundamentos de la IA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: guía de estudio con índice lateral fijo (10 temas + glosario) y una vista por tema; en móvil el índice pasa a barra superior deslizable. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#141C29; --muted:#566275; --line:#D9DFE8;
+  --accent:#2448C4; --accent-ink:#FFFFFF; --accent-soft:#E5EBFB;
+  --example:#A4510B; --example-soft:#FCF0E1;
+  --ok:#157A3A; --ok-soft:#E3F4E8; --bad:#B42323; --bad-soft:#FBE7E7;
+  --p1:#0E8A88; --p2:#2448C4; --p3:#7A3FC2; --p4:#B9650E; --p5:#2E8A3A;
+  --s1:#3C6FE0; --s2:#D9822B; --s3:#2E9C6E;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+    --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+    --example:#F1AC62; --example-soft:#33261A;
+    --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+    --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+    --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+  --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+  --example:#F1AC62; --example-soft:#33261A;
+  --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+  --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+  --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:2.2rem}
+h3{font-size:1.1rem;font-weight:600;margin-top:1.4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 14px 24px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px}
+.brand small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;line-height:1.25;display:block;margin-top:2px}
+.progress{padding:0 8px}
+.progress .bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress span{font-size:.8rem;color:var(--muted)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.navlist a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.92rem;line-height:1.3}
+.navlist a:hover{background:var(--surface-2)}
+.navlist a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlist .num{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem;background:var(--surface-2);color:var(--muted)}
+.navlist a[aria-current="page"] .num{background:var(--accent);color:var(--accent-ink)}
+.navlist a.done .num{background:var(--ok-soft);color:var(--ok)}
+.navsep{height:1px;background:var(--line);margin:6px 8px}
+
+main{min-width:0;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{max-width:860px;margin:0 auto}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--accent)}
+.lead{font-size:1.12rem;color:var(--muted);max-width:65ch}
+.prose{max-width:68ch}
+.oneline{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius) var(--radius) 0;font-weight:500}
+.objs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.objs li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);background:var(--surface)}
+
+/* Callouts */
+.callout{margin:1.2rem 0;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.callout>.tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+.callout p:first-of-type{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.ex{background:var(--example-soft);border-color:transparent}
+.ex>.tag{color:var(--example)}
+.exam{background:var(--surface);border:1px solid var(--accent)}
+.exam>.tag{color:var(--accent)}
+.exam ul{margin:.3rem 0 0;padding-left:1.2rem}
+.warn{background:var(--bad-soft);border-color:transparent}
+.warn>.tag{color:var(--bad)}
+
+/* Diagrams */
+.diagram{margin:1.2rem 0;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow-x:auto}
+.diagram figcaption{font-size:.8rem;color:var(--muted);margin-top:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
+.flow .node{flex:1 1 0;min-width:110px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.86rem;line-height:1.35}
+.flow .node b{display:block;font-family:var(--font-display);font-size:.95rem;margin-bottom:2px}
+.flow .arrow{flex:none;align-self:center;color:var(--muted);font-size:1.2rem}
+.flow .node.hl{background:var(--accent-soft);border-color:var(--accent)}
+@media (max-width:640px){
+  .flow.stack{flex-direction:column}
+  .flow.stack .arrow{transform:rotate(90deg)}
+  .flow.stack .node{min-width:0}
+}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.box{padding:12px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.9rem;line-height:1.45;min-width:0}
+.box h4{font-size:.98rem;margin-bottom:4px}
+.box .k{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.box.accent{background:var(--accent-soft);border-color:var(--accent)}
+.box small{color:var(--muted)}
+
+/* Tree */
+.tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:560px}
+.tree .lvl{display:flex;gap:16px;justify-content:center;width:100%}
+.tree .tnode{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:.85rem;text-align:center;line-height:1.3}
+.tree .tnode.root{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tree .tnode.mid{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.tree .branch{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;border-top:2px solid var(--line);position:relative}
+.tree .stem{width:2px;height:14px;background:var(--line)}
+.tree .leaves{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tree .leaf{font-size:.8rem;padding:6px 9px;border-radius:6px;background:var(--surface);border:1px dashed var(--line);text-align:center;line-height:1.3}
+.tree .leaf em{display:block;font-style:normal;color:var(--muted);font-size:.74rem}
+
+/* Lifecycle */
+.cycle{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-width:640px;counter-reset:ph}
+.phase{position:relative;padding:12px;border-radius:10px;background:var(--surface-2);border-top:4px solid var(--c);font-size:.85rem;line-height:1.4}
+.phase .pn{font-family:var(--font-mono);font-size:.72rem;color:var(--c);font-weight:600}
+.phase b{display:block;font-family:var(--font-display);font-size:.95rem;margin:2px 0 6px}
+.phase .topics{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.phase .topics a{font-size:.72rem;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.phase:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:1rem}
+.loopback{margin-top:10px;font-size:.8rem;color:var(--muted);text-align:center;min-width:640px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;margin:1rem 0}
+pre.code .c{color:var(--muted)}
+pre.code .o{color:var(--ok)}
+
+/* Data matrix (dato/obs/variable) */
+.matrix td,.matrix th{text-align:center;font-family:var(--font-mono);font-size:.82rem;transition:background .15s}
+.matrix.show-var td:nth-child(3),.matrix.show-var th:nth-child(3){background:var(--accent-soft);color:var(--accent)}
+.matrix.show-obs tbody tr:nth-child(2) td{background:var(--example-soft);color:var(--example)}
+.matrix.show-dat tbody tr:nth-child(3) td:nth-child(4){background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+/* Buttons & inputs */
+.btn{font:inherit;font-size:.88rem;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+input[type=text],input[type=number]{font:inherit;font-size:.92rem;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.out{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* Interactive SVG */
+svg text{fill:var(--muted);font-family:var(--font-body)}
+.dot{transition:r .2s,opacity .2s}
+.dot.st1{fill:var(--s1)}.dot.st2{fill:var(--s2)}.dot.st3{fill:var(--s3)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px repeat(8,minmax(44px,1fr));min-width:620px;font-size:.8rem}
+.gantt>div{padding:6px 6px;border-bottom:1px solid var(--line);min-height:32px;display:flex;align-items:center}
+.gantt .gh{font-weight:600;color:var(--muted);font-size:.72rem;justify-content:center}
+.gantt .bar{background:var(--surface-2);border-radius:5px;margin:4px 0;padding:0 6px;font-size:.72rem;color:var(--muted)}
+.gantt .bar.crit{background:var(--accent);color:var(--accent-ink)}
+.gantt .bar.mile{background:transparent;justify-content:center;color:var(--example);font-size:1rem}
+
+/* Quiz */
+.quiz{margin-top:2.4rem;padding:20px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.quiz h2{margin-top:0}
+.qitem{padding:14px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0}
+.qitem p.q{font-weight:600;margin:0 0 8px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{text-align:left;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.qopt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.qopt:disabled{cursor:default}
+.qexp{font-size:.86rem;color:var(--muted);margin-top:8px}
+.qscore{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.pager a{flex:1 1 220px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager small{display:block;color:var(--muted);font-size:.75rem}
+.pager a.next{text-align:right}
+.studied{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* Home cards */
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.tcard{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.tcard:hover{border-color:var(--accent)}
+.tcard .n{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.tcard b{font-family:var(--font-display);font-size:1rem;line-height:1.3}
+.tcard span.d{font-size:.84rem;color:var(--muted);line-height:1.4}
+.tcard .st{margin-top:auto;padding-top:6px}
+
+/* Glossary */
+.gloss{display:grid;gap:8px;margin-top:14px}
+.gloss dt{font-weight:600;font-family:var(--font-display)}
+.gloss dd{margin:0 0 6px;color:var(--muted);font-size:.92rem}
+.gloss .gi{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.gloss .gi small{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+
+/* Mobile nav */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .brand,.progress{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .navlist::-webkit-scrollbar{display:none}
+  .navlist a{white-space:nowrap;padding:6px 8px}
+  .navlist a .lbl{display:none}
+  .navlist a[aria-current="page"] .lbl{display:inline}
+  .navsep{width:1px;height:20px;margin:auto 2px}
+  main{padding-block:24px 64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Módulo 3: componentes extra */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyramid>div{padding:12px 16px;border-radius:8px;text-align:center;font-size:.88rem;line-height:1.4;max-width:100%}
+.pyramid b{display:block;font-family:var(--font-display);font-size:1rem}
+.pyramid span{color:var(--muted)}
+.pyramid .lvl3{width:55%;background:var(--accent);color:var(--accent-ink)}
+.pyramid .lvl3 span{color:var(--accent-ink);opacity:.85}
+.pyramid .lvl2{width:75%;background:var(--accent-soft);border:1px solid var(--accent)}
+.pyramid .lvl1{width:95%;background:var(--surface-2);border:1px solid var(--line)}
+@media (max-width:560px){.pyramid>div{width:100%!important}}
+.balbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.balbar .maj{background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:600;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden}
+.balbar .min{background:var(--example);min-width:3px}
+.cm{display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;max-width:520px}
+.cm .cmh{font-size:.78rem;font-weight:600;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;text-align:center}
+.cm .cmh.side{justify-content:flex-start;align-items:center;text-align:left}
+.cm .cell{padding:10px;border-radius:8px;border:1px solid var(--line)}
+.cm .cell.good{background:var(--ok-soft)}
+.cm .cell.badc{background:var(--bad-soft)}
+.cm .cell label{margin-bottom:4px}
+@media (max-width:480px){.cm{grid-template-columns:80px 1fr 1fr}}
+.mini{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--example)}
+.kfold{display:flex;flex-direction:column;gap:6px;min-width:480px}
+.kfrow{display:grid;grid-template-columns:100px repeat(5,1fr);gap:4px;align-items:center}
+.kfrow span{font-size:.75rem;text-align:center;padding:6px 0;border-radius:5px}
+.kfrow .kt{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.kfrow .ktr{background:var(--accent-soft);color:var(--accent)}
+.kfrow .out{text-align:left;color:var(--muted)}
+select.btn{padding-right:8px}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav" aria-label="Temas">
+    <div class="brand"><small>Módulo 1 · Guía de estudio</small><strong>Fundamentos de la inteligencia artificial</strong></div>
+    <div class="progress"><span id="progText">0 de 10 temas estudiados</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="navlist" id="navlist">
+      <li><a href="./" data-v="__home"><span class="num">⌂</span><span class="lbl">Todos los módulos</span></a></li>
+      <li><a href="#inicio" data-v="inicio"><span class="num">◎</span><span class="lbl">Mapa del módulo</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#tema-1" data-v="tema-1"><span class="num">1</span><span class="lbl">Historia de la IA</span></a></li>
+      <li><a href="#tema-2" data-v="tema-2"><span class="num">2</span><span class="lbl">IA en juegos</span></a></li>
+      <li><a href="#tema-3" data-v="tema-3"><span class="num">3</span><span class="lbl">Redes de neuronas</span></a></li>
+      <li><a href="#tema-4" data-v="tema-4"><span class="num">4</span><span class="lbl">Algoritmos genéticos</span></a></li>
+      <li><a href="#tema-5" data-v="tema-5"><span class="num">5</span><span class="lbl">Tesauros y taxonomías</span></a></li>
+      <li><a href="#tema-6" data-v="tema-6"><span class="num">6</span><span class="lbl">Web semántica</span></a></li>
+      <li><a href="#tema-7" data-v="tema-7"><span class="num">7</span><span class="lbl">Sistemas expertos y DSS</span></a></li>
+      <li><a href="#tema-8" data-v="tema-8"><span class="num">8</span><span class="lbl">Chatbots y asistentes</span></a></li>
+      <li><a href="#tema-9" data-v="tema-9"><span class="num">9</span><span class="lbl">Estrategia de implantación</span></a></li>
+      <li><a href="#tema-10" data-v="tema-10"><span class="num">10</span><span class="lbl">Futuro de la IA</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#glosario" data-v="glosario"><span class="num">Aa</span><span class="lbl">Glosario</span></a></li>
+    </ul>
+  </nav>
+
+  <main>
+<!-- ===================== INICIO ===================== -->
+<section class="view" data-view="inicio">
+  <p class="eyebrow">Módulo 1 · 10 temas</p>
+  <h1>Fundamentos de la inteligencia artificial</h1>
+  <p class="lead">De dónde viene la IA, sus técnicas clásicas (búsqueda en juegos, redes de neuronas, algoritmos genéticos, sistemas expertos), cómo se organiza el conocimiento (tesauros, ontologías, web semántica) y cómo se implanta en una empresa. Con simuladores para ver cada idea funcionando.</p>
+
+  <h2>El mapa del módulo</h2>
+  <figure class="diagram">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">ORIGEN</span><b>Historia</b>De Aristóteles a Dartmouth, Deep Blue y el deep learning.<div class="topics"><a href="#tema-1">T1</a></div></div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">BUSCAR Y APRENDER</span><b>Técnicas clásicas</b>Minimax, perceptrón, MLP, algoritmos genéticos.<div class="topics"><a href="#tema-2">T2</a><a href="#tema-3">T3</a><a href="#tema-4">T4</a></div></div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">REPRESENTAR</span><b>Conocimiento</b>Taxonomías, tesauros, ontologías, RDF, OWL.<div class="topics"><a href="#tema-5">T5</a><a href="#tema-6">T6</a></div></div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">RAZONAR E INTERACTUAR</span><b>Aplicaciones</b>Sistemas expertos, DSS, chatbots.<div class="topics"><a href="#tema-7">T7</a><a href="#tema-8">T8</a></div></div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">IMPLANTAR</span><b>Estrategia y futuro</b>Fases de implantación, robótica, cuántica.<div class="topics"><a href="#tema-9">T9</a><a href="#tema-10">T10</a></div></div>
+    </div>
+    <p class="loopback">Idea transversal: la IA alterna entre <b>representar conocimiento</b> (reglas, ontologías) y <b>aprenderlo de los datos</b> (redes, evolución).</p>
+    <figcaption>Cómo se conectan los 10 temas.</figcaption>
+  </figure>
+
+  <h2>Temas</h2>
+  <div class="tcards" id="tcards"></div>
+
+  <div class="callout exam">
+    <span class="tag">Cómo usar esta guía</span>
+    <ul>
+      <li>Cada tema empieza con una frase resumen y acaba con un test de 5 preguntas.</li>
+      <li>Los recuadros naranjas son <b>ejemplos en mercados</b>; los azules, lo que más se pregunta en el <b>examen</b>.</li>
+      <li>Simuladores: línea del tiempo, minimax con poda alfa-beta, perceptrón, algoritmo genético, constructor de triples RDF, motor de reglas, chatbot por intenciones y matriz de priorización.</li>
+      <li>Tu progreso se guarda en este navegador.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== TEMA 1 ===================== -->
+<section class="view" data-view="tema-1" hidden>
+  <p class="eyebrow">Tema 1</p>
+  <h1>Historia de la inteligencia artificial</h1>
+  <p class="oneline">La IA nace formalmente en <b>Dartmouth (1956)</b>, pero se apoya en siglos de lógica (Aristóteles, Boole, Frege), en la máquina de <b>Turing</b> y en la neurona artificial de <b>McCulloch y Pitts (1943)</b>. Hoy su núcleo práctico es el <b>machine learning</b> y su rama más potente, el <b>deep learning</b>.</p>
+  <ul class="objs"><li>Hitos y personajes</li><li>Test de Turing</li><li>Por qué importa la IA</li><li>ML vs DL, PLN, visión</li></ul>
+
+  <h2>Línea del tiempo interactiva</h2>
+  <figure class="diagram">
+    <div class="btnrow" id="tlFilters" style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn" data-era="all" aria-pressed="true">Todo</button>
+      <button class="btn" data-era="pre" aria-pressed="false">Precursores</button>
+      <button class="btn" data-era="nac" aria-pressed="false">Nacimiento</button>
+      <button class="btn" data-era="mod" aria-pressed="false">Era moderna</button>
+      <button class="btn" data-era="cult" aria-pressed="false">Cultura</button>
+    </div>
+    <svg id="tlSvg" viewBox="0 0 600 120" width="100%" style="display:block;margin-top:10px" role="img" aria-label="Línea del tiempo de la IA"></svg>
+    <div class="box" id="tlInfo" style="margin-top:8px;min-height:64px"></div>
+    <figcaption>Pulsa un punto para ver el hito. La escala no es lineal: cada tramo agrupa una época.</figcaption>
+  </figure>
+
+  <h2>El test de Turing</h2>
+  <div class="grid g2">
+    <div class="box"><h4>La pregunta</h4>En <i>Computing machinery and intelligence</i>, Alan Turing cambia "¿pueden pensar las máquinas?" por una prueba práctica: el <b>juego de la imitación</b>.</div>
+    <div class="box"><h4>La prueba</h4>Un evaluador conversa por texto con una persona y con una máquina sin saber quién es quién. Si no consigue distinguirlas, la máquina <b>supera el test</b>.</div>
+  </div>
+
+  <h2>Por qué importa la IA</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Automatiza</h4>Tareas repetitivas y voluminosas de forma fiable y sin fatiga.</div>
+    <div class="box"><h4>Añade inteligencia</h4>A productos ya existentes: asistentes, recomendaciones, búsquedas.</div>
+    <div class="box"><h4>Se adapta</h4>Aprende de los datos de forma progresiva: el algoritmo se convierte en clasificador o predictor.</div>
+    <div class="box"><h4>Analiza más datos</h4>Y más profundos, gracias a redes con muchas capas ocultas.</div>
+    <div class="box"><h4>Más precisión</h4>Con deep learning, en imagen, voz o diagnóstico.</div>
+    <div class="box"><h4>Saca partido de los datos</h4>Los datos pasan a ser activo competitivo: gana quien tiene los mejores.</div>
+  </div>
+
+  <h2>Machine learning, deep learning y otras ramas</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Machine learning</th><th>Deep learning</th></tr></thead>
+    <tbody>
+      <tr><td><b>Idea</b></td><td>El sistema aprende patrones de los datos sin programarlos explícitamente</td><td>Subconjunto del ML con redes neuronales de muchas capas</td></tr>
+      <tr><td><b>Características</b></td><td>Un experto define qué rasgos mirar (p. ej. orejas, bigotes para reconocer un gato)</td><td>La red descubre por sí misma los rasgos relevantes</td></tr>
+      <tr><td><b>Datos y cómputo</b></td><td>Funciona con menos datos</td><td>Necesita muchos datos y GPU</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4>Procesamiento del lenguaje natural (PLN)</h4>Que el ordenador entienda y genere lenguaje humano: traducción, chatbots, análisis de sentimiento.</div>
+    <div class="box"><h4>Visión artificial</h4>Reconocimiento de patrones en imágenes: reconocimiento facial, conducción autónoma, diagnóstico por imagen.</div>
+  </div>
+  <p class="prose">Herramientas habituales: <b>Python</b> como lenguaje y librerías como <b>TensorFlow</b> y <b>Keras</b> para redes neuronales.</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>La historia se repite en las finanzas: los primeros sistemas de trading eran <b>reglas escritas por expertos</b> (IA simbólica, como los sistemas expertos); hoy dominan modelos de <b>machine learning</b> que aprenden de millones de operaciones, y el <b>PLN</b> lee noticias y resultados trimestrales para medir el sentimiento del mercado en segundos.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Silogismos de Aristóteles · Ctesibio (250 a. C.) primera máquina autocontrolada · Boole (1847) · Frege (lógica de primer orden).</li>
+    <li>"Robot": Karel Čapek, <i>R.U.R.</i> (1921). Tres leyes de la robótica: Asimov.</li>
+    <li>McCulloch–Pitts (1943) neurona artificial · Z3 de Zuse (1941) · Turing y su test.</li>
+    <li>Dartmouth 1956: McCarthy, Minsky, Shannon → nace el término IA. Deep Blue gana a Kaspárov en 1997.</li>
+    <li>DL ⊂ ML ⊂ IA. En DL la red extrae las características; en ML clásico, el experto.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-1"></div>
+</section>
+
+<!-- ===================== TEMA 2 ===================== -->
+<section class="view" data-view="tema-2" hidden>
+  <p class="eyebrow">Tema 2</p>
+  <h1>Inteligencia artificial en juegos</h1>
+  <p class="oneline">Un juego se modela como un <b>árbol de estados</b>: MAX busca maximizar la utilidad y MIN minimizarla. <b>Minimax</b> recorre el árbol para elegir la mejor jugada y la <b>poda alfa-beta</b> evita explorar ramas que no pueden cambiar la decisión.</p>
+  <ul class="objs"><li>Terminología y tipos de juegos</li><li>Árboles de juego</li><li>Minimax y alfa-beta</li><li>IA en tiempo real y moderna</li></ul>
+
+  <h2>Elementos de un juego</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Jugadores y estados</h4>Quién juega y cada configuración posible del tablero; incluye el estado inicial.</div>
+    <div class="box"><h4>Acciones y reglas</h4>Movimientos legales en cada estado y cómo cambia el estado.</div>
+    <div class="box"><h4>Terminales y utilidad</h4>Estados finales con su valor: <span class="mono">+1</span> gana, <span class="mono">−1</span> pierde, <span class="mono">0</span> empate.</div>
+  </div>
+  <h3>Clasificación</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Criterio</th><th>Tipos</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><b>Información</b></td><td>Perfecta / imperfecta</td><td>Ajedrez / póker</td></tr>
+      <tr><td><b>Azar</b></td><td>Determinista / estocástico (Expectiminimax)</td><td>Damas / backgammon</td></tr>
+      <tr><td><b>Jugadores</b></td><td>Uno, dos o más</td><td>Solitario / ajedrez / Monopoly</td></tr>
+      <tr><td><b>Resultado</b></td><td>Suma cero / suma no cero</td><td>Ajedrez / dilema del prisionero</td></tr>
+      <tr><td><b>Tiempo</b></td><td>Por turnos / tiempo real</td><td>Go / videojuegos de estrategia</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">El tamaño del árbol explica la dificultad: el ajedrez tiene más de <b>10<sup>40</sup></b> estados y el Go más de <b>10<sup>170</sup></b>. Con factor de ramificación 35 y 8 jugadas de profundidad, minimax tendría que evaluar unos <b>35<sup>8</sup> ≈ 2 billones</b> de nodos. Por eso se corta a cierta profundidad y se usa una <b>función de evaluación</b> heurística.</p>
+
+  <h2>Simulador: minimax con poda alfa-beta</h2>
+  <figure class="diagram">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="mmRand">Hojas aleatorias</button>
+      <button class="btn" id="mmReset">Ejemplo</button>
+      <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="mmAB" checked> Poda alfa-beta</label>
+    </div>
+    <svg id="mmSvg" viewBox="0 0 600 250" width="100%" style="display:block;margin-top:10px" role="img" aria-label="Árbol minimax"></svg>
+    <p class="out" id="mmInfo"></p>
+    <figcaption>Árbol de profundidad 3 con ramificación 2 (MAX → MIN → MAX → hojas). Pulsa una hoja para cambiar su valor (+1). Las ramas tachadas son las podadas: no hace falta mirarlas.</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>Minimax en 6 pasos</h4>1) Generar el árbol hasta los terminales (o la profundidad límite). 2) Aplicar la utilidad a cada terminal. 3) Subir: en nodos MIN, el mínimo de los hijos. 4) En nodos MAX, el máximo. 5) Repetir hasta la raíz. 6) MAX elige la jugada con el mayor valor.</div>
+    <div class="box"><h4>Poda alfa-beta</h4><b>α</b> = mejor valor asegurado para MAX; <b>β</b> = mejor valor asegurado para MIN. Si en algún nodo <b>α ≥ β</b>, se poda el resto de hijos. Mismo resultado que minimax; en el caso ideal pasa de <b>O(b<sup>d</sup>)</b> a <b>O(b<sup>d/2</sup>)</b>: duplica la profundidad alcanzable.</div>
+  </div>
+  <div class="callout warn"><span class="tag">Efecto horizonte</span><p>Al cortar la búsqueda a una profundidad fija, el programa no ve una amenaza que aparece justo después del límite y puede elegir una jugada que parece buena pero lleva al desastre.</p></div>
+
+  <h2>Juegos en tiempo real y IA moderna</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Máquinas de estados (FSM)</h4>El personaje pasa de "patrullar" a "perseguir" o "huir" según eventos.</div>
+    <div class="box"><h4>Behavior trees</h4>Árboles jerárquicos de comportamientos: más modulares que las FSM.</div>
+    <div class="box"><h4>Reglas IF-THEN</h4>Si la vida es baja → buscar botiquín.</div>
+    <div class="box"><h4>Búsqueda de caminos</h4>A* y Dijkstra para mover personajes por el mapa.</div>
+    <div class="box"><h4>Agentes reactivos y utility AI</h4>Responden a estímulos o puntúan cada acción y eligen la de mayor utilidad.</div>
+    <div class="box"><h4>Aprendizaje por refuerzo</h4>AlphaGo (venció a Lee Sedol en 2016), AlphaZero, OpenAI Five, AlphaStar.</div>
+  </div>
+  <p class="prose">Tendencias: <b>IA adaptativa</b> (ajusta la dificultad), <b>modelos de jugador</b> (aprende cómo juega cada persona) e <b>IA generativa</b> (crea niveles, diálogos y personajes).</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un creador de mercado que fija precios frente a un operador informado se puede ver como un juego de <b>dos jugadores</b> con <b>información imperfecta</b>. Las pruebas de estrés usan una lógica minimax: buscan la cartera que maximiza el resultado en el <b>peor escenario</b> que el mercado (MIN) podría plantear.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Utilidad: +1 / −1 / 0. Niveles alternos MAX y MIN.</li>
+    <li>Estocástico → Expectiminimax. Ajedrez &gt; 10<sup>40</sup> estados; Go &gt; 10<sup>170</sup>.</li>
+    <li>α = mejor de MAX, β = mejor de MIN, poda si α ≥ β. O(b<sup>d</sup>) → O(b<sup>d/2</sup>).</li>
+    <li>Efecto horizonte: amenazas más allá de la profundidad límite.</li>
+    <li>Tiempo real: FSM, behavior trees, A*. RL: AlphaGo (2016).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-2"></div>
+</section>
+
+<!-- ===================== TEMA 3 ===================== -->
+<section class="view" data-view="tema-3" hidden>
+  <p class="eyebrow">Tema 3</p>
+  <h1>Redes de neuronas</h1>
+  <p class="oneline">Una neurona artificial calcula <b>y = f(Σ wᵢxᵢ + b)</b>. El <b>perceptrón</b> (Rosenblatt, 1958) aprende funciones linealmente separables como AND u OR, pero no XOR; para eso hace falta el <b>perceptrón multicapa</b> entrenado con <b>retropropagación</b> (1986).</p>
+  <ul class="objs"><li>Neurona biológica y artificial</li><li>Funciones de activación</li><li>Perceptrón y su límite</li><li>MLP y arquitecturas modernas</li></ul>
+
+  <h2>De la neurona biológica a la artificial</h2>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>Dendritas → entradas xᵢ</b>Reciben señales de otras neuronas</div><div class="arrow">→</div>
+      <div class="node"><b>Sinapsis → pesos wᵢ</b>Refuerzan o atenúan cada señal (plasticidad)</div><div class="arrow">→</div>
+      <div class="node"><b>Soma → suma Σ wᵢxᵢ + b</b>Integra las señales</div><div class="arrow">→</div>
+      <div class="node hl"><b>Axón → salida y = f(·)</b>Dispara si supera el umbral</div>
+    </div>
+    <figcaption>Modelo de McCulloch y Pitts (1943). El sesgo <span class="mono">b</span> equivale a mover el umbral.</figcaption>
+  </figure>
+  <h3>Funciones de activación</h3>
+  <figure class="diagram">
+    <svg id="actSvg" viewBox="0 0 600 150" width="100%" style="display:block" role="img" aria-label="Funciones de activación"></svg>
+    <figcaption>Escalón (Heaviside), lineal, sigmoide y ReLU, dibujadas entre −4 y 4.</figcaption>
+  </figure>
+
+  <h2>Simulador: entrena un perceptrón</h2>
+  <figure class="diagram">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <button class="btn" data-gate="AND" aria-pressed="true">AND</button>
+      <button class="btn" data-gate="OR" aria-pressed="false">OR</button>
+      <button class="btn" data-gate="NAND" aria-pressed="false">NAND</button>
+      <button class="btn" data-gate="XOR" aria-pressed="false">XOR</button>
+      <span style="flex:1"></span>
+      <button class="btn" id="pcStep">1 época</button>
+      <button class="btn" id="pcRun">Entrenar 20 épocas</button>
+      <button class="btn" id="pcReset">Reiniciar</button>
+    </div>
+    <label for="pcEta" style="margin-top:8px">Tasa de aprendizaje η = <b class="out" id="pcEtaV">0,2</b></label>
+    <input type="range" id="pcEta" min="0.05" max="1" step="0.05" value="0.2" style="width:100%">
+    <div class="grid g2" style="margin-top:8px;align-items:center">
+      <svg id="pcSvg" viewBox="0 0 260 260" width="100%" style="display:block;max-width:300px" role="img" aria-label="Frontera de decisión"></svg>
+      <div><div id="pcInfo" class="box"></div><div class="table-wrap" style="margin-top:8px"><table id="pcTable"></table></div></div>
+    </div>
+    <figcaption>Regla del perceptrón: <span class="mono">Δw = η·(d − y)·x</span>. Con XOR nunca llega a 0 errores: ninguna recta separa los puntos.</figcaption>
+  </figure>
+
+  <h2>Aprendizaje y arquitecturas</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Supervisado</h4>Se conoce la salida deseada <span class="mono">d</span> y se corrigen los pesos según el error (perceptrón, MLP).</div>
+    <div class="box"><h4>No supervisado</h4>Sin etiquetas: la red descubre agrupaciones por sí sola. Ejemplo: <b>mapas autoorganizados de Kohonen (SOM)</b>.</div>
+    <div class="box"><h4>Perceptrón multicapa (MLP)</h4>Capas ocultas + retropropagación del error (<b>Rumelhart, Hinton y Williams, 1986</b>). Por el <b>teorema de aproximación universal</b>, puede aproximar cualquier función continua. Ejemplo clásico: dígitos <b>MNIST</b> con <span class="mono">MLPClassifier</span>.</div>
+    <div class="box"><h4>Arquitecturas posteriores</h4><b>CNN</b> (imágenes), <b>RNN/LSTM</b> (secuencias, series temporales) y <b>Transformers</b> (lenguaje, base de los LLM).</div>
+  </div>
+  <div class="callout warn"><span class="tag">El invierno de las redes</span><p>Al demostrarse que el perceptrón simple no puede aprender XOR (Minsky y Papert, 1969), la financiación cayó y la investigación se frenó en los años 60–70, hasta que la retropropagación permitió entrenar redes con capas ocultas.</p></div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un perceptrón con entradas "cruce de medias" y "volumen alto" puede aprender una regla AND de compra. Pero muchas señales reales son tipo XOR (comprar si <i>solo una</i> de dos condiciones se cumple): ahí hace falta un MLP. Las <b>LSTM</b> se usan para series de precios y los <b>Transformers</b> para leer noticias financieras.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Biológica: dendritas, soma, axón, sinapsis. Artificial: y = f(Σwx + b).</li>
+    <li>Activaciones: escalón, lineal, sigmoide, ReLU.</li>
+    <li>Perceptrón: Rosenblatt 1958; Δw = η(d − y)x; aprende AND/OR/NAND, no XOR.</li>
+    <li>MLP + backpropagation: Rumelhart, Hinton y Williams (1986).</li>
+    <li>No supervisado: Kohonen (SOM).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-3"></div>
+</section>
+
+<!-- ===================== TEMA 4 ===================== -->
+<section class="view" data-view="tema-4" hidden>
+  <p class="eyebrow">Tema 4</p>
+  <h1>Algoritmos genéticos</h1>
+  <p class="oneline">Un algoritmo genético imita la <b>evolución natural</b>: una población de soluciones codificadas como <b>cromosomas</b> mejora generación a generación mediante <b>selección</b>, <b>cruce</b> y <b>mutación</b>, guiada por una función de <b>aptitud (fitness)</b>.</p>
+  <ul class="objs"><li>Historia y computación evolutiva</li><li>Vocabulario genético</li><li>Ciclo del algoritmo</li><li>Tipos de fitness</li></ul>
+
+  <h2>Origen</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Año</th><th>Hito</th></tr></thead>
+    <tbody>
+      <tr><td class="num">Finales 1950</td><td>Turing propone una "máquina que aprende" imitando la evolución</td></tr>
+      <tr><td class="num">1962</td><td>Box, Friedman, Bledsoe y Bremermann: primeros algoritmos inspirados en la evolución</td></tr>
+      <tr><td class="num">1965</td><td>Rechenberg: <b>estrategias evolutivas (EE)</b></td></tr>
+      <tr><td class="num">1966</td><td>Fogel, Owens y Walsh: <b>programación evolutiva (PE)</b></td></tr>
+      <tr><td class="num">Años 70</td><td>John Holland: <b>algoritmos genéticos (AG)</b></td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose"><b>Computación evolutiva = PE + EE + AG</b>. Junto con la lógica difusa y las redes neuronales forma el <b>soft computing</b>.</p>
+
+  <h2>Vocabulario</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Cromosoma</h4>Una solución candidata completa (p. ej. <span class="mono">10110010</span>).</div>
+    <div class="box"><h4>Gen y alelo</h4>Gen: cada posición. Alelo: el valor que toma (0 o 1).</div>
+    <div class="box"><h4>Genotipo / fenotipo</h4>Codificación interna / solución real que representa.</div>
+  </div>
+  <p class="prose">Codificación <b>binaria</b>, <b>entera</b> o <b>real</b>. El tamaño de la población es un compromiso: muy pequeña pierde diversidad; muy grande es lenta.</p>
+
+  <h2>Ciclo del algoritmo</h2>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>Población inicial</b>Aleatoria</div><div class="arrow">→</div>
+      <div class="node"><b>Evaluar fitness</b>De cada individuo</div><div class="arrow">→</div>
+      <div class="node"><b>Selección</b>Los mejores tienen más probabilidad</div><div class="arrow">→</div>
+      <div class="node"><b>Cruce</b>Con probabilidad Pc</div><div class="arrow">→</div>
+      <div class="node"><b>Mutación</b>Pm ≈ 0,5–2 %</div><div class="arrow">→</div>
+      <div class="node hl"><b>Reemplazo</b>Nueva generación; ¿parar?</div>
+    </div>
+    <figcaption>Parada: solución suficientemente buena, el 95 % de los genes ha convergido o se alcanza el máximo de generaciones. Reemplazo: a los padres, a los similares, a los peores (≈10 %) o aleatorio.</figcaption>
+  </figure>
+
+  <h2>Simulador: evolucionar una cartera</h2>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Cada cromosoma tiene 12 genes: 1 = el activo entra en la cartera. Fitness = rendimiento esperado − penalización por riesgo; si se superan 6 activos, se penaliza.</p>
+    <div class="grid g3">
+      <div><label for="gaPm">Mutación Pm = <b class="out" id="gaPmV">1,0 %</b></label><input type="range" id="gaPm" min="0" max="10" step="0.5" value="1" style="width:100%"></div>
+      <div><label for="gaPc">Cruce Pc = <b class="out" id="gaPcV">80 %</b></label><input type="range" id="gaPc" min="0" max="100" step="5" value="80" style="width:100%"></div>
+      <div><label for="gaPop">Población = <b class="out" id="gaPopV">20</b></label><input type="range" id="gaPop" min="6" max="60" step="2" value="20" style="width:100%"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" id="gaStep">1 generación</button>
+      <button class="btn" id="gaRun">20 generaciones</button>
+      <button class="btn" id="gaReset">Nueva población</button>
+    </div>
+    <svg id="gaSvg" viewBox="0 0 600 160" width="100%" style="display:block;margin-top:10px" role="img" aria-label="Evolución del fitness"></svg>
+    <div id="gaBest" style="margin-top:6px"></div>
+    <figcaption>Línea azul: mejor fitness de cada generación; gris: media de la población. El óptimo (calculado probando las 4.096 carteras) se marca con la línea discontinua.</figcaption>
+  </figure>
+
+  <h2>Tipos de fitness</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Puro</h4>La medida natural del problema (p. ej. beneficio).</div>
+    <div class="box"><h4>Estandarizado</h4>Transformado para que <b>0 sea el mejor</b> valor (minimizar).</div>
+    <div class="box"><h4>Ajustado</h4><span class="mono">a = 1 / (1 + s)</span>, con s el estandarizado: queda entre 0 y 1 y mayor es mejor.</div>
+    <div class="box"><h4>Normalizado</h4>Ajustado dividido por la suma de la población: todos <b>suman 1</b> (útil para la ruleta de selección).</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Los AG se usan para <b>seleccionar carteras</b> con restricciones difíciles (número máximo de activos, lotes mínimos) y para <b>optimizar parámetros de estrategias de trading</b> (longitud de medias, stop-loss). Cuidado: optimizar demasiado sobre datos históricos produce <b>sobreajuste</b>.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Holland (años 70) = AG; Rechenberg (1965) = EE; Fogel (1966) = PE.</li>
+    <li>Soft computing = computación evolutiva + lógica difusa + redes neuronales.</li>
+    <li>Cromosoma, gen, alelo, genotipo/fenotipo.</li>
+    <li>Pm típica 0,5–2 %. Parada: buena solución, 95 % de convergencia, máximo de generaciones.</li>
+    <li>Fitness ajustado a = 1/(1 + s); normalizado suma 1.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-4"></div>
+</section>
+
+<!-- ===================== TEMA 5 ===================== -->
+<section class="view" data-view="tema-5" hidden>
+  <p class="eyebrow">Tema 5</p>
+  <h1>Tesauros, vocabularios y taxonomías</h1>
+  <p class="oneline">Los <b>sistemas de organización del conocimiento (SOC/KOS)</b> ordenan términos de menor a mayor riqueza semántica: <b>listas</b> → <b>taxonomías</b> (jerarquía) → <b>tesauros</b> (jerarquía + asociación + equivalencia) → <b>ontologías</b> (relaciones formales que una máquina puede razonar).</p>
+  <ul class="objs"><li>Tipos de SOC</li><li>Relaciones de un tesauro</li><li>Ontologías y triples</li><li>Gestión del conocimiento</li></ul>
+
+  <h2>Escalera de complejidad</h2>
+  <figure class="diagram">
+    <div class="pyramid">
+      <div class="lvl3" style="width:40%"><b>Ontología</b><span>clases, propiedades, reglas (OWL)</span></div>
+      <div class="lvl2" style="width:58%"><b>Tesauro</b><span>TG/TE, TR, USE/UP</span></div>
+      <div class="lvl2" style="width:76%;background:var(--surface-2)"><b>Taxonomía</b><span>categorías y subcategorías</span></div>
+      <div class="lvl1" style="width:95%"><b>Lista de términos</b><span>glosarios, diccionarios</span></div>
+    </div>
+    <figcaption>Cuanto más arriba, más semántica y más capacidad de razonamiento automático.</figcaption>
+  </figure>
+
+  <h2>Taxonomía</h2>
+  <p class="prose">Clasifica en <b>categorías y subcategorías</b> (el modelo clásico es la clasificación de los seres vivos de <b>Linneo</b>). Distingue <b>términos preferentes</b> (los que se usan) y <b>no preferentes</b> (sinónimos que remiten al preferente).</p>
+
+  <h2>Tesauro: las tres relaciones</h2>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div class="box"><h4>Jerárquica</h4><b>TG</b> término genérico / <b>TE</b> término específico.<br><span class="mono">Renta variable TG Activo financiero</span></div>
+      <div class="box"><h4>Asociativa</h4><b>TR</b> término relacionado, sin jerarquía.<br><span class="mono">Acción TR Dividendo</span></div>
+      <div class="box"><h4>Equivalencia</h4><b>USE / UP</b> (usado por): remite del no descriptor al descriptor.<br><span class="mono">Stock USE Acción</span></div>
+    </div>
+    <figcaption>Descriptores (términos aceptados), no descriptores (sinónimos) e identificadores (nombres propios).</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>Origen y ejemplos</h4>El término lo usa por primera vez <b>Helen Brownson</b> en la conferencia de <b>Dorking</b> (14 de mayo de 1957). Ejemplos: tesauro de la <b>UNESCO</b> y del <b>CENDOJ</b>. Estándar web: <b>SKOS</b>.</div>
+    <div class="box"><h4>Funciones</h4><b>Normalización</b> (un único término por concepto), <b>inducción</b> (sugiere términos relacionados) y <b>representación</b> (describe el contenido de los documentos).</div>
+  </div>
+
+  <h2>Ontología</h2>
+  <p class="prose">Define clases, propiedades y relaciones de forma formal (lenguaje <b>OWL</b>), y se expresa en <b>triples sujeto – predicado – objeto</b>. Permite que una máquina deduzca hechos nuevos.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Deductivo</h4>De lo general a lo particular: toda acción es un activo; Iberdrola es una acción → es un activo.</div>
+    <div class="box"><h4>Inductivo</h4>De casos a una regla general (probable, no segura).</div>
+    <div class="box"><h4>Abductivo</h4>La mejor explicación para lo observado.</div>
+  </div>
+  <p class="prose"><b>Gestión del conocimiento</b> (procesos de la organización para crear, compartir y usar conocimiento) no es lo mismo que <b>organización del conocimiento</b> (estructurar los términos y conceptos con SOC).</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Los estándares <b>GICS</b> (sectores bursátiles) son una taxonomía: Energía → Petróleo y gas → Exploración. La ontología <b>FIBO</b> (Financial Industry Business Ontology) va más allá y define formalmente qué es un bono, un emisor o una contraparte, para que los sistemas de distintos bancos puedan intercambiar datos sin ambigüedad.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Orden de complejidad: listas &lt; taxonomías &lt; tesauros &lt; ontologías.</li>
+    <li>Tesauro: jerárquica (TG/TE), asociativa (TR), equivalencia (USE/UP).</li>
+    <li>Brownson, Dorking, 1957. Estándar: SKOS. Ejemplos: UNESCO, CENDOJ.</li>
+    <li>Funciones del tesauro: normalización, inducción, representación.</li>
+    <li>Ontología → OWL, triples. Razonamiento deductivo, inductivo, abductivo.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-5"></div>
+</section>
+
+<!-- ===================== TEMA 6 ===================== -->
+<section class="view" data-view="tema-6" hidden>
+  <p class="eyebrow">Tema 6</p>
+  <h1>Web semántica</h1>
+  <p class="oneline">La web semántica (W3C) convierte la web de documentos en una <b>web de datos</b> que las máquinas entienden: los datos se describen con <b>RDF</b> (triples), su vocabulario con <b>RDFS</b> y sus reglas con <b>OWL</b>, y se enlazan entre sí siguiendo los principios de <b>Linked Data</b>.</p>
+  <ul class="objs"><li>Arquitectura en capas</li><li>RDF y sus serializaciones</li><li>RDFS y OWL</li><li>Linked Data y SPARQL</li></ul>
+
+  <h2>Qué es y por qué</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Idea</h4>Añadir significado (metadatos) a la información para que los programas puedan interpretarla, combinarla y razonar sobre ella. Se apoya en <b>ontologías</b>: especificaciones <b>explícitas, formales y compartidas</b> de una conceptualización.</div>
+    <div class="box"><h4>Ventajas e inconvenientes</h4>Búsquedas más precisas, integración de fuentes heterogéneas, inferencia automática. A cambio: esfuerzo de anotación, acuerdo sobre vocabularios y complejidad técnica.</div>
+  </div>
+
+  <h2>Arquitectura en capas</h2>
+  <figure class="diagram">
+    <div class="pyramid">
+      <div class="lvl3" style="width:34%"><b>Confianza</b><span>firmas, procedencia</span></div>
+      <div class="lvl2" style="width:46%"><b>Prueba</b><span>justificar las conclusiones</span></div>
+      <div class="lvl2" style="width:58%"><b>Lógica / reglas</b><span>SWRL, inferencia</span></div>
+      <div class="lvl2" style="width:70%;background:var(--surface-2)"><b>Ontologías</b><span>OWL · consultas SPARQL</span></div>
+      <div class="lvl1" style="width:82%"><b>RDF + RDFS</b><span>datos en triples y su vocabulario</span></div>
+      <div class="lvl1" style="width:95%"><b>XML · URI · Unicode</b><span>sintaxis, identificadores, caracteres</span></div>
+    </div>
+    <figcaption>Cada capa se apoya en la inferior.</figcaption>
+  </figure>
+
+  <h2>RDF: todo es un triple</h2>
+  <p class="prose">Un enunciado RDF tiene <b>sujeto</b> (recurso con URI), <b>propiedad</b> (predicado, también con URI) y <b>objeto</b> (otro recurso o un literal). <span class="mono">rdf:type</span> indica a qué clase pertenece un recurso. <b>RDF no es XML</b>: es un modelo de datos que se puede escribir en RDF/XML, N-Triples, <b>Turtle</b>, RDFa o <b>JSON-LD</b>.</p>
+  <h3>Simulador: construye un grafo RDF</h3>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div><label for="rdfS">Sujeto</label><input type="text" id="rdfS" value="ex:Iberdrola"></div>
+      <div><label for="rdfP">Propiedad</label><input type="text" id="rdfP" value="ex:cotizaEn"></div>
+      <div><label for="rdfO">Objeto</label><input type="text" id="rdfO" value="ex:IBEX35"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" id="rdfAdd">Añadir triple</button>
+      <button class="btn" id="rdfInfer">Inferir (rdfs:subClassOf)</button>
+      <button class="btn" id="rdfReset">Ejemplo</button>
+      <button class="btn" id="rdfClear">Vaciar</button>
+    </div>
+    <svg id="rdfSvg" viewBox="0 0 600 260" width="100%" style="display:block;margin-top:10px" role="img" aria-label="Grafo RDF"></svg>
+    <pre class="code" id="rdfTtl" style="margin-top:8px"></pre>
+    <figcaption>Los objetos entre comillas son literales (rectángulos). "Inferir" aplica la regla de RDFS: si x rdf:type A y A rdfs:subClassOf B, entonces x rdf:type B (en verde las tripletas deducidas).</figcaption>
+  </figure>
+
+  <h2>RDFS y OWL</h2>
+  <div class="grid g2">
+    <div class="box"><h4>RDFS (vocabulario)</h4><span class="mono">rdfs:Class, Resource, Literal, Datatype, subClassOf, subPropertyOf, domain, range, label, comment, seeAlso, isDefinedBy</span>.</div>
+    <div class="box"><h4>OWL (ontologías)</h4>Deriva de <b>DAML+OIL</b>. Tres variantes: <b>Lite</b> (jerarquías simples), <b>DL</b> (lógica descriptiva SHOIN, decidible) y <b>Full</b> (máxima expresividad, el razonamiento puede no terminar).</div>
+  </div>
+  <p class="prose">Herramientas de consulta y reglas: <b>SPARQL</b> (lenguaje de consulta sobre RDF), lógicas descriptivas, <b>SWRL</b> y F-logic.</p>
+<pre class="code"><span class="c"># SPARQL: empresas del IBEX 35 y su sector</span>
+SELECT ?empresa ?sector WHERE {
+  ?empresa ex:cotizaEn ex:IBEX35 .
+  ?empresa ex:sector   ?sector .
+}</pre>
+
+  <h2>Linked Data</h2>
+  <p class="prose">Tim <b>Berners-Lee</b> define cuatro principios:</p>
+  <div class="grid g2">
+    <div class="box"><h4>1 · URI</h4>Usar URI para nombrar las cosas.</div>
+    <div class="box"><h4>2 · HTTP</h4>Que sean URI HTTP, para poder consultarlas.</div>
+    <div class="box"><h4>3 · Información útil</h4>Al consultar una URI, devolver datos en estándares (RDF, SPARQL).</div>
+    <div class="box"><h4>4 · Enlaces</h4>Incluir enlaces a otras URI para descubrir más cosas.</div>
+  </div>
+  <p class="prose">Ejemplo del temario: Daniel conoce a Luis, que vive en Venezuela; enlazando con DBpedia se obtiene la capital o la población de Venezuela sin haberla escrito. El <b>Knowledge Graph</b> de Google aplica esta idea.</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>El identificador <b>LEI</b> (Legal Entity Identifier) de GLEIF se publica como Linked Data: cada entidad tiene una URI con su matriz y filiales. Un banco puede cruzar su exposición a un grupo empresarial completo siguiendo los enlaces <span class="mono">esFilialDe</span>, en lugar de conciliar nombres a mano.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Triple: sujeto – propiedad – objeto. RDF ≠ XML (XML es una de sus serializaciones).</li>
+    <li>Serializaciones: RDF/XML, N-Triples, Turtle, RDFa, JSON-LD.</li>
+    <li>OWL viene de DAML+OIL; Lite, DL (SHOIN) y Full.</li>
+    <li>Capas superiores: lógica, prueba, confianza. Consulta: SPARQL.</li>
+    <li>4 principios de Linked Data (Berners-Lee): URI, HTTP, RDF/SPARQL, enlaces.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-6"></div>
+</section>
+
+<!-- ===================== TEMA 7 ===================== -->
+<section class="view" data-view="tema-7" hidden>
+  <p class="eyebrow">Tema 7</p>
+  <h1>Sistemas expertos y sistemas de apoyo a la decisión</h1>
+  <p class="oneline">Un <b>sistema experto</b> reproduce el razonamiento de un especialista con una <b>base de conocimiento</b> (reglas) y un <b>motor de inferencia</b>. Un <b>DSS</b> no decide por el usuario: combina datos y modelos para ayudarle a decidir.</p>
+  <ul class="objs"><li>Componentes de un SE</li><li>Representación del conocimiento</li><li>Encadenamiento hacia delante y atrás</li><li>Tipos de DSS</li></ul>
+
+  <h2>Pioneros</h2>
+  <div class="grid g2">
+    <div class="box"><h4>DENDRAL</h4>Deducía estructuras moleculares a partir de espectrometría de masas.</div>
+    <div class="box"><h4>MYCIN</h4>Diagnosticaba infecciones de la sangre y recomendaba antibióticos con factores de certeza.</div>
+  </div>
+
+  <h2>Arquitectura de un sistema experto</h2>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>Interfaz de usuario</b>Preguntas y respuestas</div><div class="arrow">↔</div>
+      <div class="node hl"><b>Motor de inferencia</b>Aplica las reglas a los hechos</div><div class="arrow">↔</div>
+      <div class="node"><b>Base de conocimiento</b>Reglas del experto</div>
+    </div>
+    <div class="grid g2" style="margin-top:10px">
+      <div class="box"><h4>Memoria de trabajo</h4>Hechos del caso actual (lo que se sabe y lo que se va deduciendo).</div>
+      <div class="box"><h4>Módulo de explicación</h4>Responde "¿por qué?" y "¿cómo?" mostrando las reglas usadas.</div>
+    </div>
+  </figure>
+  <p class="prose">Formas de representar el conocimiento: <b>reglas IF-THEN</b>, <b>redes semánticas</b>, <b>marcos (frames)</b>, ontologías y <b>lógica difusa</b>.</p>
+
+  <h2>Simulador: motor de reglas</h2>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Marca los hechos iniciales de un cliente que pide un préstamo y ejecuta el motor.</p>
+    <div id="seFacts" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" data-se="fwd" aria-pressed="true">Hacia delante</button>
+      <button class="btn" data-se="bwd" aria-pressed="false">Hacia atrás: ¿aprobar?</button>
+    </div>
+    <div class="table-wrap" style="margin-top:8px"><table id="seRules"></table></div>
+    <div id="seTrace" class="box" style="margin-top:8px"></div>
+    <figcaption>Hacia delante (dirigido por datos): dispara toda regla cuyas condiciones se cumplan hasta que no haya nada nuevo. Hacia atrás (dirigido por objetivos): parte de la meta y busca las reglas que la concluyen, comprobando sus condiciones como submetas.</figcaption>
+  </figure>
+
+  <h2>Sistemas de apoyo a la decisión (DSS)</h2>
+  <p class="prose">Se popularizan en los años 80–90. Componentes: <b>base de datos</b>, <b>base de modelos</b>, <b>procesador</b> (motor que los combina) e <b>interfaz de diálogo</b>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo de DSS</th><th>Se basa en</th></tr></thead>
+    <tbody>
+      <tr><td><b>Orientado a datos</b></td><td>Consultas sobre grandes volúmenes de datos (data warehouse, OLAP)</td></tr>
+      <tr><td><b>Orientado a modelos</b></td><td>Modelos estadísticos, financieros o de optimización</td></tr>
+      <tr><td><b>Orientado al conocimiento</b></td><td>Reglas y experiencia (cercano a un SE)</td></tr>
+      <tr><td><b>Colaborativo</b></td><td>Decisiones en grupo</td></tr>
+      <tr><td><b>Inteligente</b></td><td>Incorpora IA / machine learning</td></tr>
+      <tr><td><b>En la nube</b></td><td>Servicios accesibles desde cualquier lugar</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Los departamentos de riesgos usan sistemas basados en reglas para <b>scoring de crédito</b>, <b>detección de fraude</b> en tarjetas y <b>alertas de abuso de mercado</b>: "SI operación &gt; 5 veces el volumen medio Y cliente vinculado al emisor Y antes de un hecho relevante ENTONCES alerta". Su gran ventaja frente a una red neuronal es la <b>explicabilidad</b> que exige el regulador.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>DENDRAL (química) y MYCIN (medicina).</li>
+    <li>SE: base de conocimiento, motor de inferencia, memoria de trabajo, explicación, interfaz.</li>
+    <li>Hacia delante = de los datos a las conclusiones; hacia atrás = de la meta a los datos.</li>
+    <li>DSS: BD + base de modelos + procesador + diálogo. Tipos: datos, modelos, conocimiento, colaborativo, inteligente, nube.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-7"></div>
+</section>
+
+<!-- ===================== TEMA 8 ===================== -->
+<section class="view" data-view="tema-8" hidden>
+  <p class="eyebrow">Tema 8</p>
+  <h1>Chatbots y asistentes virtuales</h1>
+  <p class="oneline">Un <b>chatbot</b> conversa por texto (WhatsApp, Telegram, web) y un <b>asistente virtual</b> por voz (Alexa, Siri, Google Assistant). Ambos se basan en detectar la <b>intención</b> del usuario y extraer sus <b>entidades</b> para dar la respuesta o ejecutar la acción adecuada.</p>
+  <ul class="objs"><li>Chatbot vs asistente de voz</li><li>Factores críticos</li><li>Intenciones y entidades</li><li>Herramientas</li></ul>
+
+  <div class="grid g2">
+    <div class="box"><h4>Chatbots de texto</h4>Facebook Messenger, WhatsApp, WeChat, Telegram, webs. Resuelven en torno al <b>20–30 %</b> de las incidencias sin intervención humana.</div>
+    <div class="box"><h4>Asistentes de voz</h4>Google Home y Google Assistant, Amazon Alexa, Siri, Cortana, Bixby.</div>
+  </div>
+
+  <h2>Cómo se construye</h2>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>Diagrama de flujo</b>Qué conversaciones cubrirá</div><div class="arrow">→</div>
+      <div class="node"><b>PLN</b>Detectar intención + entidades</div><div class="arrow">→</div>
+      <div class="node"><b>Respuesta / acción</b>Texto, botones, consulta a sistemas</div><div class="arrow">→</div>
+      <div class="node hl"><b>Informes y analítica</b>Qué no entiende, mejorar</div>
+    </div>
+    <figcaption>Integraciones habituales: CRM, Mailchimp, Slack, Typeform. Herramientas: Chatfuel y similares (sin código), IBM Watson Assistant, Google Dialogflow CX (hasta 40.000 intenciones).</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>Intención (intent)</h4>Lo que el usuario quiere hacer: <span class="mono">consultar_cotizacion</span>, <span class="mono">abrir_cuenta</span>.</div>
+    <div class="box"><h4>Entidad (entity)</h4>Los datos concretos de la frase: <span class="mono">empresa = Santander</span>, <span class="mono">fecha = ayer</span>.</div>
+  </div>
+
+  <h2>Simulador: chatbot por intenciones</h2>
+  <figure class="diagram">
+    <div id="cbLog" class="box" style="min-height:160px;max-height:280px;overflow:auto"></div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <input type="text" id="cbIn" placeholder="Prueba: ¿a cuánto cotiza Telefónica?" style="flex:1">
+      <button class="btn" id="cbSend">Enviar</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px" id="cbSugg"></div>
+    <p class="out" id="cbDbg"></p>
+    <figcaption>Clasificador muy simple: puntúa cada intención por palabras clave y detecta entidades (empresas). Si ninguna supera el umbral, salta la intención por defecto (fallback): ahí se ve el límite de un bot sin buen entrenamiento.</figcaption>
+  </figure>
+
+  <h2>Factores críticos de éxito</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Objetivo claro</h4>Saber qué problema resuelve y para quién.</div>
+    <div class="box"><h4>Personalidad y tono</h4>Coherentes con la marca.</div>
+    <div class="box"><h4>Paso a humano</h4>Derivar a un agente cuando no sabe responder.</div>
+    <div class="box"><h4>Mejora continua</h4>Analizar conversaciones y reentrenar.</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Los brókers online usan chatbots para consultas de saldo, estado de órdenes o cotizaciones, con intenciones como <span class="mono">estado_orden</span> y entidades como el ISIN. Las operaciones de compra/venta suelen exigir confirmación explícita y autenticación fuerte: el bot prepara la orden, pero no la ejecuta solo.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Chatbot = texto; asistente virtual = voz (Alexa, Siri, Google Assistant, Cortana, Bixby).</li>
+    <li>Resuelven ~20–30 % de incidencias.</li>
+    <li>Desarrollo: diagrama de flujo → PLN (intents + entities) → informes.</li>
+    <li>Herramientas: Chatfuel, Watson Assistant, Dialogflow CX (40.000 intenciones).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-8"></div>
+</section>
+
+<!-- ===================== TEMA 9 ===================== -->
+<section class="view" data-view="tema-9" hidden>
+  <p class="eyebrow">Tema 9</p>
+  <h1>Estrategia de implantación de la IA</h1>
+  <p class="oneline">Implantar IA es una decisión <b>estratégica</b>, no solo técnica: se parte de problemas de negocio reales, se priorizan por <b>impacto y viabilidad</b>, se pilotan, se ponen en producción con <b>MLOps y gobernanza</b> y se mejoran de forma continua.</p>
+  <ul class="objs"><li>Objetivos y equilibrios</li><li>Las 6 fases</li><li>Matriz de priorización</li><li>Factores clave de éxito</li></ul>
+
+  <h2>Antes de empezar</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Objetivos</h4>Realistas, a corto, medio y largo plazo, medibles con <b>KPI</b>, con criterios éticos y sin dejarse llevar por el <b>hype</b>.</div>
+    <div class="box"><h4>Equilibrios a gestionar</h4>Innovación ↔ viabilidad · automatización ↔ humano en el bucle · centralización ↔ descentralización · coste ↔ impacto · estandarización ↔ personalización.</div>
+  </div>
+
+  <h2>Guía en 6 fases</h2>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>1 · Detectar problemas</b>Dónde duele el negocio</div><div class="arrow">→</div>
+      <div class="node"><b>2 · Definir soluciones</b>Qué puede aportar la IA</div><div class="arrow">→</div>
+      <div class="node"><b>3 · Seleccionar desafíos</b>Matriz impacto / viabilidad</div><div class="arrow">→</div>
+      <div class="node"><b>4 · Ejecución y piloto</b>Prueba acotada, medir</div><div class="arrow">→</div>
+      <div class="node"><b>5 · Puesta en marcha</b>MLOps, seguridad, gestión del cambio, gobernanza</div><div class="arrow">→</div>
+      <div class="node hl"><b>6 · Retroalimentación</b>Monitorizar, detectar deriva, reentrenar</div>
+    </div>
+    <figcaption>La fase 6 cierra el ciclo: la IA no es un proyecto que se entrega y se olvida.</figcaption>
+  </figure>
+
+  <h2>Simulador: matriz de priorización</h2>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Ajusta el impacto y la viabilidad de cada iniciativa de IA en una gestora de fondos.</p>
+    <div id="pmCtrls" class="grid g2"></div>
+    <svg id="pmSvg" viewBox="0 0 600 340" width="100%" style="display:block;margin-top:10px" role="img" aria-label="Matriz impacto-viabilidad"></svg>
+    <div id="pmOrder" style="margin-top:6px"></div>
+    <figcaption>Cuadrantes: <b>quick wins</b> (alto impacto, alta viabilidad) se hacen primero; <b>apuestas estratégicas</b> (alto impacto, baja viabilidad) se preparan; <b>mejoras menores</b> se hacen si sobran recursos; el resto se descarta.</figcaption>
+  </figure>
+
+  <h2>Puesta en marcha y mejora continua</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Fase 5</h4>Despliegue con <b>MLOps</b> (versionado, despliegue y monitorización automatizados), seguridad y privacidad, <b>gestión del cambio</b> y formación de los usuarios, y <b>gobernanza</b> (responsables, auditoría).</div>
+    <div class="box"><h4>Fase 6</h4>Recoger feedback de usuarios, evaluar el rendimiento de forma continua, detectar la <b>deriva</b> de datos y del modelo, actualizar y reentrenar, y revisar los aspectos éticos y regulatorios.</div>
+  </div>
+  <h3>Factores clave de éxito</h3>
+  <div class="grid g3">
+    <div class="box">Alineación con la estrategia del negocio</div>
+    <div class="box">Calidad y gobernanza de los datos</div>
+    <div class="box">Cultura y capacidad organizativa</div>
+    <div class="box">Formación y talento</div>
+    <div class="box">Infraestructura tecnológica</div>
+    <div class="box">Gestión del cambio y comunicación</div>
+    <div class="box">Medición de resultados (KPI)</div>
+    <div class="box">Ética y responsabilidad</div>
+    <div class="box">Escalabilidad, ecosistema y aprendizaje continuo</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un banco quiere IA en su mesa de tesorería. <b>Quick win</b>: resumir automáticamente noticias y research para los gestores. <b>Apuesta estratégica</b>: un modelo de ejecución óptima de órdenes, con alto impacto pero muchos requisitos de datos y regulatorios. Tras el piloto, el modelo se vigila en producción: si cambia el régimen de mercado (deriva), se reentrena.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Fases: detectar problemas → definir soluciones → seleccionar desafíos → ejecución y piloto → puesta en marcha → retroalimentación.</li>
+    <li>Priorizar por impacto y viabilidad (matriz).</li>
+    <li>Puesta en marcha: MLOps, seguridad, gestión del cambio, gobernanza.</li>
+    <li>Mejora continua: deriva, reentrenamiento, auditoría ética.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-9"></div>
+</section>
+
+<!-- ===================== TEMA 10 ===================== -->
+<section class="view" data-view="tema-10" hidden>
+  <p class="eyebrow">Tema 10</p>
+  <h1>Futuro de la inteligencia artificial</h1>
+  <p class="oneline">La IA se volverá <b>invisible y omnipresente</b>, impulsará la automatización y la robótica y ganará autonomía con el <b>aprendizaje autosupervisado</b> y la <b>transferencia de conocimiento</b>. La computación cuántica y el transhumanismo abren posibilidades y también riesgos de seguridad y desigualdad.</p>
+  <ul class="objs"><li>Tendencias de la IA</li><li>Robótica</li><li>Computación cuántica</li><li>Riesgos y ética</li></ul>
+
+  <h2>Tendencias</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Automatización acelerada</h4>Fábricas y procesos administrativos se automatizan para resistir crisis futuras.</div>
+    <div class="box"><h4>IA invisible</h4>Integrada en móviles, televisores y aplicaciones: dejará de ser un valor añadido para ser lo normal.</div>
+    <div class="box"><h4>Aprendizaje autosupervisado</h4>Los sistemas incorporan información a partir de sus propias acciones y predicciones.</div>
+    <div class="box"><h4>Transferencia de conocimiento</h4>Lo aprendido por un sistema (o una persona) pasa a otro sin pérdida, y luego se adapta al entorno.</div>
+  </div>
+  <div class="callout warn"><span class="tag">Singularidad</span><p>Punto en el que una IA aprende sola, evoluciona y toma conciencia de sí misma. El temario la sitúa hacia <b>2040–2050</b>, quizá antes con computación cuántica. Cuanto más omnipresente sea la IA, más vulnerable y mayores las consecuencias de su mal uso: seguridad, regulación y ética.</p></div>
+
+  <h2>Robótica</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Robots y drones</h4>Tareas repetitivas y de riesgo; clave: abaratar su precio. Riesgo de destrucción de empleo en tareas repetitivas.</div>
+    <div class="box"><h4>Coches autónomos</h4>Niveles 1 (ninguna automatización) a 5 (total). Los primeros de nivel 5: autobuses urbanos con ruta fija.</div>
+    <div class="box"><h4>Robots enjambre</h4>Colaboran en una tarea; Rolls-Royce usa robots de ~10 mm para inspeccionar motores de avión.</div>
+    <div class="box"><h4>Robots asistenciales</h4>Robobear, Pepper: compañía y cuidado de mayores.</div>
+    <div class="box"><h4>Nanobots</h4>Biológicos (transportar fármacos, bloquear tumores) o electrónicos (ensamblar, manipular moléculas).</div>
+    <div class="box"><h4>Transhumanismo</h4>Integrar tecnología en el cuerpo: más fuerza y longevidad, ayuda a personas con discapacidad, viajes espaciales; riesgo de brecha por riqueza.</div>
+  </div>
+
+  <h2>Computación cuántica</h2>
+  <p class="prose">Puede eliminar límites de procesamiento en farmacia, logística o industria y acelerar el reconocimiento de imágenes, el aprendizaje automático y la predicción. Pero también pone <b>en jaque la criptografía</b> actual, las comunicaciones cifradas y las criptomonedas (incluidas Bitcoin y Ethereum).</p>
+
+  <h3>Mira la escala: posibilidades frente a qubits</h3>
+  <figure class="diagram">
+    <label for="qbN">Qubits = <b class="out" id="qbV">20</b></label>
+    <input type="range" id="qbN" min="1" max="100" value="20" style="width:100%">
+    <div class="grid g3" id="qbOut" style="margin-top:10px"></div>
+    <figcaption>n qubits representan a la vez 2ⁿ estados. El temario habla de 50–100 qubits operando simultáneamente en 5–10 años.</figcaption>
+  </figure>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>La cuántica interesa a la banca para <b>optimización de carteras</b> y <b>simulaciones de Monte Carlo</b> mucho más rápidas en la valoración de derivados. A la vez, obliga a migrar a <b>criptografía poscuántica</b>: las firmas que protegen pagos y criptomonedas podrían romperse.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Dos tendencias: aprendizaje autosupervisado y transferencia de conocimiento.</li>
+    <li>Singularidad: estimada en 2040–2050.</li>
+    <li>Coches autónomos: niveles 1 a 5; nivel 4 permite hacer otras tareas.</li>
+    <li>Enjambres (Rolls-Royce), asistenciales (Pepper), nanobots.</li>
+    <li>Cuántica: potencia la IA pero amenaza la criptografía y las criptomonedas.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-10"></div>
+</section>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section class="view" data-view="glosario" hidden>
+  <p class="eyebrow">Consulta rápida</p>
+  <h1>Glosario</h1>
+  <p class="lead">Los términos clave del módulo 1. Escribe para filtrar.</p>
+  <label for="glossQ" style="margin-top:16px">Buscar término</label>
+  <input type="text" id="glossQ" placeholder="Por ejemplo: minimax, RDF, perceptrón…">
+  <div class="gloss" id="glossList"></div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  const TOPICS = [
+    {id:"tema-1", t:"Historia de la IA", d:"De Aristóteles y Turing a Dartmouth, Deep Blue y el deep learning."},
+    {id:"tema-2", t:"IA en juegos", d:"Árboles de juego, minimax, poda alfa-beta y aprendizaje por refuerzo."},
+    {id:"tema-3", t:"Redes de neuronas", d:"Neurona artificial, perceptrón, XOR, MLP y retropropagación."},
+    {id:"tema-4", t:"Algoritmos genéticos", d:"Cromosomas, selección, cruce, mutación y fitness."},
+    {id:"tema-5", t:"Tesauros y taxonomías", d:"SOC: listas, taxonomías, tesauros y ontologías."},
+    {id:"tema-6", t:"Web semántica", d:"RDF, RDFS, OWL, SPARQL y Linked Data."},
+    {id:"tema-7", t:"Sistemas expertos y DSS", d:"Base de conocimiento, motor de inferencia y apoyo a la decisión."},
+    {id:"tema-8", t:"Chatbots y asistentes", d:"Intenciones, entidades, herramientas y factores de éxito."},
+    {id:"tema-9", t:"Estrategia de implantación", d:"Seis fases, priorización, MLOps y mejora continua."},
+    {id:"tema-10", t:"Futuro de la IA", d:"Robótica, singularidad, cuántica y transhumanismo."}
+  ];  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (x,d=2) => isFinite(x) ? x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d}) : "—";
+  const parse = s => s.split(/[;\s]*,[;\s]*|\s+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(isFinite);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function gaussFrom(r){ return function(){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
+
+  // ---------- Storage ----------
+  const KEY = "fundamentos-m1-v1";
+  let state = {studied:{}, scores:{}};
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---------- Router ----------
+  const views = document.querySelectorAll(".view");
+  const navLinks = document.querySelectorAll("#navlist a");
+  function route(){
+    let h = (location.hash || "#inicio").slice(1);
+    if (!document.querySelector('.view[data-view="'+h+'"]')) h = "inicio";
+    views.forEach(v => v.hidden = v.dataset.view !== h);
+    navLinks.forEach(a => { if (a.dataset.v === h) { a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Quiz ----------
+  const QUIZ = {
+    "tema-1":[
+      {q:"¿En qué conferencia y año nace formalmente el término «inteligencia artificial»?", o:["Dorking, 1957","Dartmouth, 1956","Turing, 1950"], a:1, e:"McCarthy, Minsky y Shannon, entre otros, en Dartmouth (1956)."},
+      {q:"¿Quién acuñó la palabra «robot»?", o:["Isaac Asimov","Karel Čapek","Alan Turing"], a:1, e:"En la obra R.U.R. (1921). Asimov formuló las tres leyes de la robótica."},
+      {q:"El primer modelo de neurona artificial (1943) se debe a…", o:["Rosenblatt","McCulloch y Pitts","Rumelhart y Hinton"], a:1, e:"Rosenblatt creó el perceptrón en 1958."},
+      {q:"En el test de Turing, la máquina lo supera si…", o:["Resuelve un problema matemático","El evaluador no la distingue de una persona","Gana al ajedrez"], a:1, e:"Es el «juego de la imitación»."},
+      {q:"Frente al machine learning clásico, el deep learning…", o:["Necesita que un experto defina los rasgos","Descubre por sí mismo las características relevantes","Funciona con pocos datos"], a:1, e:"A cambio necesita muchos datos y capacidad de cálculo."}
+    ],
+    "tema-2":[
+      {q:"En minimax, un nodo MIN toma…", o:["El máximo de sus hijos","El mínimo de sus hijos","La media de sus hijos"], a:1, e:"MIN representa al rival que intenta minimizar la utilidad de MAX."},
+      {q:"La poda alfa-beta corta una rama cuando…", o:["α ≥ β","α < β","α = 0"], a:0, e:"Esa rama ya no puede cambiar la decisión."},
+      {q:"En el caso ideal, alfa-beta reduce la complejidad de O(b^d) a…", o:["O(b·d)","O(b^(d/2))","O(log b^d)"], a:1, e:"Permite buscar al doble de profundidad con el mismo coste."},
+      {q:"¿Qué algoritmo se usa en juegos con componente de azar?", o:["Expectiminimax","A*","Dijkstra"], a:0, e:"Añade nodos de azar que calculan valores esperados."},
+      {q:"El «efecto horizonte» consiste en…", o:["Que el árbol no cabe en memoria","No ver una amenaza que aparece justo después de la profundidad límite","Que el rival juega al azar"], a:1, e:"Es consecuencia de cortar la búsqueda a profundidad fija."}
+    ],
+    "tema-3":[
+      {q:"¿Qué función lógica NO puede aprender un perceptrón simple?", o:["AND","OR","XOR"], a:2, e:"XOR no es linealmente separable."},
+      {q:"La regla de aprendizaje del perceptrón es…", o:["Δw = η·(d − y)·x","Δw = x·y","Δw = η·y"], a:0, e:"Solo cambia los pesos cuando hay error (d ≠ y)."},
+      {q:"La retropropagación para el MLP la popularizaron en 1986…", o:["McCulloch y Pitts","Rumelhart, Hinton y Williams","Minsky y McCarthy"], a:1, e:"Permitió entrenar redes con capas ocultas."},
+      {q:"En la neurona artificial, los pesos sinápticos equivalen a…", o:["Las dendritas","Las sinapsis","El axón"], a:1, e:"Refuerzan o atenúan cada señal de entrada."},
+      {q:"Un mapa autoorganizado de Kohonen es un ejemplo de aprendizaje…", o:["Supervisado","No supervisado","Por refuerzo"], a:1, e:"Agrupa los datos sin etiquetas."}
+    ],
+    "tema-4":[
+      {q:"¿Quién desarrolló los algoritmos genéticos en los años 70?", o:["Rechenberg","John Holland","Fogel"], a:1, e:"Rechenberg: estrategias evolutivas; Fogel: programación evolutiva."},
+      {q:"El valor concreto que toma un gen se llama…", o:["Alelo","Fenotipo","Locus"], a:0, e:"En codificación binaria, 0 o 1."},
+      {q:"La probabilidad de mutación habitual es…", o:["50–80 %","0,5–2 %","Siempre 0"], a:1, e:"Baja, para mantener diversidad sin destruir las buenas soluciones."},
+      {q:"El fitness ajustado se calcula como…", o:["a = 1/(1 + s)","a = s²","a = s/Σs"], a:0, e:"Con s el fitness estandarizado; el normalizado suma 1."},
+      {q:"¿Qué forma el soft computing junto a la computación evolutiva?", o:["Bases de datos y SQL","Lógica difusa y redes neuronales","Sistemas expertos y tesauros"], a:1, e:"Técnicas tolerantes a la imprecisión."}
+    ],
+    "tema-5":[
+      {q:"¿Cuál es el orden de menor a mayor complejidad?", o:["Ontología, tesauro, taxonomía, lista","Lista, taxonomía, tesauro, ontología","Taxonomía, lista, ontología, tesauro"], a:1, e:"Cada nivel añade más relaciones y semántica."},
+      {q:"«Acción TR Dividendo» es una relación…", o:["Jerárquica","Asociativa","De equivalencia"], a:1, e:"TR = término relacionado."},
+      {q:"La relación USE/UP de un tesauro es de…", o:["Equivalencia","Jerarquía","Asociación"], a:0, e:"Remite del no descriptor al descriptor."},
+      {q:"¿Quién usó por primera vez el término «tesauro» en documentación (Dorking, 1957)?", o:["Helen Brownson","Tim Berners-Lee","Carl Linneo"], a:0, e:"El 14 de mayo de 1957."},
+      {q:"¿Qué estándar del W3C se usa para publicar tesauros en la web?", o:["SKOS","SQL","HTML"], a:0, e:"Simple Knowledge Organization System."}
+    ],
+    "tema-6":[
+      {q:"Un enunciado RDF está formado por…", o:["Clave y valor","Sujeto, propiedad y objeto","Tabla, fila y columna"], a:1, e:"Es un triple."},
+      {q:"¿Cuál de estas afirmaciones es correcta?", o:["RDF es lo mismo que XML","RDF/XML es solo una de las serializaciones de RDF","RDF solo admite JSON"], a:1, e:"También Turtle, N-Triples, RDFa o JSON-LD."},
+      {q:"¿Qué variante de OWL puede hacer que el razonamiento no termine?", o:["OWL Lite","OWL DL","OWL Full"], a:2, e:"OWL DL (SHOIN) es decidible."},
+      {q:"¿Qué lenguaje se usa para consultar datos RDF?", o:["SPARQL","SWRL","OWL"], a:0, e:"SWRL es un lenguaje de reglas."},
+      {q:"¿Quién formuló los cuatro principios de Linked Data?", o:["Tim Berners-Lee","Alan Turing","John McCarthy"], a:0, e:"URI, HTTP, información útil en RDF y enlaces a otras URI."}
+    ],
+    "tema-7":[
+      {q:"¿Qué componente de un sistema experto aplica las reglas a los hechos?", o:["La interfaz","El motor de inferencia","La memoria de trabajo"], a:1, e:"La memoria de trabajo guarda los hechos del caso."},
+      {q:"El encadenamiento hacia atrás…", o:["Parte de los datos","Parte de la meta y busca reglas que la concluyan","No usa reglas"], a:1, e:"Está dirigido por objetivos."},
+      {q:"MYCIN era un sistema experto para…", o:["Química molecular","Diagnóstico de infecciones","Trading"], a:1, e:"DENDRAL se dedicaba a estructuras moleculares."},
+      {q:"Un DSS se diferencia de un sistema experto en que…", o:["Toma la decisión solo","Ayuda al usuario a decidir","No usa datos"], a:1, e:"Combina datos y modelos para apoyar la decisión."},
+      {q:"¿Qué módulo responde «¿por qué?» al usuario?", o:["El de explicación","La base de datos","El procesador"], a:0, e:"Muestra las reglas que llevaron a la conclusión."}
+    ],
+    "tema-8":[
+      {q:"¿Qué distingue a un asistente virtual de un chatbot según el temario?", o:["El asistente usa la voz","El chatbot no usa PLN","No hay diferencia"], a:0, e:"Alexa, Siri o Google Assistant son asistentes de voz."},
+      {q:"En «¿a cuánto cotiza Santander?», «Santander» es…", o:["La intención","Una entidad","Un fallback"], a:1, e:"La intención sería consultar la cotización."},
+      {q:"¿Qué porcentaje de incidencias resuelve un chatbot según el temario?", o:["5 %","20–30 %","90 %"], a:1, e:"El resto se deriva a personas."},
+      {q:"Dialogflow CX admite hasta…", o:["400 intenciones","40.000 intenciones","4 millones de intenciones"], a:1, e:"Herramienta de Google para chatbots complejos."},
+      {q:"¿Qué ocurre cuando el bot no reconoce ninguna intención?", o:["Se apaga","Responde la intención por defecto (fallback)","Inventa una respuesta"], a:1, e:"Un buen diseño ofrece entonces pasar con un humano."}
+    ],
+    "tema-9":[
+      {q:"¿Cuál es la primera fase de la guía de implantación?", o:["Elegir el modelo","Detectar problemas","Contratar científicos de datos"], a:1, e:"Se parte de problemas reales de negocio."},
+      {q:"Una iniciativa de alto impacto y alta viabilidad es un…", o:["Quick win","Proyecto a descartar","Apuesta estratégica"], a:0, e:"Se aborda primero."},
+      {q:"¿Qué práctica automatiza el despliegue y la monitorización de modelos?", o:["MLOps","SEO","ERP"], a:0, e:"Forma parte de la puesta en marcha."},
+      {q:"En la fase de retroalimentación es clave detectar…", o:["La deriva de datos y del modelo","El color de la interfaz","El número de servidores"], a:0, e:"Si los datos cambian, el modelo se degrada y hay que reentrenar."},
+      {q:"¿Cuál NO es uno de los equilibrios que hay que gestionar?", o:["Automatización vs humano en el bucle","Coste vs impacto","Hardware vs software"], a:2, e:"Los otros son innovación–viabilidad, centralización–descentralización y estandarización–personalización."}
+    ],
+    "tema-10":[
+      {q:"¿Qué dos tendencias darán más autonomía a la IA según el temario?", o:["Autosupervisión y transferencia de conocimiento","Blockchain y 5G","Sistemas expertos y tesauros"], a:0, e:"Aprender de sus propias acciones y traspasar lo aprendido."},
+      {q:"La singularidad se estima hacia…", o:["2025","2040–2050","2100"], a:1, e:"Quizá antes con computación cuántica."},
+      {q:"Un coche autónomo de nivel 5 tiene…", o:["Ninguna automatización","Automatización total","Solo control de crucero"], a:1, e:"El nivel 1 es ninguna automatización en la escala del temario."},
+      {q:"¿Qué empresa usa robots enjambre de unos 10 mm para reparar motores?", o:["Rolls-Royce","Tesla","Google"], a:0, e:"Entran en el motor sin desmontarlo."},
+      {q:"¿Qué amenaza plantea la computación cuántica?", o:["Romper la criptografía actual y las criptomonedas","Hacer más lentos los ordenadores","Eliminar internet"], a:0, e:"Obliga a adoptar criptografía poscuántica."}
+    ]
+  };
+  function renderProgress(){
+    const n = TOPICS.filter(t => state.studied[t.id]).length;
+    document.getElementById("progText").textContent = n + " de 10 temas estudiados";
+    document.getElementById("progBar").style.width = (n*10) + "%";
+    navLinks.forEach(a => a.classList.toggle("done", !!state.studied[a.dataset.v]));
+    document.getElementById("tcards").innerHTML = TOPICS.map((t,i) => {
+      const sc = state.scores[t.id];
+      const st = state.studied[t.id] ? '<span class="pill ok">Estudiado</span>' : '<span class="pill neutral">Pendiente</span>';
+      const scs = sc!=null ? ' <span class="pill neutral">Test: '+sc+'/'+QUIZ[t.id].length+'</span>' : '';
+      return '<a class="tcard" href="#'+t.id+'"><span class="n">TEMA '+(i+1)+'</span><b>'+t.t+'</b><span class="d">'+t.d+'</span><span class="st">'+st+scs+'</span></a>';
+    }).join("");
+    document.querySelectorAll(".studied button").forEach(b => {
+      const on = !!state.studied[b.dataset.t];
+      b.setAttribute("aria-pressed", on);
+      b.textContent = on ? "✓ Estudiado" : "Marcar como estudiado";
+    });
+  }
+
+  document.querySelectorAll(".quiz").forEach(box => {
+    const id = box.dataset.quiz, qs = QUIZ[id];
+    let answered = 0, right = 0;
+    box.innerHTML = '<h2>Autoevaluación</h2><p style="color:var(--muted);font-size:.9rem;margin-top:4px">' + qs.length + ' preguntas. Elige una respuesta para ver la explicación.</p>' +
+      qs.map((q,i) => '<div class="qitem"><p class="q">'+(i+1)+'. '+q.q+'</p><div class="qopts">'+q.o.map((o,j)=>'<button class="qopt" data-i="'+i+'" data-j="'+j+'">'+o+'</button>').join("")+'</div><p class="qexp" hidden></p></div>').join("") +
+      '<div class="qscore"><span class="out" data-score>0 de '+qs.length+' respondidas</span><button class="btn" data-reset>Repetir test</button></div>' +
+      '<div class="studied"><button class="btn primary" data-t="'+id+'" aria-pressed="false">Marcar como estudiado</button></div>';
+    box.addEventListener("click", ev => {
+      const b = ev.target.closest(".qopt");
+      if (b){
+        const i = +b.dataset.i, j = +b.dataset.j, q = qs[i], item = b.closest(".qitem");
+        item.querySelectorAll(".qopt").forEach((x,k) => { x.disabled = true; if (k===q.a) x.classList.add("right"); });
+        if (j !== q.a) b.classList.add("wrong"); else right++;
+        answered++;
+        const exp = item.querySelector(".qexp");
+        exp.textContent = (j===q.a ? "Correcto. " : "No es correcto. ") + q.e; exp.hidden = false;
+        box.querySelector("[data-score]").textContent = answered < qs.length ? (answered+" de "+qs.length+" respondidas · "+right+" aciertos") : ("Resultado: "+right+" de "+qs.length+" aciertos");
+        if (answered === qs.length){ state.scores[id] = right; if (right >= qs.length-1) state.studied[id] = true; save(); renderProgress(); }
+        return;
+      }
+      if (ev.target.closest("[data-reset]")){
+        answered = 0; right = 0;
+        box.querySelectorAll(".qopt").forEach(x => { x.disabled=false; x.classList.remove("right","wrong"); });
+        box.querySelectorAll(".qexp").forEach(x => x.hidden = true);
+        box.querySelector("[data-score]").textContent = "0 de "+qs.length+" respondidas";
+        return;
+      }
+      if (ev.target.closest(".studied button")){ state.studied[id] = !state.studied[id]; save(); renderProgress(); }
+    });
+  });
+
+  TOPICS.forEach((t,i) => {
+    const sec = document.querySelector('.view[data-view="'+t.id+'"]');
+    const prev = i>0 ? TOPICS[i-1] : null, next = i<TOPICS.length-1 ? TOPICS[i+1] : null;
+    const div = document.createElement("div"); div.className = "pager";
+    div.innerHTML = (prev ? '<a href="#'+prev.id+'"><small>← Tema '+i+'</small>'+prev.t+'</a>' : '<a href="#inicio"><small>←</small>Mapa del módulo</a>') +
+                    (next ? '<a class="next" href="#'+next.id+'"><small>Tema '+(i+2)+' →</small>'+next.t+'</a>' : '<a class="next" href="#glosario"><small>→</small>Glosario</a>');
+    sec.appendChild(div);
+  });
+
+  const SVGE = (tag, a, txt) => '<'+tag+' '+Object.entries(a).map(([k,v])=>k+'="'+v+'"').join(" ")+(txt!=null?'>'+txt+'</'+tag+'>':'/>');
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const $ = id => document.getElementById(id);
+  function pressGroup(sel, btn){ document.querySelectorAll(sel).forEach(b=>b.setAttribute("aria-pressed", b===btn?"true":"false")); }
+
+  // ---------- T1: línea del tiempo ----------
+  const TL = [
+    ["s. IV a. C.","Aristóteles","pre","Formula los silogismos: primer sistema de razonamiento lógico formal."],
+    ["250 a. C.","Ctesibio","pre","Construye la primera máquina autocontrolada: un regulador de flujo de agua."],
+    ["s. XVII","Descartes","pre","Plantea si los animales y el cuerpo humano son máquinas complejas."],
+    ["1847","Boole","pre","Álgebra de Boole: la lógica se convierte en cálculo con 0 y 1."],
+    ["1879","Frege","pre","Lógica de primer orden, base de la representación del conocimiento."],
+    ["1921","Čapek","cult","La obra R.U.R. introduce la palabra «robot»."],
+    ["1941","Zuse Z3","nac","Primer ordenador programable y funcional."],
+    ["1942","Asimov","cult","Tres leyes de la robótica."],
+    ["1943","McCulloch–Pitts","nac","Primer modelo matemático de neurona artificial."],
+    ["1950","Turing","nac","«Computing machinery and intelligence» y el test de Turing."],
+    ["1956","Dartmouth","nac","McCarthy, Minsky, Shannon y otros acuñan «inteligencia artificial»."],
+    ["1958","Perceptrón","nac","Rosenblatt crea el perceptrón, la primera red que aprende."],
+    ["1965–75","DENDRAL/MYCIN","nac","Primeros sistemas expertos (química y medicina)."],
+    ["1982","Blade Runner","cult","El cine populariza los androides; después El hombre bicentenario, Matrix, Yo, robot y Her."],
+    ["1986","Backprop","mod","Rumelhart, Hinton y Williams: retropropagación para redes multicapa."],
+    ["1997","Deep Blue","mod","El ordenador de IBM vence a Kaspárov al ajedrez."],
+    ["2012","Deep learning","mod","Las redes profundas con GPU disparan la precisión en visión artificial."],
+    ["2016","AlphaGo","mod","Vence a Lee Sedol al Go con aprendizaje por refuerzo."],
+    ["2020s","IA generativa","mod","Transformers y grandes modelos de lenguaje: chatbots y asistentes generalistas."]
+  ];
+  let tlEra="all", tlSel=10;
+  function tlDraw(){
+    const n=TL.length, X=i=>24+i*(552/(n-1));
+    let h=SVGE("line",{x1:14,y1:60,x2:586,y2:60,stroke:"var(--line)","stroke-width":3});
+    TL.forEach((e,i)=>{ const on=tlEra==="all"||e[2]===tlEra, sel=i===tlSel, up=i%2===0;
+      h+='<g data-i="'+i+'" style="cursor:pointer;opacity:'+(on?1:.25)+'">';
+      h+=SVGE("line",{x1:X(i),y1:60,x2:X(i),y2:up?40:80,stroke:"var(--line)"});
+      h+=SVGE("circle",{cx:X(i),cy:60,r:sel?9:6,fill:sel?"var(--accent)":"var(--surface)",stroke:"var(--accent)","stroke-width":2});
+      h+=SVGE("text",{x:X(i),y:up?32:96,"text-anchor":"middle","font-size":9,style:"fill:var(--muted)"},esc(e[0]));
+      h+=SVGE("rect",{x:X(i)-14,y:20,width:28,height:84,fill:"transparent"});
+      h+='</g>'; });
+    $("tlSvg").innerHTML=h;
+    const e=TL[tlSel]; $("tlInfo").innerHTML='<h4 style="margin:0 0 4px">'+esc(e[0])+' · '+esc(e[1])+'</h4>'+esc(e[3]);
+  }
+  $("tlSvg").addEventListener("click",ev=>{ const g=ev.target.closest("g[data-i]"); if(!g) return; tlSel=+g.dataset.i; tlDraw(); });
+  document.querySelectorAll("#tlFilters [data-era]").forEach(b=>b.addEventListener("click",()=>{ tlEra=b.dataset.era; pressGroup("#tlFilters [data-era]",b); if(tlEra!=="all"&&TL[tlSel][2]!==tlEra) tlSel=TL.findIndex(e=>e[2]===tlEra); tlDraw(); }));
+  tlDraw();
+
+  // ---------- T2: minimax con alfa-beta ----------
+  const MM0=[3,5,6,9,1,2,0,-1];
+  let MM=MM0.slice();
+  const mmPos=i=>{ const d=i===0?0:i<3?1:i<7?2:3, k=i-(2**d-1), cnt=2**d; return [30+(k+0.5)/cnt*540, 28+d*68]; };
+  function mmSolve(useAB){
+    const val=Array(15).fill(null), AB=Array(15).fill(null), visited=new Set(), pruned=new Set();
+    const markP=i=>{ if(i>14) return; pruned.add(i); markP(2*i+1); markP(2*i+2); };
+    function rec(i,a,b){ visited.add(i);
+      if(i>=7){ val[i]=MM[i-7]; return val[i]; }
+      const isMax=(i===0||i>=3);
+      let v=isMax?-Infinity:Infinity;
+      for(const c of [2*i+1,2*i+2]){
+        if(useAB&&a>=b){ markP(c); continue; }
+        const r=rec(c,a,b);
+        if(isMax){ v=Math.max(v,r); a=Math.max(a,v); } else { v=Math.min(v,r); b=Math.min(b,v); }
+      }
+      val[i]=v; AB[i]=[a,b]; return v; }
+    rec(0,-Infinity,Infinity);
+    return {val,AB,visited,pruned};
+  }
+  function mmDraw(){
+    const useAB=$("mmAB").checked, R=mmSolve(useAB), f=x=>x===Infinity?"+∞":x===-Infinity?"−∞":x;
+    let h="";
+    ["MAX","MIN","MAX","Hojas"].forEach((l,d)=>{ h+=SVGE("text",{x:4,y:32+d*68,"font-size":9,style:"fill:var(--muted);font-weight:600"},l); });
+    for(let i=1;i<15;i++){ const [x1,y1]=mmPos(i),[x2,y2]=mmPos((i-1)>>1), p=R.pruned.has(i);
+      h+=SVGE("line",{x1,y1,x2,y2,stroke:p?"var(--bad)":"var(--line)","stroke-width":2,"stroke-dasharray":p?"5 4":"none"});
+      if(p&&!R.pruned.has((i-1)>>1)) h+=SVGE("text",{x:(x1+x2)/2+6,y:(y1+y2)/2,"font-size":13,style:"fill:var(--bad);font-weight:700"},"✕"); }
+    // camino elegido
+    let cur=0; while(cur<7){ const c=[2*cur+1,2*cur+2].find(c=>R.val[c]===R.val[cur]&&!R.pruned.has(c)); if(c==null) break; const [x1,y1]=mmPos(cur),[x2,y2]=mmPos(c); h+=SVGE("line",{x1,y1,x2,y2,stroke:"var(--ok)","stroke-width":4}); cur=c; }
+    for(let i=0;i<15;i++){ const [x,y]=mmPos(i), p=R.pruned.has(i), leaf=i>=7, isMax=(i===0||(i>=3&&i<7));
+      if(leaf){ h+='<g data-leaf="'+(i-7)+'" style="cursor:pointer;opacity:'+(p?.35:1)+'">'+SVGE("rect",{x:x-17,y:y-14,width:34,height:28,rx:5,fill:p?"var(--surface-2)":"var(--example-soft)",stroke:p?"var(--line)":"var(--example)","stroke-width":2})+SVGE("text",{x,y:y+5,"text-anchor":"middle","font-size":13,style:"fill:var(--ink);font-weight:700"},MM[i-7])+'</g>'; }
+      else { const v=R.val[i]; h+='<g style="opacity:'+(p?.35:1)+'">'+SVGE("circle",{cx:x,cy:y,r:17,fill:isMax?"var(--accent-soft)":"var(--surface)",stroke:isMax?"var(--accent)":"var(--ink)","stroke-width":2})+SVGE("text",{x,y:y+5,"text-anchor":"middle","font-size":13,style:"fill:var(--ink);font-weight:700"},v==null||p?"?":f(v));
+        if(useAB&&R.AB[i]&&!p) h+=SVGE("text",{x:x+21,y:y-8,"font-size":9,style:"fill:var(--muted)"},"α="+f(R.AB[i][0])+" β="+f(R.AB[i][1]));
+        h+='</g>'; } }
+    $("mmSvg").innerHTML=h;
+    const ev=[...R.visited].filter(i=>i>=7).length, best=R.val[1]===R.val[0]?"izquierda":"derecha";
+    $("mmInfo").innerHTML='Valor de la raíz: <b>'+R.val[0]+'</b> · MAX juega por la <b>'+best+'</b> · hojas evaluadas: <b>'+ev+' de 8</b>'+(useAB?' ('+(8-ev)+' podadas)':' (sin poda se miran todas)');
+  }
+  $("mmSvg").addEventListener("click",ev=>{ const g=ev.target.closest("g[data-leaf]"); if(!g) return; const k=+g.dataset.leaf; MM[k]=MM[k]>=9?-9:MM[k]+1; mmDraw(); });
+  $("mmAB").addEventListener("change",mmDraw);
+  $("mmRand").addEventListener("click",()=>{ MM=MM.map(()=>Math.floor(Math.random()*19)-9); mmDraw(); });
+  $("mmReset").addEventListener("click",()=>{ MM=MM0.slice(); mmDraw(); });
+  mmDraw();
+
+  // ---------- T3: funciones de activación ----------
+  (function(){
+    const F=[["Escalón",z=>z>=0?1:0,0,1],["Lineal",z=>z,-4,4],["Sigmoide",z=>1/(1+Math.exp(-z)),0,1],["ReLU",z=>Math.max(0,z),0,4]];
+    let h=""; F.forEach(([l,f,lo,hi],k)=>{ const ox=k*150+10, W=130, X=z=>ox+(z+4)/8*W, Y=v=>125-(v-lo)/(hi-lo)*95;
+      h+=SVGE("rect",{x:ox,y:22,width:W,height:110,rx:6,fill:"var(--surface-2)"});
+      h+=SVGE("line",{x1:X(0),y1:24,x2:X(0),y2:130,stroke:"var(--line)"})+SVGE("line",{x1:ox,y1:Y(Math.max(lo,0)),x2:ox+W,y2:Y(Math.max(lo,0)),stroke:"var(--line)"});
+      let p=""; for(let z=-4;z<=4.001;z+=0.05){ const zz=Math.abs(z)<1e-9?0:z; p+=(p?"L":"M")+X(zz).toFixed(1)+" "+Y(f(zz)).toFixed(1); }
+      h+=SVGE("path",{d:p,fill:"none",stroke:"var(--accent)","stroke-width":2.5});
+      h+=SVGE("text",{x:ox+W/2,y:15,"text-anchor":"middle","font-size":12,style:"fill:var(--ink);font-weight:600"},l); });
+    $("actSvg").innerHTML=h;
+  })();
+
+  // ---------- T3: perceptrón ----------
+  const GATES={AND:[0,0,0,1],OR:[0,1,1,1],NAND:[1,1,1,0],XOR:[0,1,1,0]}, PX=[[0,0],[0,1],[1,0],[1,1]];
+  let pcGate="AND", pcW=[0.1,-0.2], pcB=0, pcEp=0, pcHist=[];
+  const pcOut=x=>(pcW[0]*x[0]+pcW[1]*x[1]+pcB)>=0?1:0;
+  function pcEpoch(){ const eta=+$("pcEta").value, D=GATES[pcGate]; let err=0;
+    PX.forEach((x,k)=>{ const y=pcOut(x), d=D[k]; if(y!==d){ err++; pcW[0]+=eta*(d-y)*x[0]; pcW[1]+=eta*(d-y)*x[1]; pcB+=eta*(d-y); } });
+    pcEp++; pcHist.push(err); }
+  function pcDraw(){
+    const D=GATES[pcGate], S=v=>40+v*180, T=v=>220-v*180; let h="";
+    for(let i=0;i<=12;i++) for(let j=0;j<=12;j++){ const x=-0.2+i*0.1167, y=-0.2+j*0.1167; h+=SVGE("circle",{cx:S(x).toFixed(1),cy:T(y).toFixed(1),r:2.2,fill:pcOut([x,y])?"var(--accent)":"var(--line)",opacity:.6}); }
+    let a,b; if(Math.abs(pcW[1])>1e-9){ a=[-0.4,-(pcW[0]*-0.4+pcB)/pcW[1]]; b=[1.4,-(pcW[0]*1.4+pcB)/pcW[1]]; } else if(Math.abs(pcW[0])>1e-9){ a=[-pcB/pcW[0],-0.4]; b=[-pcB/pcW[0],1.4]; }
+    if(a) h+=SVGE("line",{x1:S(a[0]).toFixed(1),y1:T(a[1]).toFixed(1),x2:S(b[0]).toFixed(1),y2:T(b[1]).toFixed(1),stroke:"var(--ink)","stroke-width":2,"stroke-dasharray":"6 4"});
+    PX.forEach((x,k)=>{ const ok=pcOut(x)===D[k]; h+=SVGE("circle",{cx:S(x[0]),cy:T(x[1]),r:12,fill:D[k]?"var(--accent)":"var(--surface)",stroke:ok?"var(--accent)":"var(--bad)","stroke-width":ok?2:4})+SVGE("text",{x:S(x[0]),y:T(x[1])+26,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)"},"("+x[0]+","+x[1]+")"); });
+    $("pcSvg").innerHTML=h;
+    const errs=PX.filter((x,k)=>pcOut(x)!==D[k]).length;
+    $("pcInfo").innerHTML='<b>'+pcGate+'</b> · época '+pcEp+'<br><span class="mono">w₁ = '+fmt(pcW[0])+' · w₂ = '+fmt(pcW[1])+' · b = '+fmt(pcB)+'</span><br>'+(errs?'<span class="pill bad">'+errs+' mal clasificado'+(errs>1?'s':'')+'</span>':'<span class="pill ok">Todo bien clasificado</span>')+(pcGate==="XOR"&&pcEp>=8?' <span class="pill neutral">XOR no es linealmente separable: nunca converge</span>':'');
+    $("pcTable").innerHTML='<thead><tr><th>x₁</th><th>x₂</th><th>d (deseada)</th><th>y (red)</th></tr></thead><tbody>'+PX.map((x,k)=>'<tr><td class="num">'+x[0]+'</td><td class="num">'+x[1]+'</td><td class="num">'+D[k]+'</td><td class="num" style="'+(pcOut(x)!==D[k]?'color:var(--bad);font-weight:700':'')+'">'+pcOut(x)+'</td></tr>').join("")+'</tbody>';
+  }
+  function pcReset(){ pcW=[0.1,-0.2]; pcB=0; pcEp=0; pcHist=[]; pcDraw(); }
+  document.querySelectorAll("[data-gate]").forEach(b=>b.addEventListener("click",()=>{ pcGate=b.dataset.gate; pressGroup("[data-gate]",b); pcReset(); }));
+  $("pcStep").addEventListener("click",()=>{ pcEpoch(); pcDraw(); });
+  $("pcRun").addEventListener("click",()=>{ for(let i=0;i<20;i++) pcEpoch(); pcDraw(); });
+  $("pcReset").addEventListener("click",pcReset);
+  $("pcEta").addEventListener("input",()=>{ $("pcEtaV").textContent=fmt(+$("pcEta").value,2); });
+  $("pcEtaV").textContent=fmt(0.2,2); pcReset();
+
+  // ---------- T4: algoritmo genético ----------
+  const GA_ASSETS=["SAN","BBVA","ITX","IBE","TEF","REP","AENA","FER","CABK","AMS","ELE","GRF"];
+  const GA_R=[7.2,8.1,9.5,6.4,4.1,7.8,8.6,6.9,8.4,9.1,5.3,3.2], GA_S=[24,26,21,14,19,27,20,18,25,23,15,30];
+  const gaFit=c=>{ let k=0,f=0; c.forEach((g,i)=>{ if(g){ k++; f+=GA_R[i]-0.3*GA_S[i]; } }); return f-4*Math.max(0,k-6); };
+  const GA_OPT=(()=>{ let b=-Infinity; for(let m=0;m<4096;m++){ const c=GA_ASSETS.map((_,i)=>(m>>i)&1); b=Math.max(b,gaFit(c)); } return b; })();
+  let gaPop=[], gaBestH=[], gaMeanH=[], gaRng=mulberry32(1), gaSeed=1;
+  function gaStats(){ const f=gaPop.map(gaFit); gaBestH.push(Math.max(...f)); gaMeanH.push(f.reduce((a,b)=>a+b,0)/f.length); }
+  function gaInit(){ gaSeed++; gaRng=mulberry32(gaSeed*7919); const N=+$("gaPop").value; gaPop=Array.from({length:N},()=>GA_ASSETS.map(()=>gaRng()<0.5?1:0)); gaBestH=[]; gaMeanH=[]; gaStats(); gaDraw(); }
+  function gaGen(){
+    const N=+$("gaPop").value, Pm=+$("gaPm").value/100, Pc=+$("gaPc").value/100, r=gaRng;
+    const fit=gaPop.map(gaFit), elite=gaPop[fit.indexOf(Math.max(...fit))].slice();
+    const pick=()=>{ const a=Math.floor(r()*gaPop.length), b=Math.floor(r()*gaPop.length); return (fit[a]>=fit[b]?gaPop[a]:gaPop[b]).slice(); };
+    const next=[elite];
+    while(next.length<N){ let p1=pick(), p2=pick();
+      if(r()<Pc){ const cut=1+Math.floor(r()*11); const c1=p1.slice(0,cut).concat(p2.slice(cut)), c2=p2.slice(0,cut).concat(p1.slice(cut)); p1=c1; p2=c2; }
+      [p1,p2].forEach(c=>{ for(let i=0;i<c.length;i++) if(r()<Pm) c[i]=1-c[i]; if(next.length<N) next.push(c); }); }
+    gaPop=next; gaStats(); }
+  function gaDraw(){
+    const n=gaBestH.length, all=gaBestH.concat(gaMeanH,[GA_OPT]), lo=Math.min(...all)-2, hi=Math.max(...all)+2, G=Math.max(20,n-1);
+    const X=g=>50+g/G*530, Y=v=>140-(v-lo)/(hi-lo)*125;
+    let h=SVGE("line",{x1:50,y1:140,x2:580,y2:140,stroke:"var(--line)"})+SVGE("line",{x1:50,y1:12,x2:50,y2:140,stroke:"var(--line)"});
+    h+=SVGE("line",{x1:50,x2:580,y1:Y(GA_OPT).toFixed(1),y2:Y(GA_OPT).toFixed(1),stroke:"var(--ok)","stroke-dasharray":"6 4"})+SVGE("text",{x:576,y:Y(GA_OPT)-4,"text-anchor":"end","font-size":10,style:"fill:var(--ok)"},"óptimo "+fmt(GA_OPT,1));
+    [[gaMeanH,"var(--muted)"],[gaBestH,"var(--accent)"]].forEach(([H,c])=>{ let p=""; H.forEach((v,g)=>p+=(p?"L":"M")+X(g).toFixed(1)+" "+Y(v).toFixed(1)); h+=SVGE("path",{d:p,fill:"none",stroke:c,"stroke-width":2.5}); });
+    [lo,hi].forEach(v=>h+=SVGE("text",{x:44,y:Y(v)+4,"text-anchor":"end","font-size":9},fmt(v,0)));
+    h+=SVGE("text",{x:315,y:156,"text-anchor":"middle","font-size":10},"Generación ("+(n-1)+")");
+    $("gaSvg").innerHTML=h;
+    const fit=gaPop.map(gaFit), best=gaPop[fit.indexOf(Math.max(...fit))];
+    $("gaBest").innerHTML='<div style="display:flex;gap:4px;flex-wrap:wrap">'+best.map((g,i)=>'<span class="mono" title="Rend. '+fmt(GA_R[i],1)+' % · riesgo '+GA_S[i]+' %" style="padding:4px 7px;border-radius:5px;border:1px solid var(--line);'+(g?'background:var(--accent);color:var(--accent-ink)':'opacity:.5')+'">'+g+' '+GA_ASSETS[i]+'</span>').join("")+'</div><p class="out" style="margin:6px 0 0">Mejor cromosoma: '+best.join("")+' · fitness '+fmt(Math.max(...fit),2)+(Math.abs(Math.max(...fit)-GA_OPT)<1e-9?' <span class="pill ok">óptimo encontrado</span>':'')+' · rendimientos y riesgos ficticios.</p>';
+  }
+  $("gaStep").addEventListener("click",()=>{ gaGen(); gaDraw(); });
+  $("gaRun").addEventListener("click",()=>{ for(let i=0;i<20;i++) gaGen(); gaDraw(); });
+  $("gaReset").addEventListener("click",gaInit);
+  [["gaPm","gaPmV",v=>fmt(v,1)+" %"],["gaPc","gaPcV",v=>fmt(v,0)+" %"],["gaPop","gaPopV",v=>v]].forEach(([i,o,f])=>$(i).addEventListener("input",()=>{ $(o).textContent=f(+$(i).value); }));
+  $("gaPmV").textContent=fmt(1,1)+" %";
+  gaInit();
+
+  // ---------- T6: grafo RDF ----------
+  const RDF0=[["ex:Iberdrola","rdf:type","ex:Accion"],["ex:Accion","rdfs:subClassOf","ex:RentaVariable"],["ex:RentaVariable","rdfs:subClassOf","ex:ActivoFinanciero"],["ex:Iberdrola","ex:cotizaEn","ex:IBEX35"],["ex:Iberdrola","ex:sector",'"Utilities"']];
+  let RDF=RDF0.map(t=>t.concat([false]));
+  function rdfDraw(){
+    const nodes=[]; RDF.forEach(t=>{ [t[0],t[2]].forEach(n=>{ if(!nodes.includes(n)) nodes.push(n); }); });
+    const N=nodes.length, pos={}; nodes.forEach((n,i)=>{ const a=-Math.PI/2+i/Math.max(1,N)*2*Math.PI; pos[n]=[300+225*Math.cos(a),130+98*Math.sin(a)]; });
+    let h='<defs><marker id="rdfArr" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>';
+    const wOf=n=>Math.min(150,n.length*6.4+16);
+    RDF.forEach(t=>{ if(t[0]===t[2]) return; const [x1,y1]=pos[t[0]], [x2,y2]=pos[t[2]], dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1;
+      const hw=wOf(t[2])/2+2, hh=14, s=Math.min(hw/Math.abs(dx/L||1e-9), hh/Math.abs(dy/L||1e-9));
+      const ex=x2-dx/L*s, ey=y2-dy/L*s, c=t[3]?"var(--ok)":"var(--muted)";
+      h+=SVGE("line",{x1:x1.toFixed(1),y1:y1.toFixed(1),x2:ex.toFixed(1),y2:ey.toFixed(1),stroke:c,"stroke-width":t[3]?2:1.5,"stroke-dasharray":t[3]?"5 3":"none","marker-end":"url(#rdfArr)"});
+      const mx=(x1+x2)/2, my=(y1+y2)/2, lw=t[1].length*5.6+8;
+      h+=SVGE("rect",{x:(mx-lw/2).toFixed(1),y:my-8,width:lw.toFixed(1),height:15,rx:3,fill:"var(--surface)"})+SVGE("text",{x:mx.toFixed(1),y:my+3,"text-anchor":"middle","font-size":9.5,style:"fill:"+(t[3]?"var(--ok)":"var(--ink)")},esc(t[1])); });
+    nodes.forEach(n=>{ const [x,y]=pos[n], lit=n.startsWith('"'), w=wOf(n);
+      h+=SVGE("rect",{x:(x-w/2).toFixed(1),y:y-14,width:w.toFixed(1),height:28,rx:lit?2:14,fill:lit?"var(--example-soft)":"var(--accent-soft)",stroke:lit?"var(--example)":"var(--accent)","stroke-width":1.5})+SVGE("text",{x:x.toFixed(1),y:y+4,"text-anchor":"middle","font-size":10.5,style:"fill:var(--ink);font-weight:600"},esc(n)); });
+    $("rdfSvg").innerHTML=N?h:SVGE("text",{x:300,y:130,"text-anchor":"middle","font-size":13},"Grafo vacío: añade un triple");
+    const subj=[]; RDF.forEach(t=>{ if(!subj.includes(t[0])) subj.push(t[0]); });
+    $("rdfTtl").innerHTML='<span class="c">@prefix ex:   &lt;http://ejemplo.org/&gt; .\n@prefix rdf:  &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .\n@prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .</span>\n\n'+subj.map(s=>{ const ts=RDF.filter(t=>t[0]===s); return esc(s)+' '+ts.map((t,i)=>(i?'    ':'')+esc(t[1])+' '+esc(t[2])+(t[3]?'  <span class="c"># inferido</span>':'')).join(' ;\n')+' .'; }).join("\n");
+  }
+  $("rdfAdd").addEventListener("click",()=>{ const s=$("rdfS").value.trim(), p=$("rdfP").value.trim(), o=$("rdfO").value.trim(); if(!s||!p||!o) return; if(RDF.length>=16) return; if(!RDF.some(t=>t[0]===s&&t[1]===p&&t[2]===o)) RDF.push([s,p,o,false]); rdfDraw(); });
+  $("rdfInfer").addEventListener("click",()=>{ let added=true; while(added){ added=false;
+      const has=(s,p,o)=>RDF.some(t=>t[0]===s&&t[1]===p&&t[2]===o);
+      RDF.slice().forEach(a=>RDF.slice().forEach(b=>{
+        if(a[1]==="rdf:type"&&b[1]==="rdfs:subClassOf"&&a[2]===b[0]&&!has(a[0],"rdf:type",b[2])){ RDF.push([a[0],"rdf:type",b[2],true]); added=true; }
+        if(a[1]==="rdfs:subClassOf"&&b[1]==="rdfs:subClassOf"&&a[2]===b[0]&&!has(a[0],"rdfs:subClassOf",b[2])){ RDF.push([a[0],"rdfs:subClassOf",b[2],true]); added=true; } })); }
+    rdfDraw(); });
+  $("rdfReset").addEventListener("click",()=>{ RDF=RDF0.map(t=>t.concat([false])); rdfDraw(); });
+  $("rdfClear").addEventListener("click",()=>{ RDF=[]; rdfDraw(); });
+  rdfDraw();
+
+  // ---------- T7: motor de reglas ----------
+  const SE_FACTS=[["ingresos","Ingresos estables",true],["deuda","Deuda baja",true],["historial","Historial limpio",true],["garantia","Aporta garantía",false],["impagos","Impagos previos",false]];
+  const SE_NAMES={ingresos:"ingresos estables",deuda:"deuda baja",historial:"historial limpio",garantia:"garantía",impagos:"impagos previos",solvente:"solvente",pagador:"buen pagador",rbajo:"riesgo bajo",ralto:"riesgo alto",aprobar:"APROBAR",revisar:"REVISIÓN MANUAL"};
+  const SE_RULES=[["R1",["ingresos","deuda"],"solvente"],["R2",["ingresos","garantia"],"solvente"],["R3",["historial"],"pagador"],["R4",["solvente","pagador"],"rbajo"],["R5",["impagos"],"ralto"],["R6",["rbajo"],"aprobar"],["R7",["ralto"],"revisar"]];
+  let seMode="fwd";
+  $("seFacts").innerHTML=SE_FACTS.map(f=>'<label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" data-fact="'+f[0]+'"'+(f[2]?' checked':'')+'> '+f[1]+'</label>').join("");
+  function seRun(){
+    const facts=new Set([...document.querySelectorAll("[data-fact]")].filter(c=>c.checked).map(c=>c.dataset.fact));
+    const fired=new Set(), lines=[], N=k=>'<b>'+SE_NAMES[k]+'</b>';
+    if(seMode==="fwd"){
+      lines.push("Memoria de trabajo inicial: "+([...facts].map(N).join(", ")||"vacía"));
+      let cyc=0, ch=true; while(ch){ ch=false; cyc++;
+        const now=SE_RULES.filter(r=>!fired.has(r[0])&&r[1].every(c=>facts.has(c)));
+        if(now.length){ now.forEach(r=>{ fired.add(r[0]); if(!facts.has(r[2])){ facts.add(r[2]); ch=true; } }); lines.push("Ciclo "+cyc+": disparan "+now.map(r=>r[0]+" → "+N(r[2])).join(", ")); } }
+      lines.push("Sin reglas nuevas: fin. Conclusiones: "+(["aprobar","revisar"].filter(k=>facts.has(k)).map(N).join(" y ")||"ninguna decisión"));
+    } else {
+      const seen=new Set();
+      const prove=(g,d)=>{ const pad="&nbsp;".repeat(d*4);
+        if(facts.has(g)){ lines.push(pad+"✓ "+N(g)+" es un hecho"); return true; }
+        const rs=SE_RULES.filter(r=>r[2]===g);
+        if(!rs.length){ lines.push(pad+"✗ "+N(g)+" no es un hecho y ninguna regla lo concluye"); return false; }
+        if(seen.has(g)) return false; seen.add(g);
+        for(const r of rs){ lines.push(pad+"¿"+N(g)+"? Pruebo "+r[0]+": necesita "+r[1].map(N).join(" y "));
+          if(r[1].every(c=>prove(c,d+1))){ fired.add(r[0]); facts.add(g); lines.push(pad+"✓ "+r[0]+" demuestra "+N(g)); seen.delete(g); return true; } }
+        lines.push(pad+"✗ no se puede demostrar "+N(g)); seen.delete(g); return false; };
+      const ok=prove("aprobar",0);
+      lines.push(ok?'<span class="pill ok">Meta demostrada: aprobar</span>':'<span class="pill bad">No se puede demostrar «aprobar»</span>');
+    }
+    $("seRules").innerHTML='<thead><tr><th>Regla</th><th>SI</th><th>ENTONCES</th><th></th></tr></thead><tbody>'+SE_RULES.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1].map(c=>SE_NAMES[c]).join(" Y ")+'</td><td>'+SE_NAMES[r[2]]+'</td><td>'+(fired.has(r[0])?'<span class="pill ok">disparada</span>':'')+'</td></tr>').join("")+'</tbody>';
+    $("seTrace").innerHTML=lines.join("<br>");
+  }
+  document.querySelectorAll("[data-fact]").forEach(c=>c.addEventListener("change",seRun));
+  document.querySelectorAll("[data-se]").forEach(b=>b.addEventListener("click",()=>{ seMode=b.dataset.se; pressGroup("[data-se]",b); seRun(); }));
+  seRun();
+
+  // ---------- T8: chatbot ----------
+  const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9ñ\s]/g," ");
+  const CB_ENT={santander:["Santander",4.85],bbva:["BBVA",9.62],telefonica:["Telefónica",3.98],iberdrola:["Iberdrola",13.40],inditex:["Inditex",47.10],repsol:["Repsol",13.20]};
+  const CB_INT=[
+    ["saludo",["hola","buenas","buenos","hey","saludos"]],
+    ["cotizacion",["cotiza","cotizacion","precio","cuanto","vale","valor"]],
+    ["estado_orden",["orden","ordenes","ejecutada","ejecutado","pendiente","operacion"]],
+    ["abrir_cuenta",["abrir","cuenta","alta","registrarme","registro"]],
+    ["comisiones",["comision","comisiones","coste","tarifa","cobrais"]],
+    ["humano",["agente","persona","humano","gestor"]],
+    ["despedida",["adios","gracias","luego","chao"]]
+  ];
+  let cbPending=null;
+  function cbReply(text){
+    const w=norm(text).split(/\s+/).filter(Boolean); let ent=null; w.forEach(x=>{ if(CB_ENT[x]) ent=CB_ENT[x]; });
+    let best=null, sc=0; CB_INT.forEach(([n,kw])=>{ const s=w.filter(x=>kw.includes(x)).length; if(s>sc){ sc=s; best=n; } });
+    if(!best&&ent&&cbPending==="cotizacion"){ best="cotizacion"; }
+    const dbg='Intención: <b>'+(best||"fallback")+'</b>'+(best?' ('+sc+' coincidencia'+(sc===1?'':'s')+')':'')+' · Entidades: '+(ent?'empresa = '+ent[0]:'ninguna');
+    let r;
+    switch(best){
+      case "saludo": r="¡Hola! Puedo darte cotizaciones, el estado de tus órdenes, nuestras comisiones o ayudarte a abrir una cuenta."; break;
+      case "cotizacion": if(ent){ r=ent[0]+" cotiza a "+fmt(ent[1])+" € (precio ficticio de demostración)."; cbPending=null; } else { r="¿De qué empresa quieres la cotización?"; cbPending="cotizacion"; } break;
+      case "estado_orden": r="Tu última orden (compra de 100 acciones) está pendiente de ejecución en mercado."; break;
+      case "abrir_cuenta": r="Para abrir una cuenta necesito verificar tu identidad. Te envío el enlace al proceso de alta."; break;
+      case "comisiones": r="La comisión es del 0,10 % por operación con un mínimo de 3 € (ejemplo ficticio)."; break;
+      case "humano": r="Te paso con un agente humano. Espera un momento."; break;
+      case "despedida": r="¡Gracias a ti! Buena sesión de mercado."; break;
+      default: r="No te he entendido. ¿Quieres que te pase con un agente?";
+    }
+    if(best&&best!=="cotizacion") cbPending=null;
+    return [r,dbg];
+  }
+  function cbSay(text){ if(!text.trim()) return; const [r,dbg]=cbReply(text), log=$("cbLog");
+    log.innerHTML+='<p style="margin:4px 0;text-align:right"><span style="display:inline-block;padding:6px 10px;border-radius:12px;background:var(--accent);color:var(--accent-ink)">'+esc(text)+'</span></p><p style="margin:4px 0"><span style="display:inline-block;padding:6px 10px;border-radius:12px;background:var(--surface-2)">'+esc(r)+'</span></p>';
+    log.scrollTop=log.scrollHeight; $("cbDbg").innerHTML=dbg; $("cbIn").value=""; }
+  $("cbSend").addEventListener("click",()=>cbSay($("cbIn").value));
+  $("cbIn").addEventListener("keydown",e=>{ if(e.key==="Enter") cbSay($("cbIn").value); });
+  ["Hola","¿A cuánto cotiza Telefónica?","¿Cuál es el precio?","Santander","¿Qué comisiones tenéis?","¿Me explicas el bitcoin?"].forEach(s=>{ const b=document.createElement("button"); b.className="btn"; b.textContent=s; b.addEventListener("click",()=>cbSay(s)); $("cbSugg").appendChild(b); });
+  $("cbLog").innerHTML='<p style="margin:4px 0"><span style="display:inline-block;padding:6px 10px;border-radius:12px;background:var(--surface-2)">Hola, soy el asistente del bróker. ¿En qué puedo ayudarte?</span></p>';
+
+  // ---------- T9: matriz de priorización ----------
+  const PM=[["Resumen de noticias con LLM",6,9],["Detección de fraude",8,6],["Ejecución óptima de órdenes",9,3],["Chatbot de atención",5,7],["Predicción de precios a 1 año",4,2],["Clasificación de correos",3,8]];
+  $("pmCtrls").innerHTML=PM.map((p,i)=>'<div class="box" style="padding:8px 10px"><b>'+(i+1)+'. '+p[0]+'</b><label style="margin:4px 0 0;font-size:.8rem">Impacto <span class="out" id="pmIv'+i+'">'+p[1]+'</span></label><input type="range" min="1" max="10" value="'+p[1]+'" data-pm="'+i+'" data-k="1" style="width:100%"><label style="margin:0;font-size:.8rem">Viabilidad <span class="out" id="pmVv'+i+'">'+p[2]+'</span></label><input type="range" min="1" max="10" value="'+p[2]+'" data-pm="'+i+'" data-k="2" style="width:100%"></div>').join("");
+  const pmQ=(i,v)=>i>5.5?(v>5.5?["Quick win","ok"]:["Apuesta estratégica","neutral"]):(v>5.5?["Mejora menor","neutral"]:["Descartar","bad"]);
+  function pmDraw(){
+    const X=v=>60+(v-0.5)/10*520, Y=v=>310-(v-0.5)/10*290; let h="";
+    [["Apuesta estratégica",60,20,"var(--surface-2)"],["Quick win",X(5.5),20,"var(--ok-soft)"],["Descartar",60,Y(5.5),"var(--bad-soft)"],["Mejora menor",X(5.5),Y(5.5),"var(--surface-2)"]].forEach(([l,x,y,c])=>{ h+=SVGE("rect",{x,y,width:260,height:145,fill:c,opacity:.7})+SVGE("text",{x:x+8,y:y+16,"font-size":11,style:"fill:var(--muted);font-weight:600"},l); });
+    h+=SVGE("text",{x:320,y:332,"text-anchor":"middle","font-size":11},"Viabilidad →")+SVGE("text",{x:20,y:165,"text-anchor":"middle","font-size":11,transform:"rotate(-90 20 165)"},"Impacto →");
+    PM.forEach((p,i)=>{ const x=X(p[2]), y=Y(p[1]); h+=SVGE("circle",{cx:x,cy:y,r:13,fill:"var(--accent)"})+SVGE("text",{x,y:y+4,"text-anchor":"middle","font-size":11,style:"fill:var(--accent-ink);font-weight:700"},i+1); });
+    $("pmSvg").innerHTML=h;
+    const ord=PM.map((p,i)=>[i,p]).sort((a,b)=>b[1][1]*b[1][2]-a[1][1]*a[1][2]);
+    $("pmOrder").innerHTML='<b>Orden sugerido (impacto × viabilidad):</b><ol style="margin:4px 0 0">'+ord.map(([i,p])=>{ const q=pmQ(p[1],p[2]); return '<li>'+p[0]+' · '+p[1]*p[2]+' <span class="pill '+q[1]+'">'+q[0]+'</span></li>'; }).join("")+'</ol>';
+  }
+  document.querySelectorAll("[data-pm]").forEach(s=>s.addEventListener("input",()=>{ const i=+s.dataset.pm, k=+s.dataset.k; PM[i][k]=+s.value; $((k===1?"pmIv":"pmVv")+i).textContent=s.value; pmDraw(); }));
+  pmDraw();
+
+  // ---------- T10: qubits ----------
+  function qb(){ const n=+$("qbN").value; $("qbV").textContent=n;
+    const st=2**n, big=v=>v<1e15?fmt(v,0):v.toExponential(2).replace("e+"," · 10^");
+    const bytes=st*16, U=["B","KB","MB","GB","TB","PB","EB","ZB","YB"]; let u=0, b=bytes; while(b>=1024&&u<U.length-1){ b/=1024; u++; }
+    const box=(l,v,s,c)=>'<div class="box '+(c||'')+'"><small>'+l+'</small><div class="k" style="font-size:1.2rem">'+v+'</div><small>'+s+'</small></div>';
+    $("qbOut").innerHTML=box("Estados a la vez","2^"+n+" = "+big(st),"superposición de n qubits")+box("Memoria para simularlo","≈ "+(u===U.length-1&&b>=1024?big(b):fmt(b,b<10?1:0))+" "+U[u],"16 bytes por amplitud en un ordenador clásico")+box("Bits clásicos equivalentes",n+" bits","guardan 1 de "+big(st)+" estados cada vez","accent"); }
+  $("qbN").addEventListener("input",qb); qb();
+  // ---------- Glosario ----------
+  const GL = [
+    ["Alelo","Valor concreto que toma un gen (p. ej. 0 o 1).",4],
+    ["Algoritmo genético","Búsqueda inspirada en la evolución: selección, cruce y mutación sobre una población. Holland, años 70.",4],
+    ["Alfa-beta","Poda de minimax: α mejor valor de MAX, β mejor de MIN; se poda si α ≥ β.",2],
+    ["Aprendizaje por refuerzo","El agente aprende por prueba y error maximizando una recompensa (AlphaGo).",2],
+    ["Asistente virtual","Agente conversacional por voz: Alexa, Siri, Google Assistant, Cortana, Bixby.",8],
+    ["Backpropagation","Retropropagación del error para entrenar redes multicapa (Rumelhart, Hinton y Williams, 1986).",3],
+    ["Chatbot","Programa que conversa por texto detectando intenciones y entidades.",8],
+    ["Cromosoma","Solución candidata codificada en un algoritmo genético.",4],
+    ["Dartmouth","Conferencia de 1956 donde nace el término inteligencia artificial.",1],
+    ["Deep learning","Machine learning con redes neuronales de muchas capas que extraen sus propias características.",1],
+    ["Deriva (drift)","Cambio en los datos o en su relación con el objetivo que degrada un modelo en producción.",9],
+    ["DSS","Sistema de apoyo a la decisión: BD, base de modelos, procesador y diálogo.",7],
+    ["Efecto horizonte","Error por no ver amenazas más allá de la profundidad de búsqueda.",2],
+    ["Encadenamiento hacia atrás","Inferencia dirigida por objetivos: de la meta a los hechos.",7],
+    ["Encadenamiento hacia delante","Inferencia dirigida por datos: de los hechos a las conclusiones.",7],
+    ["Entidad","Dato concreto extraído de una frase (empresa, fecha, importe).",8],
+    ["Expectiminimax","Minimax con nodos de azar para juegos estocásticos.",2],
+    ["Fitness","Función de aptitud que mide la calidad de un individuo. Ajustado: 1/(1+s).",4],
+    ["Intención (intent)","Lo que el usuario quiere conseguir con su mensaje.",8],
+    ["Linked Data","Publicar datos enlazados con URI HTTP y RDF (4 principios de Berners-Lee).",6],
+    ["Machine learning","Sistemas que aprenden patrones de los datos sin programación explícita.",1],
+    ["Minimax","Algoritmo de decisión en juegos de dos jugadores: MAX maximiza, MIN minimiza.",2],
+    ["MLOps","Prácticas para desplegar, versionar y monitorizar modelos en producción.",9],
+    ["MLP","Perceptrón multicapa: red con capas ocultas que resuelve problemas no lineales como XOR.",3],
+    ["Motor de inferencia","Parte del sistema experto que aplica las reglas a los hechos.",7],
+    ["Mutación","Cambio aleatorio de un gen con probabilidad Pm (≈0,5–2 %).",4],
+    ["Ontología","Especificación explícita, formal y compartida de conceptos y relaciones (OWL).",5],
+    ["OWL","Lenguaje de ontologías del W3C; variantes Lite, DL y Full.",6],
+    ["Perceptrón","Red de una neurona de Rosenblatt (1958); solo separa clases linealmente.",3],
+    ["PLN","Procesamiento del lenguaje natural.",1],
+    ["Quick win","Iniciativa de alto impacto y alta viabilidad: se aborda primero.",9],
+    ["RDF","Modelo de datos en triples sujeto–propiedad–objeto.",6],
+    ["RDFS","Vocabulario para describir clases y propiedades RDF (subClassOf, domain, range…).",6],
+    ["Singularidad","Momento en que una IA evoluciona sola y toma conciencia; estimado en 2040–2050.",10],
+    ["Sistema experto","Programa que reproduce el razonamiento de un especialista con reglas (MYCIN, DENDRAL).",7],
+    ["SKOS","Estándar del W3C para publicar tesauros y taxonomías.",5],
+    ["Soft computing","Computación evolutiva + lógica difusa + redes neuronales.",4],
+    ["SPARQL","Lenguaje de consulta para datos RDF.",6],
+    ["Taxonomía","Clasificación jerárquica en categorías y subcategorías.",5],
+    ["Tesauro","Vocabulario controlado con relaciones jerárquicas, asociativas y de equivalencia.",5],
+    ["Test de Turing","Una máquina lo supera si un evaluador no la distingue de una persona.",1],
+    ["Transhumanismo","Integrar tecnología en el cuerpo humano para ampliar sus capacidades.",10],
+    ["Triple","Unidad de RDF: sujeto, propiedad (predicado) y objeto.",6],
+    ["XOR","Función no linealmente separable que el perceptrón simple no puede aprender.",3]
+  ];
+  function gloss(){
+    const q = document.getElementById("glossQ").value.trim().toLowerCase();
+    const items = GL.filter(g => !q || (g[0]+" "+g[1]).toLowerCase().includes(q));
+    document.getElementById("glossList").innerHTML = items.length ? items.map(g => '<div class="gi"><dl style="margin:0"><dt>'+g[0]+'</dt><dd>'+g[1]+'</dd></dl><small><a href="#tema-'+g[2]+'">Tema '+g[2]+'</a></small></div>').join("") : '<p style="color:var(--muted)">No hay términos que coincidan. Prueba con otra palabra.</p>';
+  }
+  document.getElementById("glossQ").addEventListener("input", gloss); gloss();
+
+  renderProgress();
+  route();
+})();
+</script>
+
+</body>
+</html>

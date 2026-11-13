@@ -4,6 +4,7 @@ Páginas web interactivas para estudiar cada módulo: resúmenes, diagramas, eje
 
 | Módulo | Guía |
 |---|---|
+| Módulo 1 · Fundamentos de la inteligencia artificial | `modulo-1.html` |
 | Módulo 2 · Tipos y ciclo de vida del dato | `modulo-2.html` |
 | Módulo 3 · El dato en la inteligencia artificial | `modulo-3.html` |
 | Módulo 4 · Minería de datos: selección, preprocesamiento y transformación | `modulo-4.html` |

@@ -1,0 +1,1719 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tipos y ciclo de vida del dato</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: guía de estudio con índice lateral fijo (10 temas + glosario) y una vista por tema; en móvil el índice pasa a barra superior deslizable. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#141C29; --muted:#566275; --line:#D9DFE8;
+  --accent:#2448C4; --accent-ink:#FFFFFF; --accent-soft:#E5EBFB;
+  --example:#A4510B; --example-soft:#FCF0E1;
+  --ok:#157A3A; --ok-soft:#E3F4E8; --bad:#B42323; --bad-soft:#FBE7E7;
+  --p1:#0E8A88; --p2:#2448C4; --p3:#7A3FC2; --p4:#B9650E; --p5:#2E8A3A;
+  --s1:#3C6FE0; --s2:#D9822B; --s3:#2E9C6E;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+    --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+    --example:#F1AC62; --example-soft:#33261A;
+    --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+    --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+    --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+  --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+  --example:#F1AC62; --example-soft:#33261A;
+  --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+  --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+  --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:2.2rem}
+h3{font-size:1.1rem;font-weight:600;margin-top:1.4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 14px 24px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px}
+.brand small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;line-height:1.25;display:block;margin-top:2px}
+.progress{padding:0 8px}
+.progress .bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress span{font-size:.8rem;color:var(--muted)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.navlist a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.92rem;line-height:1.3}
+.navlist a:hover{background:var(--surface-2)}
+.navlist a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlist .num{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem;background:var(--surface-2);color:var(--muted)}
+.navlist a[aria-current="page"] .num{background:var(--accent);color:var(--accent-ink)}
+.navlist a.done .num{background:var(--ok-soft);color:var(--ok)}
+.navsep{height:1px;background:var(--line);margin:6px 8px}
+
+main{min-width:0;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{max-width:860px;margin:0 auto}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--accent)}
+.lead{font-size:1.12rem;color:var(--muted);max-width:65ch}
+.prose{max-width:68ch}
+.oneline{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius) var(--radius) 0;font-weight:500}
+.objs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.objs li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);background:var(--surface)}
+
+/* Callouts */
+.callout{margin:1.2rem 0;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.callout>.tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+.callout p:first-of-type{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.ex{background:var(--example-soft);border-color:transparent}
+.ex>.tag{color:var(--example)}
+.exam{background:var(--surface);border:1px solid var(--accent)}
+.exam>.tag{color:var(--accent)}
+.exam ul{margin:.3rem 0 0;padding-left:1.2rem}
+.warn{background:var(--bad-soft);border-color:transparent}
+.warn>.tag{color:var(--bad)}
+
+/* Diagrams */
+.diagram{margin:1.2rem 0;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow-x:auto}
+.diagram figcaption{font-size:.8rem;color:var(--muted);margin-top:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
+.flow .node{flex:1 1 0;min-width:110px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.86rem;line-height:1.35}
+.flow .node b{display:block;font-family:var(--font-display);font-size:.95rem;margin-bottom:2px}
+.flow .arrow{flex:none;align-self:center;color:var(--muted);font-size:1.2rem}
+.flow .node.hl{background:var(--accent-soft);border-color:var(--accent)}
+@media (max-width:640px){
+  .flow.stack{flex-direction:column}
+  .flow.stack .arrow{transform:rotate(90deg)}
+  .flow.stack .node{min-width:0}
+}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.box{padding:12px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.9rem;line-height:1.45;min-width:0}
+.box h4{font-size:.98rem;margin-bottom:4px}
+.box .k{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.box.accent{background:var(--accent-soft);border-color:var(--accent)}
+.box small{color:var(--muted)}
+
+/* Tree */
+.tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:560px}
+.tree .lvl{display:flex;gap:16px;justify-content:center;width:100%}
+.tree .tnode{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:.85rem;text-align:center;line-height:1.3}
+.tree .tnode.root{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tree .tnode.mid{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.tree .branch{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;border-top:2px solid var(--line);position:relative}
+.tree .stem{width:2px;height:14px;background:var(--line)}
+.tree .leaves{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tree .leaf{font-size:.8rem;padding:6px 9px;border-radius:6px;background:var(--surface);border:1px dashed var(--line);text-align:center;line-height:1.3}
+.tree .leaf em{display:block;font-style:normal;color:var(--muted);font-size:.74rem}
+
+/* Lifecycle */
+.cycle{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-width:640px;counter-reset:ph}
+.phase{position:relative;padding:12px;border-radius:10px;background:var(--surface-2);border-top:4px solid var(--c);font-size:.85rem;line-height:1.4}
+.phase .pn{font-family:var(--font-mono);font-size:.72rem;color:var(--c);font-weight:600}
+.phase b{display:block;font-family:var(--font-display);font-size:.95rem;margin:2px 0 6px}
+.phase .topics{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.phase .topics a{font-size:.72rem;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.phase:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:1rem}
+.loopback{margin-top:10px;font-size:.8rem;color:var(--muted);text-align:center;min-width:640px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;margin:1rem 0}
+pre.code .c{color:var(--muted)}
+pre.code .o{color:var(--ok)}
+
+/* Data matrix (dato/obs/variable) */
+.matrix td,.matrix th{text-align:center;font-family:var(--font-mono);font-size:.82rem;transition:background .15s}
+.matrix.show-var td:nth-child(3),.matrix.show-var th:nth-child(3){background:var(--accent-soft);color:var(--accent)}
+.matrix.show-obs tbody tr:nth-child(2) td{background:var(--example-soft);color:var(--example)}
+.matrix.show-dat tbody tr:nth-child(3) td:nth-child(4){background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+/* Buttons & inputs */
+.btn{font:inherit;font-size:.88rem;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+input[type=text],input[type=number]{font:inherit;font-size:.92rem;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.out{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* Interactive SVG */
+svg text{fill:var(--muted);font-family:var(--font-body)}
+.dot{transition:r .2s,opacity .2s}
+.dot.st1{fill:var(--s1)}.dot.st2{fill:var(--s2)}.dot.st3{fill:var(--s3)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px repeat(8,minmax(44px,1fr));min-width:620px;font-size:.8rem}
+.gantt>div{padding:6px 6px;border-bottom:1px solid var(--line);min-height:32px;display:flex;align-items:center}
+.gantt .gh{font-weight:600;color:var(--muted);font-size:.72rem;justify-content:center}
+.gantt .bar{background:var(--surface-2);border-radius:5px;margin:4px 0;padding:0 6px;font-size:.72rem;color:var(--muted)}
+.gantt .bar.crit{background:var(--accent);color:var(--accent-ink)}
+.gantt .bar.mile{background:transparent;justify-content:center;color:var(--example);font-size:1rem}
+
+/* Quiz */
+.quiz{margin-top:2.4rem;padding:20px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.quiz h2{margin-top:0}
+.qitem{padding:14px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0}
+.qitem p.q{font-weight:600;margin:0 0 8px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{text-align:left;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.qopt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.qopt:disabled{cursor:default}
+.qexp{font-size:.86rem;color:var(--muted);margin-top:8px}
+.qscore{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.pager a{flex:1 1 220px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager small{display:block;color:var(--muted);font-size:.75rem}
+.pager a.next{text-align:right}
+.studied{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* Home cards */
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.tcard{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.tcard:hover{border-color:var(--accent)}
+.tcard .n{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.tcard b{font-family:var(--font-display);font-size:1rem;line-height:1.3}
+.tcard span.d{font-size:.84rem;color:var(--muted);line-height:1.4}
+.tcard .st{margin-top:auto;padding-top:6px}
+
+/* Glossary */
+.gloss{display:grid;gap:8px;margin-top:14px}
+.gloss dt{font-weight:600;font-family:var(--font-display)}
+.gloss dd{margin:0 0 6px;color:var(--muted);font-size:.92rem}
+.gloss .gi{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.gloss .gi small{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+
+/* Mobile nav */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .brand,.progress{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .navlist::-webkit-scrollbar{display:none}
+  .navlist a{white-space:nowrap;padding:6px 8px}
+  .navlist a .lbl{display:none}
+  .navlist a[aria-current="page"] .lbl{display:inline}
+  .navsep{width:1px;height:20px;margin:auto 2px}
+  main{padding-block:24px 64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav" aria-label="Temas">
+    <div class="brand"><small>Guía de estudio</small><strong>Tipos y ciclo de vida del dato</strong></div>
+    <div class="progress"><span id="progText">0 de 10 temas estudiados</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="navlist" id="navlist">
+      <li><a href="#inicio" data-v="inicio"><span class="num">◎</span><span class="lbl">Mapa del curso</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#tema-1" data-v="tema-1"><span class="num">1</span><span class="lbl">La estadística</span></a></li>
+      <li><a href="#tema-2" data-v="tema-2"><span class="num">2</span><span class="lbl">Tipos de datos estadísticos</span></a></li>
+      <li><a href="#tema-3" data-v="tema-3"><span class="num">3</span><span class="lbl">Ciclo de vida de los datos</span></a></li>
+      <li><a href="#tema-4" data-v="tema-4"><span class="num">4</span><span class="lbl">Etapas iniciales del ciclo</span></a></li>
+      <li><a href="#tema-5" data-v="tema-5"><span class="num">5</span><span class="lbl">Recolección de datos</span></a></li>
+      <li><a href="#tema-6" data-v="tema-6"><span class="num">6</span><span class="lbl">Limpieza del dato</span></a></li>
+      <li><a href="#tema-7" data-v="tema-7"><span class="num">7</span><span class="lbl">Análisis e interpretación</span></a></li>
+      <li><a href="#tema-8" data-v="tema-8"><span class="num">8</span><span class="lbl">Almacén del dato</span></a></li>
+      <li><a href="#tema-9" data-v="tema-9"><span class="num">9</span><span class="lbl">Disponibilidad del dato</span></a></li>
+      <li><a href="#tema-10" data-v="tema-10"><span class="num">10</span><span class="lbl">Aspectos normativos</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#glosario" data-v="glosario"><span class="num">Aa</span><span class="lbl">Glosario</span></a></li>
+    </ul>
+  </nav>
+
+  <main>
+<!-- ===================== INICIO ===================== -->
+<section class="view" data-view="inicio">
+  <p class="eyebrow">Guía de estudio · 10 temas</p>
+  <h1>Tipos y ciclo de vida del dato</h1>
+  <p class="lead">Todo el temario resumido en una sola página: conceptos clave, diagramas, ejemplos reales y un test de autoevaluación al final de cada tema.</p>
+
+  <h2>Cómo encajan los 10 temas</h2>
+  <p class="prose">El temario sigue el recorrido de un dato: desde que se decide qué medir hasta que el resultado se consulta en un panel. Los temas 1 y 2 son la base y el tema 10 aplica a todas las fases.</p>
+  <figure class="diagram" style="margin-top:14px">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">FASE 1</span><b>Detección y análisis de fuentes</b>¿Qué datos hay, dónde y cómo se extraen?<div class="topics"><a href="#tema-4">T4 Etapas iniciales</a><a href="#tema-5">T5 Recolección</a></div></div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">FASE 2</span><b>Almacenamiento y organización</b>Data lake, data warehouse, ETL.<div class="topics"><a href="#tema-8">T8 Almacén</a></div></div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">FASE 3</span><b>Pre-procesado y calidad</b>Faltantes, atípicos, transformación.<div class="topics"><a href="#tema-6">T6 Limpieza</a></div></div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">FASE 4</span><b>Analítica descriptiva y predictiva</b>Frecuencias, correlaciones, modelos.<div class="topics"><a href="#tema-7">T7 Análisis</a></div></div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">FASE 5</span><b>Explotación de resultados</b>Dashboards, acceso y seguridad.<div class="topics"><a href="#tema-9">T9 Disponibilidad</a></div></div>
+    </div>
+    <p class="loopback">Base: <a href="#tema-1">T1 Estadística</a> · <a href="#tema-2">T2 Tipos de datos</a> · Visión general: <a href="#tema-3">T3 Ciclo de vida</a> · En todas las fases: <a href="#tema-10">T10 Normativa</a></p>
+    <figcaption>Las 5 fases del ciclo de vida del dato (tema 3) y qué tema desarrolla cada una.</figcaption>
+  </figure>
+
+  <h2>Temas</h2>
+  <div class="tcards" id="tcards"></div>
+
+  <div class="callout exam">
+    <span class="tag">Cómo usar esta guía</span>
+    <ul>
+      <li>Lee cada tema empezando por la frase resumen: si la entiendes, ya tienes la idea central.</li>
+      <li>Los recuadros naranjas son <b>ejemplos reales</b>; los azules, lo que más se pregunta en el <b>examen</b>.</li>
+      <li>Haz el test del final y marca el tema como estudiado. Tu progreso se guarda en este navegador.</li>
+      <li>Si una palabra no te suena, búscala en el <a href="#glosario">glosario</a>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== TEMA 1 ===================== -->
+<section class="view" data-view="tema-1" hidden>
+  <p class="eyebrow">Tema 1</p>
+  <h1>La estadística</h1>
+  <p class="oneline">La estadística obtiene, ordena y analiza datos. Si solo describe un grupo, es <b>descriptiva</b>; si usa una muestra para sacar conclusiones sobre toda la población, es <b>inferencial</b>.</p>
+  <ul class="objs"><li>Conceptos básicos y tipos de estadística</li><li>Población estadística</li><li>Muestra y tipos de muestreo</li><li>Escalas de medida</li></ul>
+
+  <h2>Las dos ramas de la estadística</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div class="box"><h4>Estadística descriptiva</h4>Describe y resume las características de un grupo <b>sin sacar conclusiones para un grupo mayor</b>. No usa cálculo de probabilidades. Sus resúmenes pueden ser numéricos (medias, porcentajes) o visuales (gráficos). Hoy se conoce también como <i>análisis exploratorio</i>.<br><small>El temario la llama también "deductiva".</small></div>
+      <div class="box accent"><h4>Estadística inferencial</h4>Parte de una <b>muestra representativa</b> para sacar conclusiones sobre <b>toda la población</b>, con un nivel de confianza y un margen de error conocidos. Herramientas: muestreo, estimación de parámetros y contraste de hipótesis.<br><small>Métodos: estimación puntual, pruebas de hipótesis, pruebas paramétricas y no paramétricas, correlación, regresión, análisis de varianza.</small></div>
+    </div>
+    <div class="flow stack" style="margin-top:14px">
+      <div class="node"><b>Población</b>Todos los votantes de España</div><div class="arrow">→</div>
+      <div class="node"><b>Muestra</b>~3.000 entrevistas elegidas con criterio científico</div><div class="arrow">→</div>
+      <div class="node hl"><b>Inferencia</b>"El partido A obtendría un 28 % ± 1,8 %"</div>
+    </div>
+    <figcaption>La inferencia va de la parte (muestra) al todo (población), siempre con un margen de error.</figcaption>
+  </figure>
+
+  <div class="callout ex"><span class="tag">Ejemplo real</span>
+    <p><b>Encuestas electorales.</b> El barómetro del CIS (Centro de Investigaciones Sociológicas) entrevista a unas pocas miles de personas y estima la intención de voto de todo el país. Es el ejemplo clásico de estadística inferencial que cita el temario. Otros ejemplos: los <b>estudios de mercado</b> y la <b>epidemiología</b>, que proyecta cuántos casos de una enfermedad habrá para dimensionar camas, personal y vacunas.</p>
+    <p>En cambio, el informe anual de ventas de una tienda ("vendimos 12.400 unidades, un 8 % más que el año pasado") es <b>descriptivo</b>: resume lo ocurrido sin generalizar.</p>
+  </div>
+
+  <h3>La estadística en los negocios</h3>
+  <p class="prose">El temario enumera usos típicos: satisfacción de clientes, tipos y frecuencia de accidentes, ventas por cliente, vendedor, zona y producto, predicción de ventas, proyectos de inversión, evolución de ratios económico-financieras, estudios de mercado, productos más demandados, estadística de personal y control de calidad.</p>
+
+  <h2>Población</h2>
+  <p class="prose">Conjunto de elementos o sujetos que comparten una o más características y que son objeto de estudio.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Definición</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><b>Finita</b></td><td>Número de elementos conocido y contable</td><td>Unidades vendidas de un producto este mes</td></tr>
+      <tr><td><b>Infinita</b></td><td>Número muy grande y no conocido</td><td>Metros cúbicos de arena de un arenal</td></tr>
+      <tr><td><b>Real</b></td><td>Cosas que existen y se pueden numerar</td><td>Alumnos matriculados en la universidad</td></tr>
+      <tr><td><b>Hipotética</b></td><td>Grupo posible pero difícil de comprobar</td><td>Personas que comprarían un producto aún no lanzado</td></tr>
+      <tr><td><b>Aleatoria</b></td><td>Su aparición es accidental o azarosa</td><td>El peso de un grupo de piezas de fruta</td></tr>
+      <tr><td><b>Dependiente</b></td><td>Depende de una causa conocida</td><td>Pacientes ingresados por una ola de calor</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Muestra y tipos de muestreo</h2>
+  <p class="prose">La <b>muestra</b> es la porción que se extrae de una población para conocer sus características cuando no se puede estudiar a todos. Siempre hay que documentar cómo se eligió. El <b>individuo</b> es cada persona, elemento o sujeto que aporta la información.</p>
+
+  <figure class="diagram" id="sampler">
+    <div class="btnrow" role="group" aria-label="Tipo de muestreo">
+      <button class="btn" data-m="simple" aria-pressed="true">Aleatorio simple</button>
+      <button class="btn" data-m="sistematico" aria-pressed="false">Sistemático</button>
+      <button class="btn" data-m="estratificado" aria-pressed="false">Estratificado</button>
+      <button class="btn" data-m="conglomerados" aria-pressed="false">Conglomerados</button>
+      <button class="btn" data-m="conveniencia" aria-pressed="false">Conveniencia (no prob.)</button>
+    </div>
+    <svg id="sampleSvg" viewBox="0 0 520 300" width="100%" style="max-width:560px;display:block" role="img" aria-label="Población de 60 individuos con la muestra seleccionada resaltada"></svg>
+    <div class="legend"><span><i style="background:var(--s1)"></i>Jóvenes (estrato 1)</span><span><i style="background:var(--s2)"></i>Adultos (estrato 2)</span><span><i style="background:var(--s3)"></i>Mayores (estrato 3)</span><span>Columnas = 5 barrios (conglomerados)</span></div>
+    <p id="sampleDesc" class="prose" style="font-size:.9rem;margin-bottom:0"></p>
+    <div class="btnrow"><button class="btn" id="resample">Sacar otra muestra</button></div>
+    <figcaption>Población de 60 personas; se eligen 12. Pulsa cada método para ver qué individuos quedan en la muestra.</figcaption>
+  </figure>
+
+  <div class="grid g2">
+    <div class="box"><h4>Probabilístico</h4>Todos los elementos tienen posibilidad de entrar en la muestra. Es el más usado.<br><b>Útil para:</b> reducir el sesgo, dar confianza y credibilidad, reflejar bien poblaciones grandes y calcular con exactitud el tamaño de muestra necesario.<br><small>Pasos: elegir la población → definir el marco → seleccionar la muestra → recoger los datos.</small></div>
+    <div class="box"><h4>No probabilístico</h4>La selección la decide el investigador; no todos tienen la misma oportunidad.<br><b>Tipos:</b> por cuotas, por conveniencia, bola de nieve y discrecional (por juicio).<br><b>Útil para:</b> estudios piloto y cuando hay poco tiempo o pocos recursos.</div>
+  </div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>No probabilístico</th><th>Cómo funciona</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><b>Por cuotas</b></td><td>Se reproduce en la muestra la misma distribución de una característica que en la población</td><td>Si la población es 70 % hombres y 30 % mujeres, la muestra también</td></tr>
+      <tr><td><b>Conveniencia</b></td><td>Se elige a quien está más cerca o accesible</td><td>Preguntar a los compañeros de clase</td></tr>
+      <tr><td><b>Bola de nieve</b></td><td>Cada participante recomienda a otro con el mismo perfil</td><td>Estudiar a personas con una enfermedad rara</td></tr>
+      <tr><td><b>Discrecional</b></td><td>El investigador elige según su conocimiento de la población</td><td>Para estudiar problemas psicológicos en el embarazo, elegir mujeres que han estado embarazadas</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Muestreo estratificado proporcional: la fórmula</h3>
+  <p class="prose">Cada estrato aporta a la muestra la misma proporción que tiene en la población:</p>
+  <p style="font-family:var(--font-mono);font-size:1.15rem;text-align:center;margin:14px 0">n<sub>i</sub> = (N<sub>i</sub> / N) · n</p>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">n<sub>i</sub>: muestra del estrato i · N<sub>i</sub>: población del estrato i · N: población total · n: muestra total.</p>
+  <div class="diagram" id="stratCalc">
+    <div class="grid g4">
+      <div><label for="sN1">Ingeniería (N₁)</label><input type="number" id="sN1" value="4200" min="0"></div>
+      <div><label for="sN2">Medicina (N₂)</label><input type="number" id="sN2" value="2800" min="0"></div>
+      <div><label for="sN3">Derecho (N₃)</label><input type="number" id="sN3" value="1000" min="0"></div>
+      <div><label for="sn">Muestra total (n)</label><input type="number" id="sn" value="400" min="0"></div>
+    </div>
+    <div class="out" id="stratOut" style="margin-top:12px"></div>
+    <figcaption>Ejemplo: encuesta de satisfacción en una universidad de 8.000 alumnos con tres facultades. Cambia los números.</figcaption>
+  </div>
+
+  <h2>Escalas de medida</h2>
+  <p class="prose">Cada escala incluye las propiedades de la anterior y añade una nueva.</p>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>Nominal</b>Solo categorías, sin orden.<br><small>Sexo (M/F), color de ojos</small></div><div class="arrow">→</div>
+      <div class="node"><b>Ordinal</b>+ orden entre categorías.<br><small>Nivel de estudios, escala Likert</small></div><div class="arrow">→</div>
+      <div class="node"><b>Intervalo</b>+ distancias iguales, <u>sin cero absoluto</u>.<br><small>Temperatura en °C (admite negativos)</small></div><div class="arrow">→</div>
+      <div class="node hl"><b>Razón</b>+ cero real = ausencia de la cualidad.<br><small>Número de hijos, ingresos</small></div>
+    </div>
+    <figcaption>Truco: 20 °C no es "el doble de calor" que 10 °C (intervalo), pero 2.000 € sí es el doble que 1.000 € (razón).</figcaption>
+  </figure>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Descriptiva = describe sin generalizar. Inferencial = de la muestra a la población, con confianza y margen de error.</li>
+    <li>Seis tipos de población: finita, infinita, real, hipotética, aleatoria, dependiente.</li>
+    <li>Probabilístico: aleatorio simple, sistemático, estratificado, conglomerados. No probabilístico: cuotas, conveniencia, bola de nieve, discrecional.</li>
+    <li>Escalas: nominal → ordinal → intervalo (sin cero absoluto) → razón (con cero absoluto).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-1"></div>
+</section>
+
+<!-- ===================== TEMA 2 ===================== -->
+<section class="view" data-view="tema-2" hidden>
+  <p class="eyebrow">Tema 2</p>
+  <h1>Tipos de datos estadísticos</h1>
+  <p class="oneline">Una <b>variable</b> es una característica que se mide; un <b>dato</b> es cada valor que toma; una <b>observación</b> es el conjunto de datos de un mismo individuo. Las variables pueden ser cuantitativas (números) o cualitativas (categorías).</p>
+  <ul class="objs"><li>Dato, observación y variable</li><li>Tipos de variables</li><li>Introducción a R y RStudio</li></ul>
+
+  <h2>Dato, observación y variable</h2>
+  <figure class="diagram">
+    <div class="btnrow" role="group" aria-label="Resaltar">
+      <button class="btn" data-mx="show-var" aria-pressed="true">Variable (columna)</button>
+      <button class="btn" data-mx="show-obs" aria-pressed="false">Observación (fila)</button>
+      <button class="btn" data-mx="show-dat" aria-pressed="false">Dato (celda)</button>
+    </div>
+    <div class="table-wrap" style="margin:0"><table class="matrix show-var" id="matrix">
+      <thead><tr><th>Cliente</th><th>Edad</th><th>Ciudad</th><th>Gasto (€)</th><th>¿Socio?</th></tr></thead>
+      <tbody>
+        <tr><td>Ana</td><td>34</td><td>Madrid</td><td>120,50</td><td>Sí</td></tr>
+        <tr><td>Luis</td><td>51</td><td>Sevilla</td><td>89,90</td><td>No</td></tr>
+        <tr><td>Marta</td><td>27</td><td>Valencia</td><td>240,00</td><td>Sí</td></tr>
+        <tr><td>Jorge</td><td>45</td><td>Bilbao</td><td>15,75</td><td>No</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption id="mxCap">Variable "Ciudad": todos los valores de una misma característica.</figcaption>
+  </figure>
+
+  <h3>Tipos de dato según su procesamiento</h3>
+  <div class="flow stack">
+    <div class="node"><b>Primarios (sin procesar)</b>Recogidos pero sin analizar: grabaciones, notas de campo, datos de experimentos</div><div class="arrow">→</div>
+    <div class="node"><b>Procesados</b>Digitalizados, transcritos, limpiados, validados o anonimizados</div><div class="arrow">→</div>
+    <div class="node hl"><b>Analizados</b>Modelos, gráficos y tablas que ayudan a decidir</div>
+  </div>
+
+  <h2>Clasificación de variables según su naturaleza</h2>
+  <figure class="diagram">
+    <div class="tree">
+      <div class="tnode root">Variable estadística</div>
+      <div class="stem"></div>
+      <div class="lvl">
+        <div class="branch">
+          <div class="tnode mid">Cuantitativa<br><small style="font-weight:400">números, admiten operaciones</small></div>
+          <div class="leaves">
+            <div class="leaf"><b>Continua</b><em>cualquier valor real, se mide</em>de medida · de tiempo · económicas</div>
+            <div class="leaf"><b>Discreta</b><em>valores aislados, se cuenta</em>de objetos · de personas · de ocurrencias</div>
+          </div>
+        </div>
+        <div class="branch">
+          <div class="tnode mid">Cualitativa<br><small style="font-weight:400">categorías o atributos</small></div>
+          <div class="leaves">
+            <div class="leaf"><b>Nominal</b><em>sin orden</em>estado civil, profesión</div>
+            <div class="leaf"><b>Ordinal</b><em>con orden</em>sed: mucha, poca, nada</div>
+            <div class="leaf"><b>Dicotómica</b><em>solo 2 valores</em>Sí/No, 0/1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figcaption>Una cualitativa con 2 valores es dicotómica; con 3 o más, politómica.</figcaption>
+  </figure>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Ejemplo</th><th>Tipo</th><th>Por qué</th></tr></thead>
+    <tbody>
+      <tr><td>Peso de un niño: 40,3 kg</td><td>Cuantitativa continua (de medida)</td><td>Se mide con un instrumento; admite decimales</td></tr>
+      <tr><td>Precio de un producto: 25 €</td><td>Cuantitativa continua (económica)</td><td>Unidad monetaria; si hay varias monedas, se convierten a una</td></tr>
+      <tr><td>Tiempo de entrega: 2 h 15 min</td><td>Cuantitativa continua (de tiempo)</td><td>Necesita un formato de fecha/hora específico</td></tr>
+      <tr><td>Número de mascotas: 2</td><td>Cuantitativa discreta (objetos)</td><td>Se cuenta; no existe 1,5 mascotas</td></tr>
+      <tr><td>Llamadas recibidas por hora: 37</td><td>Cuantitativa discreta (ocurrencias)</td><td>Cuenta sucesos en un periodo</td></tr>
+      <tr><td>Color de ojos: verdes</td><td>Cualitativa nominal</td><td>Categorías sin orden</td></tr>
+      <tr><td>Nota: aprobado / notable / sobresaliente</td><td>Cualitativa ordinal</td><td>Categorías con orden</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Según el rol (causalidad)</h3>
+  <div class="flow">
+    <div class="node"><b>Independiente</b>La que se manipula y explica el fenómeno.<br><small>Horas de estudio</small></div><div class="arrow">→</div>
+    <div class="node hl"><b>Dependiente</b>La que cambia como resultado.<br><small>Nota del examen</small></div>
+  </div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">Los roles pueden intercambiarse entre investigaciones. Según el formato del dato, también se habla de variable <b>numérica</b>, <b>de texto</b> (string) y <b>lógica</b> (verdadero/falso).</p>
+
+  <h2>R y RStudio</h2>
+  <p class="prose"><b>R</b> es un lenguaje de programación y entorno para análisis estadístico y gráfico. Es software libre (GNU GPL), multiplataforma y lo crearon R. Ihaka y R. Gentleman (Universidad de Auckland) en 1993. Tiene más de 18.000 paquetes. <b>RStudio</b> es el entorno de trabajo (IDE) más usado, dividido normalmente en 4 paneles. Se trabaja desde la consola, un script (.R) o un fichero R Markdown (.Rmd).</p>
+
+  <div class="grid g2">
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th>Función</th><th>Tipo de dato</th><th>Variable</th></tr></thead>
+      <tbody>
+        <tr><td><code>as.numeric</code></td><td>numérico</td><td>Cuantitativa</td></tr>
+        <tr><td><code>as.integer</code></td><td>entero</td><td>Cuantitativa</td></tr>
+        <tr><td><code>as.character</code></td><td>cadena</td><td>Cualitativa</td></tr>
+        <tr><td><code>as.logical</code></td><td>lógico</td><td>Dicotómica</td></tr>
+        <tr><td><code>as.factor</code></td><td>número o cadena</td><td>Cualitativa</td></tr>
+      </tbody>
+    </table></div>
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th>Operador</th><th>Ejemplo</th><th>Resultado</th></tr></thead>
+      <tbody>
+        <tr><td><code>^</code> o <code>**</code></td><td><code>4 ^ 4</code></td><td>256</td></tr>
+        <tr><td><code>%%</code> módulo</td><td><code>5 %% 3</code></td><td>2</td></tr>
+        <tr><td><code>%/%</code> div. entera</td><td><code>5 %/% 3</code></td><td>1</td></tr>
+        <tr><td><code>!=</code> distinto</td><td><code>3 != 5</code></td><td>TRUE</td></tr>
+        <tr><td><code>&lt;-</code> asignación</td><td><code>x &lt;- 3</code></td><td>x vale 3</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <h3>Vector y data frame</h3>
+  <p class="prose">Un <b>vector</b> guarda los datos de una sola variable. Un <b>data frame</b> es la tabla: cada fila es un individuo y cada columna una variable (pueden ser de tipos distintos).</p>
+<pre class="code"><span class="c"># Vectores (una variable cada uno)</span>
+temp    &lt;- c(20.37, 18.56, 18.4, 21.96, 29.53, 28.16)
+humedad &lt;- c(88, 86, 81, 79, 80, 78)
+dia     &lt;- c("lunes", "jueves", "martes", "sábado", "domingo", "martes")
+
+<span class="c"># Se unen en un data frame</span>
+datos &lt;- data.frame(dia = dia, temperatura = temp, humedad = humedad)
+names(datos)   <span class="c"># nombres de las columnas</span>
+str(datos)     <span class="c"># tipo de dato de cada variable</span>
+class(dia)     <span class="c"># "character"</span></pre>
+
+  <h3>Categorizar una variable con <code>cut()</code></h3>
+<pre class="code">edad &lt;- c(0, 12, 89, 14, 25, 2, 65, 1, 16, 24, 67, 61, 64)
+cut(edad, breaks = c(0, 14, 24, 64, Inf),
+    labels = c("Niño", "Joven", "Adulto", "Mayor"))
+<span class="o"> [1] &lt;NA&gt;   Niño   Mayor  Niño   Adulto Niño   Mayor  Niño
+ [9] Joven  Joven  Mayor  Adulto Adulto</span></pre>
+  <div class="callout warn"><span class="tag">Ojo con esta trampa</span>
+    <p>La edad <b>0 sale como NA</b>. Por defecto <code>cut()</code> crea intervalos abiertos por la izquierda, (0,14], así que el 0 queda fuera. Se arregla con <code>include.lowest = TRUE</code>. Además, R distingue mayúsculas y minúsculas: <code>Edad</code> y <code>edad</code> son objetos distintos.</p>
+  </div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Continua = se mide (números reales). Discreta = se cuenta (números naturales).</li>
+    <li>Cualitativas: nominal (sin orden), ordinal (con orden), dicotómica (dos valores).</li>
+    <li>Variable independiente explica; dependiente es explicada.</li>
+    <li>En R, <code>as.factor</code> convierte a variable categórica; un data frame es filas = individuos, columnas = variables.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-2"></div>
+</section>
+
+<!-- ===================== TEMA 3 ===================== -->
+<section class="view" data-view="tema-3" hidden>
+  <p class="eyebrow">Tema 3</p>
+  <h1>Ciclo de vida de los datos</h1>
+  <p class="oneline">El ciclo de vida del dato es la secuencia lógica que sigue un dato en 5 fases: detectar fuentes, almacenarlo, prepararlo, analizarlo y explotar los resultados. Los principios <b>FAIR</b> garantizan que los datos se puedan encontrar, acceder, combinar y reutilizar.</p>
+  <ul class="objs"><li>Fases del ciclo</li><li>Data warehouse, ETL y OLAP</li><li>Hitos del ciclo</li><li>Principios FAIR</li></ul>
+
+  <h2>Las 5 fases</h2>
+  <figure class="diagram">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">1</span><b>Detección y análisis de fuentes</b>¿Están documentadas? ¿Cómo se extraen? ¿Cuánto volumen? ¿Cada cuánto llegan registros?</div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">2</span><b>Almacenamiento y organización</b>Arquitectura, ingesta automatizada y mantenimiento. Data lake o data warehouse.</div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">3</span><b>Pre-procesado y calidad</b>Evaluar la calidad técnica del dato y hacer un análisis descriptivo inicial.</div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">4</span><b>Analítica descriptiva y predictiva</b>Machine learning: clasificación, regresión, segmentación, recomendación.</div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">5</span><b>Explotación de resultados</b>Informes interactivos, visualizaciones, dashboards para decidir.</div>
+    </div>
+    <figcaption>Ejemplo de fuentes en la fase 1: sistemas de gestión de la empresa, sensores (IoT), redes sociales y datos abiertos de las administraciones públicas.</figcaption>
+  </figure>
+
+  <h3>De describir a recomendar</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Descriptiva</h4>¿Qué ha pasado?<br><small>Ventas por zona del último trimestre</small></div>
+    <div class="box"><h4>Predictiva</h4>¿Qué va a pasar?<br><small>Demanda prevista para agosto</small></div>
+    <div class="box accent"><h4>Prescriptiva</h4>¿Qué debo hacer?<br><small>Optimización y escenarios: cuánto stock pedir</small></div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo real</span>
+    <p>Las plataformas de streaming como <b>Netflix</b> o <b>Spotify</b> recorren todo el ciclo: recogen lo que ves o escuchas (fuentes), lo guardan en sus almacenes de datos, lo limpian, entrenan <b>modelos de recomendación</b> (analítica predictiva) y lo explotan en la pantalla de inicio que te sugiere qué ver.</p>
+  </div>
+
+  <h2>Almacenamiento: data lake vs. data warehouse</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Data lake</h4>Datos en <b>formato original, "en crudo"</b>, en muchos repositorios, normalmente en la nube. Se transforman en el momento de analizarlos.</div>
+    <div class="box accent"><h4>Data warehouse</h4>Almacén diseñado para la <b>inteligencia de negocio</b>. Datos orientados por temas, integrados, no volátiles y variables con el tiempo.</div>
+  </div>
+  <p class="prose">Un data warehouse incluye bases de datos (relacionales como SQL u Oracle; no relacionales como MongoDB; basadas en grafos), procesos <b>ETL</b> y herramientas de análisis <b>OLAP</b>. Todo esto se detalla en el <a href="#tema-8">tema 8</a>.</p>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>E · Extract</b>Obtener datos de fuentes internas y externas</div><div class="arrow">→</div>
+      <div class="node"><b>T · Transform</b>Filtrar, limpiar, depurar, homogeneizar y agrupar</div><div class="arrow">→</div>
+      <div class="node"><b>L · Load</b>Escribir los datos en el data warehouse</div><div class="arrow">→</div>
+      <div class="node hl"><b>OLAP</b>Analizar en línea desde distintos puntos de vista</div>
+    </div>
+    <figcaption>Claves de una herramienta ETL: conectividad, interfaz de usuario, escalabilidad, manejo de errores y accesibilidad.</figcaption>
+  </figure>
+
+  <h2>Hitos del ciclo</h2>
+  <div class="grid g4">
+    <div class="box"><h4>Modelo de datos</h4>Elegir el adecuado según aspectos técnicos, licencias, arquitectura y espacio.</div>
+    <div class="box"><h4>Modelo de almacenamiento</h4>Servidores propios o en la nube (acceso desde cualquier sitio con Internet).</div>
+    <div class="box"><h4>Enfoque del análisis</h4>Descriptivo para mandos medios; inferencial para directivos.</div>
+    <div class="box"><h4>Dashboard</h4>Vista general rápida con posibilidad de bajar al detalle.</div>
+  </div>
+
+  <h2>Principios FAIR</h2>
+  <p class="prose">Publicados formalmente el <b>15 de marzo de 2016</b> en la revista <i>Scientific Data</i> (Nature), tras el Lorentz Center Workshop de enero de 2014. Buscan que los datos sean útiles no solo para personas sino también <b>para máquinas</b>.</p>
+  <figure class="diagram">
+    <div class="grid g4">
+      <div class="box"><span class="k">F</span><h4>Findable · Encontrables</h4>Metadatos, identificador persistente (DOI), palabras clave y versión.</div>
+      <div class="box"><span class="k">A</span><h4>Accessible · Accesibles</h4>Qué datos se abren, cómo y en qué repositorio; si hace falta software.</div>
+      <div class="box"><span class="k">I</span><h4>Interoperable</h4>Formatos estándar y abiertos que permiten el intercambio entre sistemas.</div>
+      <div class="box"><span class="k">R</span><h4>Reusable · Reutilizables</h4>Licencias claras, fecha de disponibilidad y control de calidad descrito.</div>
+    </div>
+    <figcaption>Elementos que integran: documentación y metadatos, formatos, acceso, identificadores persistentes y licencias abiertas.</figcaption>
+  </figure>
+  <div class="callout warn"><span class="tag">Matiz importante</span><p>FAIR no significa "todo abierto". Los datos confidenciales no se publican; en ese caso, al menos se publican los <b>metadatos</b>. La idea es ser "abiertos de manera inteligente", con condiciones y licencias claras.</p></div>
+  <div class="callout ex"><span class="tag">Ejemplo real</span><p>Repositorios como <b>Zenodo</b> (del CERN) asignan un <b>DOI</b> a cada conjunto de datos: así se puede citar igual que un artículo, se encuentra en buscadores y lleva una licencia (por ejemplo, Creative Commons) que dice cómo reutilizarlo.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Las 5 fases, en orden: fuentes → almacenamiento → pre-procesado y calidad → analítica → explotación.</li>
+    <li>Data warehouse: orientado por temas, integrado, no volátil, variable con el tiempo.</li>
+    <li>ETL = extraer, transformar, cargar. OLAP = procesamiento analítico en línea; su eficacia se mide por el tiempo de respuesta.</li>
+    <li>FAIR = Findable, Accessible, Interoperable, Reusable (2016, Scientific Data).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-3"></div>
+</section>
+
+<!-- ===================== TEMA 4 ===================== -->
+<section class="view" data-view="tema-4" hidden>
+  <p class="eyebrow">Tema 4</p>
+  <h1>Etapas iniciales del ciclo</h1>
+  <p class="oneline">Antes de recoger un solo dato hay que definir el <b>objetivo</b> (qué quiero), el <b>indicador</b> (cómo lo mido) y la <b>meta</b> (cuánto quiero), planificar recursos y tiempos con un <b>diagrama de Gantt</b> y conocer la estructura de los datos.</p>
+  <ul class="objs"><li>Objetivos, indicadores y metas</li><li>Diagrama de Gantt y ruta crítica</li><li>Estructura de los datos</li></ul>
+
+  <h2>Objetivo, indicador y meta</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>Objetivo</b>Qué se quiere conseguir<br><small>Incrementar las ventas</small></div><div class="arrow">→</div>
+      <div class="node"><b>Indicador</b>Unidad de medida del objetivo<br><small>Ventas mensuales en €</small></div><div class="arrow">→</div>
+      <div class="node hl"><b>Meta</b>Cuantificación: cuánto y para cuándo<br><small>+25 % antes de diciembre</small></div>
+    </div>
+  </figure>
+  <div class="callout warn"><span class="tag">Error típico con los indicadores</span>
+    <p>Objetivo: "mejorar el posicionamiento de nuestras ventajas en la mente del cliente". Indicador <b>mal elegido</b>: número de acciones de comunicación realizadas (está relacionado, pero no mide el objetivo). Indicador <b>correcto</b>: número de veces que los clientes identifican nuestros diferenciales, medido con una encuesta.</p>
+  </div>
+
+  <h3>Objetivos SMART</h3>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
+    <div class="box"><span class="k">S</span><h4>Específicos</h4>Sin dudas de interpretación. "Diferenciarse de la competencia" no basta.</div>
+    <div class="box"><span class="k">M</span><h4>Medibles</h4>La característica más compleja; algunos objetivos son solo orientativos.</div>
+    <div class="box"><span class="k">A</span><h4>Alcanzables</h4>Si el equipo no cree en ellos, generan frustración.</div>
+    <div class="box"><span class="k">R</span><h4>Relevantes</h4>Medir lo importante, no "medir por medir".</div>
+    <div class="box"><span class="k">T</span><h4>Tiempo</h4>Con un plazo para hacer seguimiento.</div>
+  </div>
+  <p class="prose" style="font-size:.9rem">La meta debe salir de una reflexión seria, no de "lo del año pasado por uno más". Se estudia desde dos perspectivas: <b>técnica</b> (tendencia histórica) y <b>humana</b> (viabilidad con los responsables).</p>
+
+  <h3>Recursos necesarios</h3>
+  <div class="grid g4">
+    <div class="box"><h4>Humanos</h4>Personas capacitadas, funciones y responsables.</div>
+    <div class="box"><h4>Materiales</h4>Equipos, infraestructura física y tecnológica (comprar, alquilar o ceder).</div>
+    <div class="box"><h4>Técnicos</h4>Técnicas y tecnologías elegidas, laboratorios, software.</div>
+    <div class="box"><h4>Financieros</h4>Fondos: presupuesto, subvenciones, créditos, ingresos.</div>
+  </div>
+
+  <h2>Diagrama de Gantt</h2>
+  <p class="prose">Herramienta de planificación inventada por <b>Henry Laurence Gantt</b> (1861-1919), usada en proyectos como la presa Hoover. Muestra el inicio y fin del proyecto, las tareas, quién las hace, cuánto duran, cómo se solapan y el progreso.</p>
+  <figure class="diagram">
+    <div class="gantt" id="gantt"></div>
+    <figcaption>Proyecto de ejemplo: encuesta de satisfacción de clientes en 8 semanas. En azul, la <b>ruta crítica</b>: si cualquiera de esas tareas se retrasa, se retrasa todo el proyecto. ◆ = hito.</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>Ventajas</h4>Claridad, vista general simplificada, datos de rendimiento, mejor gestión del tiempo, flexibilidad. Mejora la comunicación y la motivación del equipo.</div>
+    <div class="box"><h4>Desventajas</h4>Complejidad en proyectos grandes, exige linealidad cronológica (conocer el final de antemano) y trabajo arduo para mantenerlo actualizado.</div>
+  </div>
+  <p class="prose"><b>Cómo crearlo</b> (también en Excel): listar todas las tareas → identificar las dependencias → crear la línea temporal → asignar tareas a personas.</p>
+
+  <h3>Técnicas relacionadas</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Ruta crítica (CPA)</h4>Identifica las actividades, su duración y sus relaciones. Pronostica si el proyecto se entregará a tiempo.</div>
+    <div class="box"><h4>WBS</h4>Estructura de descomposición del trabajo: divide el proyecto en partes más pequeñas y manejables.</div>
+    <div class="box"><h4>PERT</h4>Creado por el Departamento de Defensa de EE. UU. en los años 50 para el proyecto Polaris. Calcula el tiempo mínimo e incorpora la incertidumbre.</div>
+  </div>
+
+  <h2>Estructura de los datos</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Estructurados</th><th>No estructurados</th></tr></thead>
+    <tbody>
+      <tr><td><b>Qué son</b></td><td>Formato definido y orden claro</td><td>Sin formato fijo; tienen etiquetas o marcadores</td></tr>
+      <tr><td><b>Ejemplos</b></td><td>Tablas de bases de datos, hojas de cálculo</td><td>Correos, PDFs, audios, vídeos, publicaciones en redes</td></tr>
+      <tr><td><b>Almacenamiento</b></td><td>Bases de datos relacionales (RDBMS)</td><td>NoSQL, data lake</td></tr>
+      <tr><td><b>Análisis</b></td><td>Fácil, resultados medibles</td><td>Requiere herramientas más complejas</td></tr>
+      <tr><td><b>Flexibilidad</b></td><td>Menor, sensibles a cambios</td><td>Mayor</td></tr>
+      <tr><td><b>Información</b></td><td>Más madura y fiable (data warehouse)</td><td>Conglomerado masivo (data lake)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Además hay que diseñar el <b>modelo de datos para el análisis</b> (cómo se relacionan tablas y fuentes) y la <b>estructura de los datos de salida</b>: qué se entrega al usuario final y qué no, por interés o por seguridad.</p>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Objetivo = qué; indicador = unidad de medida; meta = cuantificación (cuánto).</li>
+    <li>SMART: específicos, medibles, alcanzables, relevantes, en un tiempo.</li>
+    <li>Recursos: humanos, materiales, técnicos y financieros.</li>
+    <li>Gantt (H. L. Gantt), ruta crítica (CPA), WBS y PERT (proyecto Polaris, años 50).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-4"></div>
+</section>
+
+<!-- ===================== TEMA 5 ===================== -->
+<section class="view" data-view="tema-5" hidden>
+  <p class="eyebrow">Tema 5</p>
+  <h1>Recolección de datos</h1>
+  <p class="oneline">Para recoger datos hay que planificar (autorización, tiempo, recursos, formación, supervisión), elegir herramientas <b>confiables, válidas y objetivas</b>, y decidir si se recogen de primera mano (<b>primarios</b>) o se aprovechan datos ya existentes (<b>secundarios</b>).</p>
+  <ul class="objs"><li>Metodología de recolección</li><li>Herramientas</li><li>Fuentes primarias y secundarias</li><li>Documentación</li></ul>
+
+  <h2>Metodología: qué hay que decidir</h2>
+  <div class="flow stack">
+    <div class="node"><b>Tipo de estudio</b>Define elementos, contexto y magnitud</div><div class="arrow">→</div>
+    <div class="node"><b>Población y muestra</b>Tamaño y tipo de muestreo</div><div class="arrow">→</div>
+    <div class="node"><b>Técnicas</b>Según el dato sea cualitativo o cuantitativo, primario o secundario</div><div class="arrow">→</div>
+    <div class="node hl"><b>Tabulación y análisis</b>Prever qué análisis permitirán los datos</div>
+  </div>
+  <p class="prose">Planificación previa: <b>autorización o acceso</b> (siempre lo primero), <b>tiempo</b>, <b>recursos</b> (humanos, económicos, físicos), <b>capacitación</b> del equipo y <b>supervisión y coordinación</b>. No hay métodos buenos ni malos, solo más o menos adecuados al estudio.</p>
+
+  <h3>Las tres cualidades de una herramienta</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Confiabilidad</h4>Produce resultados consistentes y coherentes si se repite.<br><small>Una báscula que marca lo mismo cada vez</small></div>
+    <div class="box"><h4>Validez</h4>Mide realmente lo que dice medir.<br><small>Un test de inglés que mide inglés, no velocidad lectora</small></div>
+    <div class="box"><h4>Objetividad</h4>El investigador no introduce sus sesgos o prejuicios.</div>
+  </div>
+
+  <h2>Datos primarios vs. secundarios</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div class="box accent"><h4>Primarios</h4>Recogidos de primera mano: específicos, auténticos y precisos.<br><small>Métodos cuantitativos (valores numéricos) y cualitativos (palabras, emociones, sin datos históricos).</small></div>
+      <div class="box"><h4>Secundarios</h4>Ya documentados por otros. Más rápidos y baratos, pero hay que conocer la metodología con que se recogieron.<br><small>Internos (propiedad de la organización) o externos (acceso más o menos abierto).</small></div>
+    </div>
+  </figure>
+
+  <h3>Herramientas para datos primarios</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Herramienta</th><th>Qué es</th><th>Variantes / claves</th></tr></thead>
+    <tbody>
+      <tr><td><b>Encuesta</b></td><td>Recoge preferencias, opiniones y comentarios de la audiencia. Muy usada y fiable.</td><td>Por aplicación: correo, teléfono, personal. Por objetivo: descriptiva (foto del momento) o analítica (explica el problema). Por preguntas: abierta o cerrada (añadir "otro").</td></tr>
+      <tr><td><b>Sondeo</b></td><td>Una sola pregunta de opción única o múltiple</td><td>Pulso rápido; fácil conseguir respuestas</td></tr>
+      <tr><td><b>Entrevista</b></td><td>El entrevistador pregunta y anota</td><td>Telefónica, cara a cara, CAPI (asistida por ordenador)</td></tr>
+      <tr><td><b>Técnica Delphi</b></td><td>Expertos revisan sus pronósticos tras ver los de otros expertos</td><td>Varias rondas hasta acercar posturas</td></tr>
+      <tr><td><b>Focus group</b></td><td>Reunión de grupo para debatir un tema</td><td>Moderador experto con guion; <b>6 a 8 participantes</b> que no conozcan el tema de antemano</td></tr>
+      <tr><td><b>Cuestionario</b></td><td>Conjunto de preguntas escritas</td><td>Abierto (razones) o cerrado (hechos, obliga a posicionarse)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout ex"><span class="tag">Ejemplos reales</span>
+    <p><b>Encuesta:</b> la Encuesta de Población Activa (EPA) del INE entrevista cada trimestre a decenas de miles de hogares para calcular la tasa de paro en España.</p>
+    <p><b>Delphi:</b> se usa para prever tendencias tecnológicas o sanitarias cuando no hay datos históricos: un panel de expertos responde, ve el resumen anónimo de las respuestas del grupo y vuelve a responder.</p>
+    <p><b>Focus group:</b> antes de lanzar un nuevo sabor, una marca de refrescos reúne a 8 consumidores con un moderador para escuchar qué opinan.</p>
+  </div>
+
+  <h3>Fuentes de datos secundarios</h3>
+  <div class="grid g2">
+    <div class="box"><h4>Internas</h4>Registros de salud y seguridad, misión y visión, estados financieros, revistas internas, informes de ventas, CRM, resúmenes ejecutivos.</div>
+    <div class="box"><h4>Externas</h4>Informes de gobiernos (metodología documentada), comunicados de prensa (posible sesgo), revistas de negocios, bibliotecas e Internet y redes sociales (requieren análisis de sentimiento y lenguaje natural).</div>
+  </div>
+
+  <h2>Documentar la recolección</h2>
+  <p class="prose">Hay que dejar por escrito: la herramienta usada, la población, cómo se seleccionó la muestra, el periodo de recogida y a qué periodo corresponden los datos. Se sigue la metodología científica y la normativa aplicable (ver <a href="#tema-10">tema 10</a>).</p>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>El primer paso es la autorización o acceso.</li>
+    <li>Herramientas: confiables, válidas y objetivas.</li>
+    <li>Primarios = de primera mano. Secundarios = ya existentes (internos o externos), más baratos.</li>
+    <li>Focus group: moderador + 6 a 8 participantes. Delphi: expertos que revisan sus estimaciones.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-5"></div>
+</section>
+
+<!-- ===================== TEMA 6 ===================== -->
+<section class="view" data-view="tema-6" hidden>
+  <p class="eyebrow">Tema 6</p>
+  <h1>Limpieza del dato</h1>
+  <p class="oneline">La limpieza (<i>data cleansing</i>) detecta datos incorrectos, incompletos o irrelevantes y los sustituye, modifica o elimina. Es la fase que más tiempo consume: <b>entre el 70 y el 90 % del proyecto</b>.</p>
+  <ul class="objs"><li>Calidad del dato</li><li>Datos faltantes</li><li>Atípicos con boxplot</li><li>Imputación y transformación</li></ul>
+
+  <h2>Qué es un dato de calidad</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Características</h4>Estandarizados · completos · precisos · validables · únicos (cada observación = un suceso o individuo).</div>
+    <div class="box"><h4>Cualidades</h4>Exactitud (comparar con otras fuentes) · coherencia (igual en todas las tablas) · validez (cumple reglas) · uniformidad (mismas unidades).</div>
+    <div class="box accent"><h4>Regla de oro</h4>Datos de poca calidad = análisis de poca calidad y predicciones poco fiables. El algoritmo solo aprende de lo que le das.</div>
+  </div>
+
+  <h3>Prevenir es mejor: validar al capturar</h3>
+  <p class="prose">Cuanto más fina sea la configuración del formulario de captura, menos errores. El temario pone dos ejemplos españoles. Pruébalos:</p>
+  <div class="diagram">
+    <div class="grid g2">
+      <div><label for="vMovil">Móvil (9 dígitos, empieza por 6 o 7)</label><input type="text" id="vMovil" value="612345678" inputmode="numeric"><div class="out" id="vMovilOut" style="margin-top:6px"></div></div>
+      <div><label for="vDni">DNI (8 dígitos + letra mayúscula)</label><input type="text" id="vDni" value="12345678Z"><div class="out" id="vDniOut" style="margin-top:6px"></div></div>
+    </div>
+    <figcaption>Además del formato, el DNI real tiene una letra de control: el número dividido entre 23 da un resto que corresponde a una letra de la serie TRWAGMYFPDXBNJZSQVHLCKE.</figcaption>
+  </div>
+
+  <h2>Los pasos de la limpieza</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>1. Explorar</b>Forma (tipo de dato), estructura (categorías correctas) e integridad</div><div class="arrow">→</div>
+      <div class="node"><b>2. Datos ausentes</b>Contar los NA por variable</div><div class="arrow">→</div>
+      <div class="node"><b>3. Atípicos y errores</b>Boxplot y rango intercuartílico</div><div class="arrow">→</div>
+      <div class="node hl"><b>4. Transformar</b>Imputar, reformatear, crear campos</div>
+    </div>
+    <figcaption>Los datos suelen venir de muchos sitios a la vez: CRM, bases SQL/NoSQL, hojas de cálculo, redes sociales, facturación, listas de correo, extractos bancarios.</figcaption>
+  </figure>
+
+  <h3>Paquetes de R: tidyverse</h3>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div class="box"><h4><code>ggplot2</code></h4>Gráficos (gramática de gráficos)</div>
+    <div class="box"><h4><code>dplyr</code></h4>Manipular datos con "verbos"</div>
+    <div class="box"><h4><code>tidyr</code></h4>Ordenar: cada variable, una columna</div>
+    <div class="box"><h4><code>readr</code></h4>Leer csv, tsv, fwf</div>
+    <div class="box"><h4><code>purrr</code></h4>Programación funcional; sustituye bucles for</div>
+    <div class="box"><h4><code>tibble</code></h4>Data frame moderno</div>
+    <div class="box"><h4><code>stringr</code></h4>Cadenas de texto (p. ej. quitar espacios)</div>
+    <div class="box"><h4><code>forcats</code></h4>Factores (variables categóricas)</div>
+    <div class="box"><h4><code>lubridate</code></h4>Fechas y horas: <code>year()</code>, <code>month()</code>, <code>hour()</code></div>
+  </div>
+
+  <h3>Detectar datos faltantes</h3>
+<pre class="code"><span class="c"># Número de NA en cada columna</span>
+sapply(df, function(x) sum(is.na(x)))
+<span class="o">Sepal.Length  Sepal.Width Petal.Length  Petal.Width      Species
+           4            7            4            3            4</span>
+
+<span class="c"># Gráfico de faltantes (paquete VIM)</span>
+aggr(df, prop = FALSE, numbers = TRUE, border = NA, combine = TRUE)</pre>
+
+  <h2>Valores atípicos (outliers) con boxplot</h2>
+  <p class="prose">El boxplot muestra la mediana, Q1 y Q3. Entre Q1 y Q3 está el 50 % central de los datos: esa distancia es el <b>rango intercuartílico (IQR = Q3 − Q1)</b>.</p>
+  <div class="grid g2">
+    <div class="box"><h4>Atípico leve</h4><span class="mono">q &lt; Q1 − 1,5·IQR</span><br>o <span class="mono">q &gt; Q3 + 1,5·IQR</span></div>
+    <div class="box"><h4>Atípico extremo</h4><span class="mono">q &lt; Q1 − 3·IQR</span><br>o <span class="mono">q &gt; Q3 + 3·IQR</span></div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo del temario: pasos diarios</span>
+    <p>Q1 = 353 pasos y Q3 = 1.947,5 pasos → IQR = 1.594,5 pasos. Límite superior leve: 1.947,5 + 1,5 × 1.594,5 = <b>4.339,25</b>. Límite superior extremo: 1.947,5 + 3 × 1.594,5 = <b>6.731</b>. Un día con 5.000 pasos sería atípico leve; uno con 9.000, extremo.</p>
+  </div>
+  <figure class="diagram" id="boxCalc">
+    <label for="boxIn">Tus datos (separados por comas)</label>
+    <input type="text" id="boxIn" value="120, 353, 410, 620, 800, 950, 1200, 1500, 1947, 2100, 2600, 5000, 9000">
+    <svg id="boxSvg" viewBox="0 0 600 120" width="100%" style="display:block;margin-top:12px" role="img" aria-label="Diagrama de caja de los datos introducidos"></svg>
+    <div class="out" id="boxOut"></div>
+    <figcaption>Calculadora de boxplot: los cuartiles se calculan como <code>quantile()</code> de R (tipo 7). Los puntos rojos son atípicos.</figcaption>
+  </figure>
+
+  <h2>Métodos de imputación</h2>
+  <p class="prose">Imputar es rellenar los valores que faltan.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Método</th><th>Cuándo</th><th>Ventajas</th><th>Desventajas</th></tr></thead>
+    <tbody>
+      <tr><td><b>No hacer nada</b></td><td>Algoritmos que manejan los NA (árboles) o los ignoran (regresión)</td><td>Fácil y rápido</td><td>Algunas librerías no se ejecutan con NA</td></tr>
+      <tr><td><b>Media / mediana</b></td><td>Solo variables numéricas</td><td>Fácil; bien en datasets pequeños</td><td>Ignora correlaciones; mal con categóricas; poco preciso</td></tr>
+      <tr><td><b>Moda</b></td><td>Variables categóricas</td><td>Funciona con categorías</td><td>Ignora correlaciones; puede introducir sesgo</td></tr>
+      <tr><td><b>Cero o constante</b></td><td>Cuando el faltante significa realmente 0</td><td>Muy sencillo</td><td>Distorsiona si el NA no es un 0</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ex"><span class="tag">¿Media o mediana? Un ejemplo con sueldos</span>
+    <p>Sueldos: 1.200 · 1.250 · 1.300 · 1.400 · 9.000 € (el director) y uno que falta. La <b>media</b> es 2.830 €; la <b>mediana</b>, 1.300 €. Rellenar con la media inventaría un sueldo que casi nadie cobra. Con distribuciones <b>sesgadas a la derecha</b> (media &gt; mediana) se usa la <b>mediana</b>. Si la distribución es simétrica, media y mediana coinciden y vale cualquiera.</p>
+  </div>
+
+  <h3>Transformaciones habituales</h3>
+  <p class="prose">Igualar formatos · descartar campos · corregir errores ortográficos · dar formato a fechas · eliminar columnas duplicadas · borrar registros inútiles · cambiar el tipo de dato · crear columnas nuevas a partir de otras · recodificar categorías.</p>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Pasos: explorar → ausentes → atípicos → transformar.</li>
+    <li>IQR = Q3 − Q1. Leve: 1,5·IQR. Extremo: 3·IQR.</li>
+    <li>Media/mediana solo numéricas; moda para categóricas; distribución sesgada → mediana.</li>
+    <li>La preparación de los datos ocupa el 70-90 % del tiempo del proyecto.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-6"></div>
+</section>
+
+<!-- ===================== TEMA 7 ===================== -->
+<section class="view" data-view="tema-7" hidden>
+  <p class="eyebrow">Tema 7</p>
+  <h1>Análisis de datos, interpretación y valoración de resultados</h1>
+  <p class="oneline">El <b>análisis exploratorio</b> busca patrones, errores y relaciones entre variables. Para variables categóricas se usan frecuencias y tablas de contingencia; para numéricas, estadísticos descriptivos, histogramas y correlaciones.</p>
+  <ul class="objs"><li>Encontrar patrones</li><li>Identificar errores</li><li>Relaciones entre variables</li><li>Responder preguntas de investigación</li></ul>
+
+  <h2>Los cuatro tipos de análisis exploratorio</h2>
+  <figure class="diagram">
+    <div class="table-wrap" style="margin:0"><table>
+      <thead><tr><th></th><th>No gráfico</th><th>Gráfico</th></tr></thead>
+      <tbody>
+        <tr><td><b>Univariado</b><br><small>una variable</small></td><td>Media, mediana, tabla de frecuencias</td><td>Histograma, gráfico de barras, boxplot</td></tr>
+        <tr><td><b>Multivariado</b><br><small>dos o más</small></td><td>Tabla de contingencia, coeficiente de correlación</td><td>Gráfico de dispersión, correlograma</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption>Cada celda se subdivide a su vez según los datos sean categóricos o numéricos.</figcaption>
+  </figure>
+
+  <h2>Explorar un conjunto de datos en R</h2>
+<pre class="code">library(dplyr); library(ggplot2); library(readxl)
+library(gmodels); library(Hmisc); library(ggthemes)
+
+glimpse(datos); str(datos)        <span class="c"># tipos de variables</span>
+head(datos); tail(datos)          <span class="c"># primeras / últimas filas</span>
+dim(datos); nrow(datos); ncol(datos)
+class(x); typeof(x)               <span class="c"># clase y tipo de un objeto</span>
+summary(datos)                    <span class="c"># mín, cuartiles, media, máx</span>
+datos$region &lt;- as.factor(datos$region)   <span class="c"># texto → categorías</span></pre>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div class="box"><code>mean()</code><br><small>media</small></div>
+    <div class="box"><code>median()</code><br><small>mediana</small></div>
+    <div class="box"><code>mfv()</code><br><small>moda (modeest)</small></div>
+    <div class="box"><code>sd()</code> / <code>var()</code><br><small>desviación / varianza</small></div>
+    <div class="box"><code>IQR()</code> / <code>mad()</code><br><small>rango intercuartílico / desviación mediana</small></div>
+    <div class="box"><code>cov()</code> / <code>cor()</code><br><small>covarianza / correlación</small></div>
+  </div>
+
+  <h2>Variables categóricas: frecuencias y proporciones</h2>
+  <p class="prose">Ejemplo del temario: encuesta a 1.455 hogares de Costa Rica.</p>
+<pre class="code">table(encuesta$ZONA)
+<span class="o"> Rural Urbana
+   447   1008</span></pre>
+  <figure class="diagram">
+    <div class="btnrow" role="group" aria-label="Tipo de tabla">
+      <button class="btn" data-ct="abs" aria-pressed="true">table()</button>
+      <button class="btn" data-ct="tot" aria-pressed="false">prop.table(t)</button>
+      <button class="btn" data-ct="row" aria-pressed="false">prop.table(t, 1) filas</button>
+      <button class="btn" data-ct="col" aria-pressed="false">prop.table(t, 2) columnas</button>
+    </div>
+    <div class="table-wrap" style="margin:0"><table id="ctTable"></table></div>
+    <figcaption id="ctCap"></figcaption>
+  </figure>
+  <p class="prose"><code>CrossTable()</code> (paquete <b>gmodels</b>) muestra todo en una tabla: N, porcentaje por fila (<code>prop.r</code>), por columna (<code>prop.c</code>), del total (<code>prop.t</code>) y chi-cuadrado (<code>prop.chisq</code>). Cada opción se desactiva con <code>= F</code>.</p>
+
+  <h2>Variables numéricas</h2>
+  <p class="prose"><code>summary()</code> da los estadísticos básicos; <code>describe()</code> (Hmisc) añade observaciones y valores perdidos; <code>descr()</code> (summarytools) añade asimetría y curtosis. El <b>histograma</b> se hace con <code>hist(datos$variable)</code> o, más personalizable, con <b>ggplot2</b>.</p>
+
+  <h3>group_by() + summarise()</h3>
+<pre class="code">encuesta %&gt;%
+  group_by(REGION) %&gt;%
+  summarise(ingresoprom = mean(ingreso), edadprom = mean(Edad))
+<span class="o">  REGION          ingresoprom edadprom
+1 Brunca             465490.     56.5
+2 Central            664111.     56.4
+3 Chorotega          448612.     56.3
+4 Huetar Caribe      417192.     55.8
+5 Huetar Norte       433180.     59.1
+6 Pacifico Central   507286.     56.7</span></pre>
+  <p class="prose"><code>mutate()</code> añade la media como nueva columna en cada fila; <code>summarise()</code> reduce a una fila por grupo.</p>
+
+  <h2>Correlación</h2>
+  <p class="prose">Mide la <b>relación lineal</b> entre dos variables con un coeficiente <b>r entre −1 y 1</b>. Mueve el control para verlo:</p>
+  <figure class="diagram">
+    <label for="rSlider">Coeficiente de correlación: <b class="out" id="rVal">0,80</b></label>
+    <input type="range" id="rSlider" min="-1" max="1" step="0.05" value="0.8" style="width:100%">
+    <svg id="corrSvg" viewBox="0 0 420 260" width="100%" style="max-width:480px;display:block;margin:8px auto 0" role="img" aria-label="Gráfico de dispersión"></svg>
+    <p class="out" id="rInterp" style="text-align:center"></p>
+    <figcaption>Ejemplo: experiencia laboral (eje X) frente a salario (eje Y). Con r = 0,8 la relación es positiva y fuerte.</figcaption>
+  </figure>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Valor de r</th><th>Interpretación</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">r = 1</td><td>Relación positiva perfecta</td></tr>
+      <tr><td class="mono">0 &lt; r &lt; 1</td><td>Relación positiva (si una sube, la otra sube)</td></tr>
+      <tr><td class="mono">r = 0</td><td>Sin relación lineal</td></tr>
+      <tr><td class="mono">−1 &lt; r &lt; 0</td><td>Relación negativa (si una sube, la otra baja)</td></tr>
+      <tr><td class="mono">r = −1</td><td>Relación negativa perfecta</td></tr>
+    </tbody>
+  </table></div>
+<pre class="code">cor(x, y)                        <span class="c"># coeficiente</span>
+cor.test(x, y)                   <span class="c"># coeficiente + p-value</span>
+round(cor(base), 2)              <span class="c"># matriz de correlación</span>
+rcorr(as.matrix(base))           <span class="c"># matriz + p-values (Hmisc)</span>
+corrplot(round(cor(base),1), method = "number", type = "upper")
+chart.Correlation(base, histogram = F, pch = 19)   <span class="c"># PerformanceAnalytics</span></pre>
+  <div class="callout ex"><span class="tag">Ejemplo del temario</span>
+    <p>En los cantones de Costa Rica, la correlación entre el porcentaje de voto a un partido (PRN) y el indicador de rezago escolar es <b>0,68</b>, con p-value ≈ 0: relación positiva y <b>estadísticamente significativa</b>. Si el p-value es menor que el nivel de significancia elegido (por ejemplo 5 %), el coeficiente es significativo.</p>
+  </div>
+  <div class="callout warn"><span class="tag">Correlación no es causalidad</span>
+    <p>Que dos variables se muevan juntas no demuestra que una cause la otra. Las ventas de helados y los ahogamientos en playas están correlacionadas porque ambas suben en verano.</p>
+  </div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>4 tipos de análisis: no gráfico, gráfico, univariado, multivariado.</li>
+    <li><code>table()</code> frecuencias; <code>prop.table(t,1)</code> por filas, <code>(t,2)</code> por columnas.</li>
+    <li>r ∈ [−1, 1]; significativo si p-value &lt; nivel de significancia (p. ej. 0,05).</li>
+    <li><code>group_by()</code> agrupa; <code>summarise()</code> resume; <code>mutate()</code> crea columnas.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-7"></div>
+</section>
+
+<!-- ===================== TEMA 8 ===================== -->
+<section class="view" data-view="tema-8" hidden>
+  <p class="eyebrow">Tema 8</p>
+  <h1>Almacén del dato (data warehouse)</h1>
+  <p class="oneline">Un <b>data warehouse</b> reúne datos de muchas fuentes mediante procesos <b>ETL</b>, los guarda organizados para el negocio y permite analizarlos con <b>OLAP</b>. Un <b>data mart</b> es un trozo de ese almacén dedicado a un área.</p>
+  <ul class="objs"><li>Arquitectura del almacén</li><li>Bases de datos relacionales y NoSQL</li><li>ETL y OLAP</li></ul>
+
+  <h2>Arquitectura completa</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>Fuentes</b>ERP, CRM, Excel, web, sensores IoT, redes sociales</div><div class="arrow">→</div>
+      <div class="node"><b>ETL</b>Extraer, transformar y cargar</div><div class="arrow">→</div>
+      <div class="node hl"><b>Data warehouse</b>Almacén central integrado</div><div class="arrow">→</div>
+      <div class="node"><b>Data marts</b>Ventas · Marketing · RR. HH.</div><div class="arrow">→</div>
+      <div class="node"><b>OLAP y BI</b>Informes, dashboards, minería de datos</div>
+    </div>
+    <figcaption>Antes de elegir la arquitectura: volumen y seguridad, recursos físicos y financieros, opciones del mercado, plazos, local o nube, y compatibilidad con lo que ya existe.</figcaption>
+  </figure>
+
+  <h2>Las 4 características de Inmon</h2>
+  <p class="prose">Bill Inmon define el data warehouse como un conjunto de datos <b>orientados por temas, integrados, variables con el tiempo y no volátiles</b>, usados para tomar decisiones.</p>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="box"><h4>Orientado por temas</h4>Organizado por temas de negocio (clientes, productos), no por aplicación.</div>
+    <div class="box"><h4>Integrado</h4>Datos de fuentes distintas unificados en una estructura común.</div>
+    <div class="box"><h4>No volátil</h4>Los datos se leen, no se modifican ni se eliminan.</div>
+    <div class="box"><h4>Variable con el tiempo</h4>Guarda el histórico para ver la evolución.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo real</span>
+    <p>Una cadena de supermercados vuelca cada noche las ventas de todas sus cajas al data warehouse. Por la mañana, el equipo de compras consulta su <b>data mart</b> para comparar las ventas de esta semana con la misma semana del año anterior (posible gracias a que el almacén es <b>no volátil</b> y <b>guarda el histórico</b>). Las tarjetas de fidelización añaden quién compró qué.</p>
+  </div>
+
+  <h3>Data lake, data warehouse y data mart</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Data lake</th><th>Data warehouse</th><th>Data mart</th></tr></thead>
+    <tbody>
+      <tr><td><b>Datos</b></td><td>En crudo, cualquier formato</td><td>Estructurados e integrados</td><td>Subconjunto de un área</td></tr>
+      <tr><td><b>Alcance</b></td><td>Toda la organización</td><td>Toda la organización</td><td>Un departamento</td></tr>
+      <tr><td><b>Ventaja</b></td><td>Flexibilidad</td><td>Fiabilidad y coherencia</td><td>Rapidez (días, no meses) y bajo coste</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose"><b>¿Por qué lo necesitan las empresas?</b> Mejor acceso a los datos, más consistencia, documentación, menores costes, combinar fuentes independientes y hacer consultas sin ralentizar los sistemas operativos. En la <b>nube</b> aporta consolidación más fácil, monetización más rápida y mejor protección.</p>
+
+  <h2>Bases de datos</h2>
+  <p class="prose">Colección de datos estructurados almacenados en un sistema electrónico.</p>
+  <div class="grid g2">
+    <div class="box accent"><h4>Relacionales (SQL)</h4>Modelo de Edgar F. Codd (1970). Tablas con filas (registros) y columnas (campos); cada registro tiene una <b>clave</b> única. Garantizan integridad referencial y las propiedades <b>ACID</b>.<br><small>Gestores: Oracle, MySQL, Microsoft SQL Server, PostgreSQL, DB2.</small></div>
+    <div class="box"><h4>No relacionales (NoSQL)</h4>No usan tablas sino documentos u otras estructuras. No usan SQL como lenguaje principal. Muy escalables y flexibles, ideales para datos no estructurados. No garantizan ACID con la misma eficacia.<br><small>Ejemplos: MongoDB, Redis, Cassandra, Neo4j.</small></div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Relacional</th><th>NoSQL</th></tr></thead>
+    <tbody>
+      <tr><td><b>Estructura</b></td><td>Tablas con esquema fijo</td><td>Documentos, clave-valor, grafos…</td></tr>
+      <tr><td><b>Lenguaje</b></td><td>SQL estandarizado</td><td>Sin estándar; SQL solo como apoyo</td></tr>
+      <tr><td><b>ACID</b></td><td>Sí</td><td>No con la misma eficacia</td></tr>
+      <tr><td><b>Escalabilidad</b></td><td>Menor (vertical)</td><td>Mayor (horizontal)</td></tr>
+      <tr><td><b>Puntos débiles</b></td><td>Multimedia, CAD, mapas; no permite jerarquías; consultas lentas entre muchas tablas</td><td>Sistema reciente, menos estandarizado, soporte más limitado</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><span class="tag">ACID</span><p><b>A</b>tomicidad (todo o nada) · <b>C</b>onsistencia · a<b>I</b>slamiento (las transacciones no se pisan; el temario lo llama "integridad") · <b>D</b>urabilidad. Ejemplo: en una transferencia bancaria, o se resta de una cuenta y se suma en la otra, o no se hace nada.</p></div>
+
+  <h3>Relaciones entre tablas</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Uno a uno (1:1)</h4>Una persona ↔ un DNI</div>
+    <div class="box"><h4>Uno a varios (1:N)</h4>Un cliente → muchos pedidos</div>
+    <div class="box"><h4>Varios a varios (N:M)</h4>Alumnos ↔ asignaturas</div>
+  </div>
+
+  <h3>Tipos de bases NoSQL</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Cómo guarda</th><th>Uso típico</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td><b>Clave-valor</b></td><td>Pares clave → valor</td><td>Juegos, apps, IoT</td><td>Redis, DynamoDB</td></tr>
+      <tr><td><b>Documentos</b></td><td>Objetos JSON flexibles y jerárquicos</td><td>Gestores de contenido, perfiles de usuario</td><td>MongoDB</td></tr>
+      <tr><td><b>Grafos</b></td><td>Nodos (entidades) y aristas (relaciones)</td><td>Redes sociales, fraude, recomendaciones</td><td>Neo4j</td></tr>
+      <tr><td><b>En memoria</b></td><td>En RAM, respuesta en milisegundos</td><td>Clasificaciones de juegos, tiempo real</td><td>Redis, Memcached</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>ETL en detalle</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>Extracción</b>Obtener datos de fuentes internas y externas y transportarlos a un sistema intermedio</div><div class="arrow">→</div>
+      <div class="node"><b>Transformación</b>Filtrar, limpiar, homogeneizar y agrupar mediante reglas o tablas de consulta</div><div class="arrow">→</div>
+      <div class="node hl"><b>Carga</b>Escribir los datos transformados en el sistema de destino</div>
+    </div>
+  </figure>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div class="box"><h4>Conectividad</h4>Conectores con todas las fuentes</div>
+    <div class="box"><h4>Interfaz</h4>Fácil de usar y sin errores</div>
+    <div class="box"><h4>Escalabilidad</h4>Crecer con el negocio (optimización pushdown)</div>
+    <div class="box"><h4>Manejo de errores</h4>Cero pérdida de datos</div>
+    <div class="box"><h4>Accesibilidad</h4>Datos en tiempo real</div>
+  </div>
+
+  <h2>OLAP</h2>
+  <p class="prose"><b>On-Line Analytical Processing</b>: el método más usado para analizar el data warehouse. Permite ver los datos desde distintos puntos de vista (por tiempo, zona, producto…) y su eficacia se mide por el <b>tiempo de respuesta</b>. Se complementa con la minería de datos (data mining).</p>
+  <div class="callout ex"><span class="tag">Ejemplo</span><p>Un director comercial mira las ventas de 2025 por país, hace clic en España para verlas por provincia (<i>drill-down</i>) y luego filtra solo la categoría "bebidas". Todo en segundos, sin tocar los sistemas de caja.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Inmon: orientado por temas, integrado, no volátil, variable con el tiempo.</li>
+    <li>Data mart = subconjunto de un área; rápido y rentable.</li>
+    <li>Relacional: tablas, claves, SQL, ACID (Codd, 1970). NoSQL: clave-valor, documentos, grafos, en memoria.</li>
+    <li>Relaciones 1:1, 1:N, N:M. Claves ETL: conectividad, interfaz, escalabilidad, errores, accesibilidad.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-8"></div>
+</section>
+
+<!-- ===================== TEMA 9 ===================== -->
+<section class="view" data-view="tema-9" hidden>
+  <p class="eyebrow">Tema 9</p>
+  <h1>Disponibilidad del dato</h1>
+  <p class="oneline">Un dato disponible es <b>accesible</b> para quien tiene permiso, <b>útil</b> y <b>usable</b>, y está <b>seguro</b> frente a accesos no autorizados y corrupción durante todo su ciclo de vida.</p>
+  <ul class="objs"><li>Acceso a los datos</li><li>Utilidad y usabilidad</li><li>Seguridad</li><li>In house vs. nube</li></ul>
+
+  <h2>Acceso</h2>
+  <p class="prose">La accesibilidad es la autorización para consultar o manipular el dato.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Páginas web con base de datos</h4>Las páginas ASP usan <b>ADO</b> (ActiveX Data Objects) para conectar con gestores compatibles con <b>ODBC</b>: SQL Server, Access, Informix, Oracle.</div>
+    <div class="box"><h4>SQL con usuarios y perfiles</h4>Requiere usuario y contraseña. Cada perfil tiene permisos distintos: unos pueden leer, otros modificar.</div>
+    <div class="box"><h4>Repositorios abiertos</h4>Datos públicos para descargar, sin información sensible de los ciudadanos.</div>
+  </div>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div class="box"><h4>Conexión con DSN</h4>Se define un identificador de conexión con el driver ODBC del panel de control (Windows → Fuentes de datos ODBC → DSN de sistema). La página usa ese nombre.</div>
+      <div class="box"><h4>Conexión sin DSN</h4>El archivo de la base está en un directorio del servidor; la cadena de conexión indica el driver y la ruta física completa.</div>
+    </div>
+    <div class="flow" style="margin-top:12px">
+      <div class="node"><b>1</b>Crear el objeto de conexión</div><div class="arrow">→</div>
+      <div class="node"><b>2</b>Definir la conexión (con o sin DSN)</div><div class="arrow">→</div>
+      <div class="node hl"><b>3</b>Abrir la conexión</div>
+    </div>
+  </figure>
+  <div class="callout ex"><span class="tag">Ejemplo real</span><p>El <b>INE</b> (Instituto Nacional de Estadística) y el portal <b>datos.gob.es</b> publican miles de conjuntos de datos abiertos (población, paro, precios) que cualquiera puede descargar. Están anonimizados: nunca incluyen datos que identifiquen a una persona.</p></div>
+
+  <h2>Utilidad y usabilidad</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Utilidad</h4>Para qué sirve el dato. El temario la considera prácticamente ilimitada: un mismo dato puede servir para muchos fines (empresa, ciencia, demografía).</div>
+    <div class="box"><h4>Usabilidad</h4>La oportunidad real de usarlo: que esté accesible, en un formato manejable y a tiempo.</div>
+  </div>
+  <p class="prose">Las empresas captan datos con sus <b>CRM</b> y <b>ERP</b> (compras, ventas, facturación, inventario, logística). En demografía, los datos permiten dimensionar salud, educación, infraestructura y vivienda.</p>
+
+  <h2>Seguridad</h2>
+  <p class="prose">Medidas para evitar el acceso no autorizado y la corrupción de los datos. El primer paso es el <b>análisis de riesgo</b>: descubrir, identificar y clasificar los datos sensibles. Incluye encriptación, tokenización y gestión de claves.</p>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div class="box"><h4>Prevenir</h4>Ingeniería de seguridad · Encriptación · Firewall · HTTPS / SSL / TLS · Antivirus y copias de seguridad</div>
+      <div class="box"><h4>Detectar</h4>NIDS (detección de intrusos en red) · SIEM (centraliza y analiza registros en tiempo real) · Análisis de vulnerabilidades</div>
+      <div class="box"><h4>Comprobar y contener</h4>Pruebas de intrusión (pentesting) · DLP (prevención de pérdida de datos) · Detección en punto final</div>
+    </div>
+    <figcaption>Mecanismos de seguridad del temario agrupados por su función.</figcaption>
+  </figure>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Mecanismo</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><b>Encriptación</b></td><td>Hace los datos ilegibles sin la clave, aunque se intercepten</td></tr>
+      <tr><td><b>NIDS</b></td><td>Vigila el tráfico de red, marca lo anómalo y alerta a los administradores</td></tr>
+      <tr><td><b>Firewall</b></td><td>Reglas que bloquean accesos no autorizados y la salida de información</td></tr>
+      <tr><td><b>Análisis de vulnerabilidades</b></td><td>Busca y prioriza puntos débiles</td></tr>
+      <tr><td><b>Pruebas de intrusión</b></td><td>Ataques controlados para ver si se puede entrar y por dónde</td></tr>
+      <tr><td><b>SIEM</b></td><td>Reúne los registros de seguridad de toda la red y detecta patrones</td></tr>
+      <tr><td><b>HTTPS, SSL, TLS</b></td><td>Cifran la comunicación entre navegador y servidor</td></tr>
+      <tr><td><b>DLP</b></td><td>Impide que salgan datos confidenciales de la red, a propósito o por error</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ex"><span class="tag">Ejemplo real: ransomware</span><p>En mayo de 2017 el ransomware <b>WannaCry</b> cifró ordenadores en más de 150 países, entre ellos equipos de Telefónica en España y del sistema sanitario británico (NHS), que tuvo que cancelar citas. Aprovechaba una vulnerabilidad de Windows para la que ya existía un parche: tener el sistema actualizado y copias de seguridad habría evitado gran parte del daño.</p></div>
+
+  <h2>In house vs. nube</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>In house (local)</th><th>Nube</th></tr></thead>
+    <tbody>
+      <tr><td><b>Percepción</b></td><td>Sensación de control</td><td>Temor a no saber dónde está el dato</td></tr>
+      <tr><td><b>Monitorización</b></td><td>Recursos limitados</td><td>Auditoría continua, 24/7/365</td></tr>
+      <tr><td><b>Errores humanos</b></td><td>Más tareas manuales</td><td>Automatización y estandarización</td></tr>
+      <tr><td><b>Acceso del personal</b></td><td>Las peores brechas ocurren tras el firewall propio</td><td>Roles repartidos; nadie tiene acceso total</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><span class="tag">Idea clave</span><p>Según el temario, que lo local sea más seguro que la nube es un <b>mito</b>: el acceso físico no autorizado a centros de datos en la nube es extremadamente raro.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Conexión con DSN (identificador ODBC) o sin DSN (ruta física); 3 pasos: crear objeto, definir, abrir.</li>
+    <li>Utilidad = para qué sirve; usabilidad = oportunidad de uso.</li>
+    <li>NIDS detecta intrusos; SIEM centraliza eventos; DLP evita fugas.</li>
+    <li>Ventajas nube: auditoría continua, automatización, controles de acceso estrictos.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-9"></div>
+</section>
+
+<!-- ===================== TEMA 10 ===================== -->
+<section class="view" data-view="tema-10" hidden>
+  <p class="eyebrow">Tema 10</p>
+  <h1>Aspectos normativos</h1>
+  <p class="oneline">En España los datos personales se protegen con el <b>RGPD</b> europeo y la <b>LOPDGDD</b>, que lo adapta y añade derechos digitales. Claves: consentimiento libre, informado, específico e inequívoco; brechas notificadas en <b>72 horas</b>; edad de consentimiento de <b>14 años</b>.</p>
+  <ul class="objs"><li>LOPDGDD</li><li>RGPD</li><li>Derechos y obligaciones</li></ul>
+
+  <h2>Cronología</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>27 abr 2016</b>Se aprueba el Reglamento (UE) 2016/679 (RGPD)</div><div class="arrow">→</div>
+      <div class="node"><b>25 may 2018</b>El RGPD empieza a aplicarse</div><div class="arrow">→</div>
+      <div class="node hl"><b>6 dic 2018</b>Entra en vigor la LOPDGDD en España</div>
+    </div>
+    <figcaption>La LOPDGDD adapta la ley española al RGPD y desarrolla el artículo 18.4 de la Constitución.</figcaption>
+  </figure>
+
+  <h2>LOPDGDD</h2>
+  <p class="prose"><b>Ley Orgánica de Protección de Datos y Garantía de Derechos Digitales.</b> Objeto: adaptar el ordenamiento español al RGPD y garantizar los derechos digitales. Finalidad: proteger la intimidad, privacidad e integridad de las personas. <b>Dato personal</b> es cualquier información en texto, imagen o audio que permita identificar a una persona.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Rendición de cuentas</h4>Más información al usuario sobre el tratamiento y sus derechos. Privacidad desde el diseño.</div>
+    <div class="box accent"><h4>Brechas de seguridad</h4>Se notifican a la <b>AEPD</b> en un máximo de <b>72 horas</b>, indicando si afectan a datos sensibles.</div>
+    <div class="box"><h4>Consentimiento</h4>Libre, informado, específico e inequívoco. El silencio o la inacción no valen.</div>
+  </div>
+
+  <h3>Tipos de consentimiento</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Cuándo se exige</th></tr></thead>
+    <tbody>
+      <tr><td><b>Inequívoco</b></td><td>Regla general para tratar datos personales, salvo que la ley diga otra cosa</td></tr>
+      <tr><td><b>Tácito</b></td><td>Cuando no se exige expreso (el RGPD lo deja de aceptar)</td></tr>
+      <tr><td><b>Expreso</b></td><td>Origen racial, salud y vida sexual</td></tr>
+      <tr><td><b>Expreso y por escrito</b></td><td>Ideología, afiliación sindical, religión y creencias</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ex"><span class="tag">Ejemplo real: los banners de cookies</span><p>Por esto las webs ya no pueden traer la casilla de "acepto" marcada por defecto: el consentimiento exige una <b>acción positiva</b>. Seguir navegando o no hacer nada no cuenta como aceptar, y la empresa debe poder <b>demostrar</b> que lo diste.</p></div>
+
+  <h3>Novedades para particulares y empresas</h3>
+  <div class="grid g2">
+    <div class="box"><h4>Personas fallecidas</h4>Familiares, personas designadas o representantes legales pueden pedir acceso, rectificación o supresión de sus datos.</div>
+    <div class="box"><h4>Menores</h4>Desde los <b>14 años</b> pueden consentir el tratamiento de sus datos (el RGPD deja a cada país elegir entre 13 y 16).</div>
+    <div class="box"><h4>Archivo público</h4>Lícito para las administraciones con fines de interés público.</div>
+    <div class="box"><h4>Infracciones penales</h4>Solo las tratan órganos competentes, si lo prevé una ley, o abogados y procuradores.</div>
+  </div>
+  <p class="prose">También: <b>bloqueo de datos</b> y obligación de nombrar un <b>delegado de protección de datos</b> si el tratamiento lo hace un organismo público, si se hace seguimiento sistemático a gran escala o si se tratan a gran escala datos sobre delitos.</p>
+
+  <h3>Nuevos derechos digitales</h3>
+  <div class="grid g3" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+    <div class="box"><h4>Neutralidad de Internet</h4>Todos los datos de la red se tratan igual.</div>
+    <div class="box"><h4>Acceso universal</h4>Asequible, de calidad y no discriminatorio.</div>
+    <div class="box"><h4>Seguridad y educación digital</h4>Comunicaciones seguras; formación digital en los planes educativos.</div>
+    <div class="box"><h4>Desconexión digital</h4>La empresa no puede contactarte fuera del horario laboral.</div>
+    <div class="box"><h4>Intimidad en el trabajo</h4>Dispositivos, videovigilancia, grabación de sonido y geolocalización, siempre informando.</div>
+    <div class="box"><h4>Derecho al olvido</h4>Pedir que se retire información obsoleta en buscadores y redes, aunque sea cierta.</div>
+    <div class="box"><h4>Portabilidad</h4>Llevar tus datos de una red social a otra.</div>
+    <div class="box"><h4>Testamento digital</h4>Los herederos deciden sobre los perfiles y datos del fallecido.</div>
+    <div class="box"><h4>Rectificación y actualización</h4>Corregir información falsa y pedir avisos de actualización en noticias.</div>
+  </div>
+  <p class="prose" style="font-size:.9rem">El derecho al olvido se puede pedir si los datos ya no son necesarios, si retiras el consentimiento o si se obtuvieron de forma ilícita.</p>
+
+  <h3>Régimen sancionador</h3>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div class="box" style="border-color:var(--bad)"><h4>Muy graves · prescriben en 3 años</h4>Usar los datos para otra finalidad · no informar al afectado · cobrar por acceder a tus datos · transferencias internacionales sin garantías</div>
+      <div class="box"><h4>Graves · 2 años</h4>Datos de menores sin consentimiento · no adoptar medidas técnicas · no nombrar responsable o encargado</div>
+      <div class="box"><h4>Leves · 1 año</h4>Falta de transparencia · no informar cuando se solicita · incumplimientos del encargado</div>
+    </div>
+    <figcaption>Multas de 10 a 20 millones de euros, o del 2 al 4 % de la facturación anual global.</figcaption>
+  </figure>
+  <div class="callout ex"><span class="tag">Multas reales</span>
+    <p><b>Meta</b> recibió en 2023 una multa de <b>1.200 millones de euros</b> de la autoridad irlandesa por transferir datos de usuarios europeos a EE. UU. sin garantías suficientes (una infracción "muy grave" según la tabla de arriba). En España, la AEPD multó en 2021 a <b>CaixaBank con 6 millones de euros</b>, en parte por no obtener un consentimiento válido de sus clientes.</p>
+  </div>
+
+  <h2>RGPD en 12 puntos</h2>
+  <div class="grid g3" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+    <div class="box"><h4>Concienciación</h4>Identificar áreas de riesgo de cumplimiento.</div>
+    <div class="box"><h4>Información que tratamos</h4>Documentar qué datos hay, de dónde vienen y con quién se comparten (auditoría).</div>
+    <div class="box"><h4>Comunicar la privacidad</h4>Base legal, plazos de conservación y derecho a reclamar ante la autoridad.</div>
+    <div class="box"><h4>Derechos individuales</h4>Acceso, rectificación, supresión, oposición al marketing directo, no a decisiones automatizadas, portabilidad.</div>
+    <div class="box"><h4>Solicitudes de acceso</h4>Procedimientos y, si es posible, acceso en línea.</div>
+    <div class="box"><h4>Base jurídica</h4>Identificar y documentar la base legal de cada tratamiento.</div>
+    <div class="box"><h4>Consentimiento</h4>"Consentimiento" y "consentimiento explícito": ambos libres, específicos, informados e inequívocos.</div>
+    <div class="box"><h4>Menores</h4>Consentimiento verificable de padres o tutores.</div>
+    <div class="box"><h4>Violaciones de datos</h4>Detectar, informar e investigar. Se notifican las que pueden causar daño.</div>
+    <div class="box"><h4>Privacidad desde el diseño</h4>Evaluaciones de impacto (PIA) unidas a la gestión de riesgos.</div>
+    <div class="box"><h4>Delegado (DPO)</h4>Responsable del cumplimiento dentro de la estructura.</div>
+    <div class="box"><h4>Internacional</h4>La autoridad principal es la del país de la sede o donde se decide el tratamiento.</div>
+  </div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>RGPD: Reglamento (UE) 2016/679, aplicable desde el 25/05/2018. LOPDGDD: vigente desde el 06/12/2018.</li>
+    <li>Brecha: notificar a la AEPD en 72 h. Edad de consentimiento en España: 14 años.</li>
+    <li>Expreso: raza, salud, vida sexual. Expreso y por escrito: ideología, sindicato, religión, creencias.</li>
+    <li>Sanciones: hasta 20 M€ o 4 % de la facturación. Prescripción: 3, 2 y 1 años.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-10"></div>
+</section>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section class="view" data-view="glosario" hidden>
+  <p class="eyebrow">Consulta rápida</p>
+  <h1>Glosario</h1>
+  <p class="lead">Los términos clave de los 10 temas. Escribe para filtrar.</p>
+  <label for="glossQ" style="margin-top:16px">Buscar término</label>
+  <input type="text" id="glossQ" placeholder="Por ejemplo: ETL, mediana, FAIR…">
+  <div class="gloss" id="glossList"></div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  const TOPICS = [
+    {id:"tema-1", t:"La estadística", d:"Descriptiva vs. inferencial, población, muestreo y escalas de medida."},
+    {id:"tema-2", t:"Tipos de datos estadísticos", d:"Dato, observación y variable; cuantitativas y cualitativas; primeros pasos en R."},
+    {id:"tema-3", t:"Ciclo de vida de los datos", d:"Las 5 fases, data warehouse, ETL, OLAP y principios FAIR."},
+    {id:"tema-4", t:"Etapas iniciales del ciclo", d:"Objetivos SMART, indicadores, metas, Gantt y estructura de datos."},
+    {id:"tema-5", t:"Recolección de datos", d:"Metodología, herramientas y fuentes primarias y secundarias."},
+    {id:"tema-6", t:"Limpieza del dato", d:"Calidad, faltantes, atípicos con boxplot e imputación."},
+    {id:"tema-7", t:"Análisis e interpretación", d:"Análisis exploratorio, tablas de contingencia y correlación."},
+    {id:"tema-8", t:"Almacén del dato", d:"Data warehouse, data mart, SQL vs. NoSQL, ETL y OLAP."},
+    {id:"tema-9", t:"Disponibilidad del dato", d:"Acceso, utilidad, mecanismos de seguridad y nube."},
+    {id:"tema-10", t:"Aspectos normativos", d:"RGPD, LOPDGDD, consentimiento, derechos digitales y sanciones."}
+  ];
+
+  // ---------- Storage (per-viewer) ----------
+  const KEY = "ciclo-dato-v1";
+  let state = {studied:{}, scores:{}};
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---------- Router ----------
+  const views = document.querySelectorAll(".view");
+  const navLinks = document.querySelectorAll("#navlist a");
+  function route(){
+    let h = (location.hash || "#inicio").slice(1);
+    if (!document.querySelector('.view[data-view="'+h+'"]')) h = "inicio";
+    views.forEach(v => v.hidden = v.dataset.view !== h);
+    navLinks.forEach(a => { if (a.dataset.v === h) { a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Progress ----------
+  function renderProgress(){
+    const n = TOPICS.filter(t => state.studied[t.id]).length;
+    document.getElementById("progText").textContent = n + " de 10 temas estudiados";
+    document.getElementById("progBar").style.width = (n*10) + "%";
+    navLinks.forEach(a => a.classList.toggle("done", !!state.studied[a.dataset.v]));
+    const cards = document.getElementById("tcards");
+    cards.innerHTML = TOPICS.map((t,i) => {
+      const sc = state.scores[t.id];
+      const st = state.studied[t.id] ? '<span class="pill ok">Estudiado</span>' : '<span class="pill neutral">Pendiente</span>';
+      const scs = sc!=null ? ' <span class="pill neutral">Test: '+sc+'/'+QUIZ[t.id].length+'</span>' : '';
+      return '<a class="tcard" href="#'+t.id+'"><span class="n">TEMA '+(i+1)+'</span><b>'+t.t+'</b><span class="d">'+t.d+'</span><span class="st">'+st+scs+'</span></a>';
+    }).join("");
+    document.querySelectorAll(".studied button").forEach(b => {
+      const on = !!state.studied[b.dataset.t];
+      b.setAttribute("aria-pressed", on);
+      b.textContent = on ? "✓ Estudiado" : "Marcar como estudiado";
+    });
+  }
+
+  // ---------- Quiz data ----------
+  const QUIZ = {
+    "tema-1":[
+      {q:"Un instituto entrevista a 2.500 personas para estimar el voto de todo el país. ¿Qué rama de la estadística aplica?", o:["Descriptiva","Inferencial","Ninguna, es un censo"], a:1, e:"Usa una muestra para sacar conclusiones sobre toda la población, con un margen de error: es inferencial."},
+      {q:"Divides la población en jóvenes, adultos y mayores y eliges al azar un número proporcional de cada grupo. ¿Qué muestreo es?", o:["Por cuotas","Por conglomerados","Estratificado"], a:2, e:"Estratificado: grupos homogéneos (estratos) y selección aleatoria proporcional. Por cuotas no es aleatorio."},
+      {q:"La temperatura en °C se mide en una escala…", o:["Nominal","De intervalo","De razón"], a:1, e:"Tiene distancias iguales pero no un cero absoluto (puede ser negativa): escala de intervalo."},
+      {q:"¿Cuál de estos muestreos es NO probabilístico?", o:["Sistemático","Bola de nieve","Aleatorio simple"], a:1, e:"En bola de nieve cada participante recluta a otro; no todos tienen la misma probabilidad de entrar."},
+      {q:"En una población de 8.000 alumnos, Medicina tiene 2.800. Si la muestra total es 400, ¿cuántos de Medicina?", o:["140","100","280"], a:0, e:"n_i = (2.800 / 8.000) · 400 = 140."}
+    ],
+    "tema-2":[
+      {q:"El número de hijos de una familia es una variable…", o:["Cuantitativa continua","Cuantitativa discreta","Cualitativa ordinal"], a:1, e:"Se obtiene contando y solo toma valores enteros: cuantitativa discreta (conteo de personas)."},
+      {q:"En una tabla de datos, una fila completa con todos los valores de un cliente es…", o:["Una variable","Un dato","Una observación"], a:2, e:"La observación es el conjunto de datos de un individuo. La variable es la columna; el dato, la celda."},
+      {q:"\"Nivel de satisfacción: bajo, medio, alto\" es una variable…", o:["Cualitativa nominal","Cualitativa ordinal","Cuantitativa discreta"], a:1, e:"Son categorías con un orden natural: ordinal."},
+      {q:"¿Qué función de R convierte una variable en categórica?", o:["as.factor()","as.numeric()","as.logical()"], a:0, e:"as.factor() crea un factor, la forma en que R maneja variables cualitativas."},
+      {q:"¿Qué devuelve 5 %/% 3 en R?", o:["2","1","1.67"], a:1, e:"%/% es la división entera: 5 entre 3 cabe 1 vez. %% (módulo) devolvería 2."}
+    ],
+    "tema-3":[
+      {q:"¿Cuál es el orden correcto de las fases del ciclo de vida del dato?", o:["Almacenar → detectar fuentes → analizar → limpiar → explotar","Detectar fuentes → almacenar → pre-procesar → analizar → explotar","Analizar → limpiar → almacenar → explotar → detectar"], a:1, e:"Fuentes, almacenamiento y organización, pre-procesado y calidad, analítica, explotación de resultados."},
+      {q:"Un almacén donde los datos se guardan en crudo y se transforman al analizarlos es un…", o:["Data lake","Data warehouse","Data mart"], a:0, e:"El data lake guarda datos en su formato original; el data warehouse los guarda ya integrados."},
+      {q:"La \"I\" de FAIR significa…", o:["Integrados","Interoperables","Inmutables"], a:1, e:"Findable, Accessible, Interoperable, Reusable."},
+      {q:"¿Qué analítica propone qué acción tomar mediante optimización y escenarios?", o:["Descriptiva","Predictiva","Prescriptiva"], a:2, e:"La predictiva anticipa qué pasará; la prescriptiva recomienda qué hacer."},
+      {q:"Según FAIR, si unos datos son confidenciales…", o:["Deben publicarse igualmente","Se publican al menos sus metadatos","Se eliminan"], a:1, e:"FAIR no exige abrirlo todo: si los datos no se pueden compartir, se ofrece acceso a los metadatos."}
+    ],
+    "tema-4":[
+      {q:"\"Aumentar las ventas un 25 % antes de diciembre\". El 25 % es…", o:["El objetivo","El indicador","La meta"], a:2, e:"La meta es la cuantificación del objetivo: cuánto se quiere conseguir."},
+      {q:"¿Qué letra de SMART exige que el objetivo tenga plazo?", o:["S","R","T"], a:2, e:"T = Tiempo: el objetivo debe tener un contexto temporal."},
+      {q:"Las tareas que, si se retrasan, retrasan todo el proyecto forman…", o:["La ruta crítica","La WBS","El hito"], a:0, e:"El método de la ruta crítica (CPA) identifica esas actividades."},
+      {q:"El método PERT se desarrolló originalmente para…", o:["La presa Hoover","El proyecto Polaris","Las autopistas interestatales"], a:1, e:"PERT nació en el Departamento de Defensa de EE. UU. en los años 50 para el proyecto Polaris. Gantt se usó en la presa Hoover."},
+      {q:"Los correos electrónicos y los vídeos son datos…", o:["Estructurados","No estructurados","Relacionales"], a:1, e:"No tienen formato fijo; se guardan en NoSQL o data lakes."}
+    ],
+    "tema-5":[
+      {q:"¿Cuál debe ser el primer paso antes de recoger datos?", o:["Tabular","Obtener autorización o acceso","Formar al equipo"], a:1, e:"La autorización o acceso es la condición previa: sin ella no se puede seguir."},
+      {q:"Una herramienta que mide realmente lo que dice medir es…", o:["Confiable","Válida","Objetiva"], a:1, e:"Validez = mide la variable que pretende. Confiabilidad = resultados consistentes."},
+      {q:"¿Cuántos participantes recomienda el temario para un focus group?", o:["3 a 4","6 a 8","15 a 20"], a:1, e:"Entre 6 y 8, más un moderador experto."},
+      {q:"Los informes de ventas y el CRM de tu empresa son fuentes de datos…", o:["Primarios","Secundarios internos","Secundarios externos"], a:1, e:"Ya existían (secundarios) y son propiedad de la organización (internos)."},
+      {q:"Expertos que revisan sus pronósticos tras conocer los de otros expertos: ¿qué técnica es?", o:["Delphi","CAPI","Sondeo"], a:0, e:"La técnica Delphi busca acercar las estimaciones de un panel de expertos en varias rondas."}
+    ],
+    "tema-6":[
+      {q:"Si Q1 = 353 y Q3 = 1.947,5, ¿cuál es el IQR?", o:["1.594,5","2.300,5","1.150"], a:0, e:"IQR = Q3 − Q1 = 1.947,5 − 353 = 1.594,5."},
+      {q:"Un valor es atípico extremo si supera…", o:["Q3 + 1,5·IQR","Q3 + 3·IQR","La media + 1 desviación"], a:1, e:"Leve: 1,5·IQR. Extremo: 3·IQR por encima de Q3 o por debajo de Q1."},
+      {q:"Falta un valor en \"Ciudad\" (variable categórica). ¿Qué imputación encaja mejor?", o:["Media","Mediana","Moda"], a:2, e:"Media y mediana solo sirven para numéricas; la moda funciona con categorías."},
+      {q:"Con una distribución sesgada a la derecha (media > mediana), para imputar es preferible…", o:["La media","La mediana","Un cero"], a:1, e:"La mediana no se ve arrastrada por los valores extremos."},
+      {q:"¿Qué paquete de tidyverse sirve para manipular fechas?", o:["lubridate","forcats","purrr"], a:0, e:"lubridate: year(), month(), day(), hour()… forcats es para factores y purrr para programación funcional."}
+    ],
+    "tema-7":[
+      {q:"r = −0,85 indica una relación…", o:["Positiva fuerte","Negativa fuerte","Inexistente"], a:1, e:"Signo negativo: cuando una sube, la otra baja. Cerca de −1: fuerte."},
+      {q:"¿Qué comando da los porcentajes por columnas de una tabla t?", o:["prop.table(t, 1)","prop.table(t, 2)","table(t, 2)"], a:1, e:"1 = filas, 2 = columnas."},
+      {q:"Un coeficiente de correlación es estadísticamente significativo si…", o:["r > 0,5","p-value < nivel de significancia","p-value > 0,05"], a:1, e:"Se compara el p-value con el nivel elegido (por ejemplo 0,05)."},
+      {q:"Un histograma de la edad es un análisis…", o:["Gráfico univariado","No gráfico multivariado","Gráfico multivariado"], a:0, e:"Una sola variable representada gráficamente."},
+      {q:"¿Qué combinación calcula el ingreso medio de cada región?", o:["group_by() + summarise()","table() + prop.table()","cor() + cor.test()"], a:0, e:"group_by agrupa por región y summarise resume cada grupo."}
+    ],
+    "tema-8":[
+      {q:"\"Los datos del almacén se leen pero no se modifican ni se eliminan\". ¿Qué característica de Inmon es?", o:["Integrado","No volátil","Orientado por temas"], a:1, e:"No volátil: la información ni se modifica ni se elimina."},
+      {q:"Un subconjunto del data warehouse dedicado solo al departamento de marketing es…", o:["Un data lake","Un data mart","Un cubo ETL"], a:1, e:"El data mart se centra en un ámbito concreto; es rápido y rentable."},
+      {q:"MongoDB, que guarda objetos JSON, es una base NoSQL de tipo…", o:["Clave-valor","Grafos","Documentos"], a:2, e:"Bases documentales: información como documentos JSON flexibles y jerárquicos."},
+      {q:"Alumnos y asignaturas (un alumno cursa varias y cada asignatura tiene varios alumnos) es una relación…", o:["1:1","1:N","N:M"], a:2, e:"Varios a varios."},
+      {q:"Para un programa OLAP, la medida principal de su eficacia es…", o:["El tiempo de respuesta","El número de tablas","El tamaño en disco"], a:0, e:"El temario lo indica expresamente: el tiempo de respuesta."}
+    ],
+    "tema-9":[
+      {q:"Un sistema que vigila el tráfico de red y alerta de comportamientos anómalos es…", o:["DLP","NIDS","SSL"], a:1, e:"NIDS: sistema de detección de intrusos en red."},
+      {q:"Software que impide que empleados envíen datos confidenciales fuera de la red:", o:["DLP","SIEM","Firewall"], a:0, e:"DLP = prevención de pérdida de datos."},
+      {q:"Una conexión a base de datos que usa un identificador definido en el driver ODBC es…", o:["Sin DSN","Con DSN","Por SQL directo"], a:1, e:"Con DSN se define un nombre de conexión en el panel ODBC; sin DSN se indica la ruta física."},
+      {q:"La diferencia entre utilidad y usabilidad del dato es que…", o:["Son sinónimos","Utilidad = para qué sirve; usabilidad = oportunidad de uso","Utilidad = seguridad; usabilidad = acceso"], a:1, e:"Un dato puede ser útil pero poco usable si no está accesible o en un formato manejable."},
+      {q:"Según el temario, que el almacenamiento local sea más seguro que la nube es…", o:["Cierto siempre","Un mito","Cierto solo para pymes"], a:1, e:"Las peores brechas ocurren tras el firewall propio; los proveedores serios monitorizan 24/7."}
+    ],
+    "tema-10":[
+      {q:"¿En qué plazo máximo se notifica una brecha de seguridad a la AEPD?", o:["24 horas","72 horas","30 días"], a:1, e:"72 horas."},
+      {q:"¿A partir de qué edad puede un menor consentir el tratamiento de sus datos en España?", o:["13 años","14 años","16 años"], a:1, e:"La LOPDGDD fija 14 años; el RGPD permite a cada país elegir entre 13 y 16."},
+      {q:"Para tratar datos sobre religión o afiliación sindical se necesita consentimiento…", o:["Tácito","Expreso","Expreso y por escrito"], a:2, e:"Ideología, afiliación sindical, religión y creencias: expreso y por escrito."},
+      {q:"Usar los datos para una finalidad distinta de la anunciada es una infracción…", o:["Leve","Grave","Muy grave"], a:2, e:"Muy grave, prescribe a los 3 años."},
+      {q:"¿Desde cuándo está en vigor la LOPDGDD?", o:["25 de mayo de 2018","6 de diciembre de 2018","27 de abril de 2016"], a:1, e:"6/12/2018. El RGPD se aplica desde el 25/05/2018 y se aprobó el 27/04/2016."}
+    ]
+  };
+
+  // ---------- Quiz render ----------
+  document.querySelectorAll(".quiz").forEach(box => {
+    const id = box.dataset.quiz, qs = QUIZ[id];
+    let answered = 0, right = 0;
+    box.innerHTML = '<h2>Autoevaluación</h2><p style="color:var(--muted);font-size:.9rem;margin-top:4px">' + qs.length + ' preguntas. Elige una respuesta para ver la explicación.</p>' +
+      qs.map((q,i) => '<div class="qitem"><p class="q">'+(i+1)+'. '+q.q+'</p><div class="qopts">'+q.o.map((o,j)=>'<button class="qopt" data-i="'+i+'" data-j="'+j+'">'+o+'</button>').join("")+'</div><p class="qexp" hidden></p></div>').join("") +
+      '<div class="qscore"><span class="out" data-score>0 de '+qs.length+' respondidas</span><button class="btn" data-reset>Repetir test</button></div>' +
+      '<div class="studied"><button class="btn primary" data-t="'+id+'" aria-pressed="false">Marcar como estudiado</button></div>';
+    box.addEventListener("click", ev => {
+      const b = ev.target.closest(".qopt");
+      if (b){
+        const i = +b.dataset.i, j = +b.dataset.j, q = qs[i], item = b.closest(".qitem");
+        item.querySelectorAll(".qopt").forEach((x,k) => { x.disabled = true; if (k===q.a) x.classList.add("right"); });
+        if (j !== q.a) b.classList.add("wrong"); else right++;
+        answered++;
+        const exp = item.querySelector(".qexp");
+        exp.textContent = (j===q.a ? "Correcto. " : "No es correcto. ") + q.e; exp.hidden = false;
+        const s = box.querySelector("[data-score]");
+        s.textContent = answered < qs.length ? (answered+" de "+qs.length+" respondidas · "+right+" aciertos") : ("Resultado: "+right+" de "+qs.length+" aciertos");
+        if (answered === qs.length){ state.scores[id] = right; if (right >= qs.length-1) state.studied[id] = true; save(); renderProgress(); }
+        return;
+      }
+      if (ev.target.closest("[data-reset]")){
+        answered = 0; right = 0;
+        box.querySelectorAll(".qopt").forEach(x => { x.disabled=false; x.classList.remove("right","wrong"); });
+        box.querySelectorAll(".qexp").forEach(x => x.hidden = true);
+        box.querySelector("[data-score]").textContent = "0 de "+qs.length+" respondidas";
+        return;
+      }
+      const st = ev.target.closest(".studied button");
+      if (st){ state.studied[id] = !state.studied[id]; save(); renderProgress(); }
+    });
+  });
+
+  // ---------- Pager ----------
+  TOPICS.forEach((t,i) => {
+    const sec = document.querySelector('.view[data-view="'+t.id+'"]');
+    const prev = i>0 ? TOPICS[i-1] : null, next = i<TOPICS.length-1 ? TOPICS[i+1] : null;
+    const div = document.createElement("div"); div.className = "pager";
+    div.innerHTML = (prev ? '<a href="#'+prev.id+'"><small>← Tema '+i+'</small>'+prev.t+'</a>' : '<a href="#inicio"><small>←</small>Mapa del curso</a>') +
+                    (next ? '<a class="next" href="#'+next.id+'"><small>Tema '+(i+2)+' →</small>'+next.t+'</a>' : '<a class="next" href="#glosario"><small>→</small>Glosario</a>');
+    sec.appendChild(div);
+  });
+
+  // ---------- Seeded RNG ----------
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  let rng = mulberry32(7);
+  function pick(arr,k){ const a = arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a.slice(0,k); }
+
+  // ---------- Sampler ----------
+  const NS = "http://www.w3.org/2000/svg";
+  const svgS = document.getElementById("sampleSvg");
+  const people = [];
+  for (let r=0;r<6;r++) for (let c=0;c<10;c++) people.push({i:r*10+c, r, c, st: r<2?1:(r<4?2:3), cl: Math.floor(c/2)});
+  // cluster backgrounds
+  for (let k=0;k<5;k++){
+    const rect = document.createElementNS(NS,"rect");
+    rect.setAttribute("x", 20+k*100); rect.setAttribute("y", 8); rect.setAttribute("width", 92); rect.setAttribute("height", 262);
+    rect.setAttribute("rx", 8); rect.setAttribute("fill","var(--surface-2)"); rect.dataset.cl = k;
+    svgS.appendChild(rect);
+    const tx = document.createElementNS(NS,"text"); tx.setAttribute("x", 66+k*100); tx.setAttribute("y", 290); tx.setAttribute("text-anchor","middle"); tx.setAttribute("font-size","11"); tx.textContent = "Barrio "+(k+1);
+    svgS.appendChild(tx);
+  }
+  people.forEach(p => {
+    const cx = 44 + p.c*50 - (p.c%2)*2, cy = 32 + p.r*42;
+    const ring = document.createElementNS(NS,"circle"); ring.setAttribute("cx",cx); ring.setAttribute("cy",cy); ring.setAttribute("r",15); ring.setAttribute("fill","none"); ring.setAttribute("stroke","var(--ink)"); ring.setAttribute("stroke-width","2.5"); ring.style.opacity = 0; p.ring = ring;
+    const dot = document.createElementNS(NS,"circle"); dot.setAttribute("cx",cx); dot.setAttribute("cy",cy); dot.setAttribute("r",9); dot.setAttribute("class","dot st"+p.st); p.dot = dot;
+    const n = document.createElementNS(NS,"text"); n.setAttribute("x",cx); n.setAttribute("y",cy+3.5); n.setAttribute("text-anchor","middle"); n.setAttribute("font-size","9"); n.style.fill="var(--surface)"; n.style.fontWeight="600"; n.textContent = p.i+1;
+    svgS.appendChild(ring); svgS.appendChild(dot); svgS.appendChild(n);
+  });
+  let method = "simple";
+  const DESC = {
+    simple:"<b>Aleatorio simple:</b> cada persona tiene un número y se sortean 12. Todos tienen la misma probabilidad.",
+    sistematico:"<b>Sistemático:</b> se ordena la lista y, desde un inicio al azar, se toma 1 de cada k = 60/12 = 5 personas.",
+    estratificado:"<b>Estratificado:</b> la población se divide en estratos (edad) y se elige al azar en cada uno de forma proporcional: 4 + 4 + 4.",
+    conglomerados:"<b>Conglomerados:</b> la población ya está dividida en grupos naturales (barrios). Se eligen al azar barrios completos y se estudia a su gente.",
+    conveniencia:"<b>Conveniencia (no probabilístico):</b> el investigador pregunta a quien tiene más cerca (esquina superior izquierda). Rápido, pero sesgado: casi todos son jóvenes."
+  };
+  function sample(){
+    let sel = [];
+    if (method==="simple") sel = pick(people,12);
+    else if (method==="sistematico"){ const s = Math.floor(rng()*5); sel = people.filter(p => p.i%5===s); }
+    else if (method==="estratificado"){ [1,2,3].forEach(s => sel = sel.concat(pick(people.filter(p=>p.st===s),4))); }
+    else if (method==="conglomerados"){ const cls = pick([0,1,2,3,4],2); sel = people.filter(p => cls.includes(p.cl)); }
+    else { sel = people.slice().sort((a,b)=>(a.r*a.r+a.c*a.c)-(b.r*b.r+b.c*b.c)).slice(0,12); }
+    const ids = new Set(sel.map(p=>p.i));
+    people.forEach(p => { const on = ids.has(p.i); p.ring.style.opacity = on?1:0; p.dot.style.opacity = on?1:.28; });
+    svgS.querySelectorAll("rect").forEach(r => r.setAttribute("fill", method==="conglomerados" && sel.some(p=>p.cl==r.dataset.cl) ? "var(--accent-soft)" : "var(--surface-2)"));
+    document.getElementById("sampleDesc").innerHTML = DESC[method];
+  }
+  document.querySelectorAll("#sampler [data-m]").forEach(b => b.addEventListener("click", () => {
+    method = b.dataset.m;
+    document.querySelectorAll("#sampler [data-m]").forEach(x => x.setAttribute("aria-pressed", x===b));
+    sample();
+  }));
+  document.getElementById("resample").addEventListener("click", sample);
+  sample();
+
+  // ---------- Stratified calc ----------
+  const fmt = (x,d=0) => x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+  function strat(){
+    const N = ["sN1","sN2","sN3"].map(id => Math.max(0, +document.getElementById(id).value||0));
+    const n = Math.max(0, +document.getElementById("sn").value||0);
+    const tot = N.reduce((a,b)=>a+b,0);
+    const names = ["Ingeniería","Medicina","Derecho"];
+    if (!tot){ document.getElementById("stratOut").textContent = "Introduce el tamaño de al menos un estrato."; return; }
+    document.getElementById("stratOut").innerHTML = "N = "+fmt(tot)+"<br>" + N.map((x,i)=> names[i]+": ("+fmt(x)+" / "+fmt(tot)+") · "+fmt(n)+" = <b>"+fmt(x/tot*n,1)+"</b> ≈ "+fmt(Math.round(x/tot*n))+" alumnos").join("<br>");
+  }
+  ["sN1","sN2","sN3","sn"].forEach(id => document.getElementById(id).addEventListener("input", strat)); strat();
+
+  // ---------- Matrix ----------
+  const CAPS = {"show-var":"Variable \"Ciudad\": todos los valores de una misma característica (columna).","show-obs":"Observación de Luis: todos sus datos (fila).","show-dat":"Dato: un único valor, el gasto de Marta (240,00 €)."};
+  document.querySelectorAll("[data-mx]").forEach(b => b.addEventListener("click", () => {
+    const m = document.getElementById("matrix"); m.className = "matrix " + b.dataset.mx;
+    document.querySelectorAll("[data-mx]").forEach(x => x.setAttribute("aria-pressed", x===b));
+    document.getElementById("mxCap").textContent = CAPS[b.dataset.mx];
+  }));
+
+  // ---------- Gantt ----------
+  const G = [
+    {t:"Definir objetivos e indicadores", s:1, e:1, c:true},
+    {t:"Diseñar el cuestionario", s:2, e:3, c:true},
+    {t:"Calcular muestra y marco", s:2, e:2, c:false},
+    {t:"Prueba piloto", s:4, e:4, c:true},
+    {t:"Trabajo de campo", s:5, e:6, c:true},
+    {t:"Preparar plantilla de informe", s:5, e:5, c:false},
+    {t:"Limpieza y análisis", s:7, e:7, c:true},
+    {t:"Informe final", s:8, e:8, c:true, m:true}
+  ];
+  let gh = '<div class="gh" style="justify-content:flex-start">Tarea</div>' + [1,2,3,4,5,6,7,8].map(w=>'<div class="gh">S'+w+'</div>').join("");
+  G.forEach(g => {
+    gh += '<div>'+g.t+'</div>';
+    for (let w=1; w<=8; w++){
+      if (w===g.s) gh += '<div class="bar'+(g.c?' crit':'')+'" style="grid-column:span '+(g.e-g.s+1)+'">'+(g.e-g.s+1)+' sem</div>';
+      else if (w<g.s || w>g.e) gh += '<div></div>';
+    }
+    if (g.m) gh = gh.replace(/<div class="bar crit" style="grid-column:span 1">1 sem<\/div>$/, '<div class="bar crit">1 sem ◆</div>');
+  });
+  document.getElementById("gantt").innerHTML = gh;
+
+  // ---------- Validators ----------
+  const LET = "TRWAGMYFPDXBNJZSQVHLCKE";
+  function vMovil(){
+    const v = document.getElementById("vMovil").value.trim(), o = document.getElementById("vMovilOut");
+    if (!/^\d+$/.test(v)) o.innerHTML = '<span class="pill bad">Rechazado</span> solo se admiten números';
+    else if (v.length!==9) o.innerHTML = '<span class="pill bad">Rechazado</span> tiene '+v.length+' dígitos, deben ser 9';
+    else if (!/^[67]/.test(v)) o.innerHTML = '<span class="pill bad">Rechazado</span> un móvil español empieza por 6 o 7';
+    else o.innerHTML = '<span class="pill ok">Válido</span> formato correcto';
+  }
+  function vDni(){
+    const v = document.getElementById("vDni").value.trim(), o = document.getElementById("vDniOut");
+    if (!/^\d{8}[A-Za-z]$/.test(v)) { o.innerHTML = '<span class="pill bad">Rechazado</span> deben ser 8 dígitos y 1 letra'; return; }
+    if (v[8] !== v[8].toUpperCase()) { o.innerHTML = '<span class="pill bad">Rechazado</span> la letra debe ir en mayúscula'; return; }
+    const ok = LET[parseInt(v.slice(0,8),10)%23];
+    o.innerHTML = v[8]===ok ? '<span class="pill ok">Válido</span> la letra de control coincide' : '<span class="pill bad">Letra incorrecta</span> para ese número correspondería la '+ok;
+  }
+  document.getElementById("vMovil").addEventListener("input", vMovil); vMovil();
+  document.getElementById("vDni").addEventListener("input", vDni); vDni();
+
+  // ---------- Boxplot ----------
+  function quant(s,p){ const h=(s.length-1)*p, lo=Math.floor(h), hi=Math.ceil(h); return s[lo]+(h-lo)*(s[hi]-s[lo]); }
+  function box(){
+    const vals = document.getElementById("boxIn").value.split(/[,;\s]+/).map(x=>x.replace(",", ".")).filter(x=>x!=="").map(Number).filter(x=>isFinite(x));
+    const svg = document.getElementById("boxSvg"), out = document.getElementById("boxOut");
+    svg.innerHTML = "";
+    if (vals.length < 4){ out.textContent = "Introduce al menos 4 números."; return; }
+    const s = vals.slice().sort((a,b)=>a-b);
+    const q1 = quant(s,.25), q2 = quant(s,.5), q3 = quant(s,.75), iqr = q3-q1;
+    const lf = q1-1.5*iqr, uf = q3+1.5*iqr, le = q1-3*iqr, ue = q3+3*iqr;
+    const inside = s.filter(x=>x>=lf && x<=uf);
+    const wl = Math.min(...inside), wh = Math.max(...inside);
+    const lo = s[0], hi = s[s.length-1], pad = (hi-lo)*0.05 || 1;
+    const X = v => 30 + (v-(lo-pad))/((hi+pad)-(lo-pad))*540;
+    const el = (n,a) => { const e = document.createElementNS(NS,n); for (const k in a) e.setAttribute(k,a[k]); svg.appendChild(e); return e; };
+    el("line",{x1:30,x2:570,y1:95,y2:95,stroke:"var(--line)"});
+    [lo, q1, q2, q3, hi].forEach(v => { const t = el("text",{x:X(v),y:112,"text-anchor":"middle","font-size":"10"}); t.textContent = fmt(v, v%1?1:0); });
+    el("line",{x1:X(wl),x2:X(q1),y1:50,y2:50,stroke:"var(--muted)","stroke-width":2});
+    el("line",{x1:X(q3),x2:X(wh),y1:50,y2:50,stroke:"var(--muted)","stroke-width":2});
+    el("line",{x1:X(wl),x2:X(wl),y1:40,y2:60,stroke:"var(--muted)","stroke-width":2});
+    el("line",{x1:X(wh),x2:X(wh),y1:40,y2:60,stroke:"var(--muted)","stroke-width":2});
+    el("rect",{x:X(q1),y:30,width:Math.max(1,X(q3)-X(q1)),height:40,fill:"var(--accent-soft)",stroke:"var(--accent)","stroke-width":2,rx:3});
+    el("line",{x1:X(q2),x2:X(q2),y1:30,y2:70,stroke:"var(--accent)","stroke-width":3});
+    if (uf < hi + pad) el("line",{x1:X(Math.min(uf,hi+pad)),x2:X(Math.min(uf,hi+pad)),y1:18,y2:82,stroke:"var(--bad)","stroke-dasharray":"4 3"});
+    const mild = [], ext = [];
+    s.forEach(v => {
+      if (v<lf || v>uf){
+        const isExt = v<le || v>ue; (isExt?ext:mild).push(v);
+        el("circle",{cx:X(v),cy:50,r:isExt?6:5,fill:isExt?"var(--bad)":"var(--surface)",stroke:"var(--bad)","stroke-width":2});
+      }
+    });
+    const t = el("text",{x:X(q2),y:22,"text-anchor":"middle","font-size":"10"}); t.textContent = "mediana";
+    out.innerHTML = "n = "+s.length+" · Q1 = "+fmt(q1,2)+" · Mediana = "+fmt(q2,2)+" · Q3 = "+fmt(q3,2)+" · <b>IQR = "+fmt(iqr,2)+"</b><br>"+
+      "Límites leves: "+fmt(lf,2)+" y "+fmt(uf,2)+" · Límites extremos: "+fmt(le,2)+" y "+fmt(ue,2)+"<br>"+
+      "Atípicos leves: "+(mild.length?mild.map(v=>fmt(v,v%1?1:0)).join(", "):"ninguno")+" · Atípicos extremos: "+(ext.length?ext.map(v=>fmt(v,v%1?1:0)).join(", "):"ninguno");
+  }
+  document.getElementById("boxIn").addEventListener("input", box); box();
+
+  // ---------- Correlation ----------
+  const cr = mulberry32(42), Z = [];
+  function gauss(){ let u=0,v=0; while(!u) u=cr(); while(!v) v=cr(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+  for (let i=0;i<70;i++) Z.push([gauss(),gauss()]);
+  const csvg = document.getElementById("corrSvg");
+  function corr(){
+    const r = +document.getElementById("rSlider").value;
+    const pts = Z.map(([a,b]) => [a, r*a + Math.sqrt(Math.max(0,1-r*r))*b]);
+    const mx = pts.reduce((s,p)=>s+p[0],0)/pts.length, my = pts.reduce((s,p)=>s+p[1],0)/pts.length;
+    let sxy=0,sxx=0,syy=0; pts.forEach(([x,y])=>{sxy+=(x-mx)*(y-my);sxx+=(x-mx)**2;syy+=(y-my)**2;});
+    const rs = sxy/Math.sqrt(sxx*syy);
+    const X = v => 50 + (v+3.2)/6.4*350, Y = v => 225 - (v+3.2)/6.4*205;
+    let h = '<line x1="50" y1="225" x2="405" y2="225" stroke="var(--line)"/><line x1="50" y1="20" x2="50" y2="225" stroke="var(--line)"/>';
+    h += '<text x="228" y="250" text-anchor="middle" font-size="12">Años de experiencia →</text><text x="18" y="122" text-anchor="middle" font-size="12" transform="rotate(-90 18 122)">Salario →</text>';
+    pts.forEach(([x,y]) => { if (Math.abs(x)<3.2 && Math.abs(y)<3.2) h += '<circle cx="'+X(x).toFixed(1)+'" cy="'+Y(y).toFixed(1)+'" r="4" fill="var(--accent)" fill-opacity=".7"/>'; });
+    if (Math.abs(r) > 0.05) h += '<line x1="'+X(-3)+'" y1="'+Y(-3*r)+'" x2="'+X(3)+'" y2="'+Y(3*r)+'" stroke="var(--example)" stroke-width="2" stroke-dasharray="5 4"/>';
+    csvg.innerHTML = h;
+    document.getElementById("rVal").textContent = fmt(r,2);
+    let it;
+    if (r===1) it="Relación positiva perfecta"; else if (r===-1) it="Relación negativa perfecta";
+    else if (Math.abs(r)<0.05) it="Sin relación lineal";
+    else it = "Relación " + (r>0?"positiva":"negativa") + (Math.abs(r)>=0.7?" fuerte":Math.abs(r)>=0.4?" moderada":" débil");
+    document.getElementById("rInterp").textContent = it + " · r calculado en la muestra: " + fmt(rs,2);
+  }
+  document.getElementById("rSlider").addEventListener("input", corr); corr();
+
+  // ---------- Contingency ----------
+  const CT = {rows:["Alquilada","En precario","Otra tenencia (cedida, prestada)","Propia pagando a plazos","Propia totalmente pagada"], d:[[43,281],[4,21],[93,98],[10,77],[297,531]]};
+  const CTCAP = {abs:"Frecuencias absolutas: número de hogares de cada tipo de vivienda en cada zona.",tot:"Proporción sobre el total (1.455): todas las celdas suman 1.",row:"Por filas: de los hogares alquilados, el 86,7 % están en zona urbana. Cada fila suma 1.",col:"Por columnas: de los hogares rurales, el 66,4 % tienen vivienda propia pagada. Cada columna suma 1."};
+  function ct(mode){
+    const tot = CT.d.flat().reduce((a,b)=>a+b,0), colS=[0,1].map(j=>CT.d.reduce((s,r)=>s+r[j],0));
+    let h = '<thead><tr><th>Tipo de vivienda</th><th class="num">Rural</th><th class="num">Urbana</th></tr></thead><tbody>';
+    CT.d.forEach((r,i) => {
+      const rs = r[0]+r[1];
+      const v = j => mode==="abs" ? fmt(r[j]) : mode==="tot" ? fmt(r[j]/tot,3) : mode==="row" ? fmt(r[j]/rs,3) : fmt(r[j]/colS[j],3);
+      h += '<tr><td>'+CT.rows[i]+'</td><td class="num">'+v(0)+'</td><td class="num">'+v(1)+'</td></tr>';
+    });
+    if (mode==="abs") h += '<tr><td><b>Total</b></td><td class="num"><b>'+fmt(colS[0])+'</b></td><td class="num"><b>'+fmt(colS[1])+'</b></td></tr>';
+    document.getElementById("ctTable").innerHTML = h + '</tbody>';
+    document.getElementById("ctCap").textContent = CTCAP[mode];
+  }
+  document.querySelectorAll("[data-ct]").forEach(b => b.addEventListener("click", () => { document.querySelectorAll("[data-ct]").forEach(x=>x.setAttribute("aria-pressed",x===b)); ct(b.dataset.ct); }));
+  ct("abs");
+
+  // ---------- Glossary ----------
+  const GL = [
+    ["ACID","Atomicidad, consistencia, aislamiento y durabilidad: garantías de las transacciones en bases relacionales.",8],
+    ["AEPD","Agencia Española de Protección de Datos. Recibe las notificaciones de brechas (72 h).",10],
+    ["Análisis exploratorio","Primer análisis para encontrar patrones, errores y relaciones; no es un análisis riguroso.",7],
+    ["Boxplot","Gráfico de caja: mediana, Q1, Q3 y bigotes; sirve para detectar atípicos.",6],
+    ["Confiabilidad","Capacidad de un instrumento de dar resultados consistentes al repetirse.",5],
+    ["Consentimiento inequívoco","Regla general: libre, informado, específico; requiere una acción positiva.",10],
+    ["Correlación (r)","Medida de relación lineal entre dos variables, de −1 a 1.",7],
+    ["CRM / ERP","Sistemas de gestión de clientes / de recursos empresariales; fuentes de datos internas.",9],
+    ["Dato","Cada valor que toma una variable en un individuo.",2],
+    ["Data frame","Estructura de R: filas = individuos, columnas = variables.",2],
+    ["Data lake","Repositorio de datos en crudo, en su formato original.",3],
+    ["Data mart","Subconjunto de un data warehouse centrado en un área de negocio.",8],
+    ["Data warehouse","Almacén de datos orientado por temas, integrado, no volátil y variable con el tiempo.",8],
+    ["Delphi","Técnica en la que expertos revisan sus pronósticos tras ver los de otros.",5],
+    ["DLP","Prevención de pérdida de datos: evita que salga información confidencial.",9],
+    ["DOI","Identificador persistente de objetos digitales; hace los datos encontrables y citables.",3],
+    ["DSN","Nombre de origen de datos definido en ODBC para conectar con una base de datos.",9],
+    ["Encriptación","Convierte los datos en ilegibles para quien no tiene la clave.",9],
+    ["Escala de razón","Escala con cero absoluto (ausencia de la cualidad): ingresos, número de hijos.",1],
+    ["Estadística descriptiva","Describe un grupo sin sacar conclusiones para uno mayor.",1],
+    ["Estadística inferencial","Generaliza de una muestra a la población con confianza y margen de error.",1],
+    ["ETL","Extract, Transform, Load: extraer, transformar y cargar datos en el almacén.",8],
+    ["FAIR","Principios: Findable, Accessible, Interoperable, Reusable (2016).",3],
+    ["Focus group","Grupo de discusión de 6 a 8 personas guiado por un moderador.",5],
+    ["Gantt","Diagrama de barras que planifica tareas en el tiempo (H. L. Gantt).",4],
+    ["Imputación","Rellenar valores faltantes (media, mediana, moda, constante).",6],
+    ["Indicador","Unidad de medida de un objetivo.",4],
+    ["IQR","Rango intercuartílico: Q3 − Q1, el 50 % central de los datos.",6],
+    ["LOPDGDD","Ley Orgánica de Protección de Datos y Garantía de Derechos Digitales (6/12/2018).",10],
+    ["Meta","Cuantificación de un objetivo: cuánto se quiere conseguir.",4],
+    ["Muestra","Parte de la población que se estudia para conocerla.",1],
+    ["NIDS","Sistema de detección de intrusos en red.",9],
+    ["NoSQL","Bases no relacionales: clave-valor, documentos, grafos, en memoria.",8],
+    ["Observación","Conjunto de datos de un mismo individuo (una fila).",2],
+    ["OLAP","Procesamiento analítico en línea para analizar el data warehouse desde varias dimensiones.",8],
+    ["Outlier (atípico)","Valor alejado: leve si supera 1,5·IQR, extremo si supera 3·IQR.",6],
+    ["PERT","Técnica de revisión y evaluación de programas; nació en el proyecto Polaris.",4],
+    ["Población","Conjunto de elementos con características comunes objeto de estudio.",1],
+    ["RGPD","Reglamento (UE) 2016/679 de protección de datos; se aplica desde el 25/05/2018.",10],
+    ["Ruta crítica","Secuencia de tareas que determina la duración mínima del proyecto.",4],
+    ["SIEM","Gestión de información y eventos de seguridad: centraliza y analiza registros.",9],
+    ["SMART","Objetivos específicos, medibles, alcanzables, relevantes y con tiempo.",4],
+    ["Tidyverse","Conjunto de paquetes de R: ggplot2, dplyr, tidyr, readr, purrr, tibble, stringr, forcats.",6],
+    ["Validez","Que un instrumento mida realmente lo que pretende medir.",5],
+    ["Variable","Característica observada que toma distintos valores (una columna).",2]
+  ];
+  function gloss(){
+    const q = document.getElementById("glossQ").value.trim().toLowerCase();
+    const items = GL.filter(g => !q || (g[0]+" "+g[1]).toLowerCase().includes(q));
+    document.getElementById("glossList").innerHTML = items.length ? items.map(g => '<div class="gi"><dl style="margin:0"><dt>'+g[0]+'</dt><dd>'+g[1]+'</dd></dl><small><a href="#tema-'+g[2]+'">Tema '+g[2]+'</a></small></div>').join("") : '<p style="color:var(--muted)">No hay términos que coincidan. Prueba con otra palabra.</p>';
+  }
+  document.getElementById("glossQ").addEventListener("input", gloss); gloss();
+
+  renderProgress();
+  route();
+})();
+</script>
+
+</body>
+</html>

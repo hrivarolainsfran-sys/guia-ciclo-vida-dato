@@ -1,0 +1,1432 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Algoritmia y complejidad</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: guía de estudio con índice lateral fijo (10 temas + glosario) y una vista por tema; en móvil el índice pasa a barra superior deslizable. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#141C29; --muted:#566275; --line:#D9DFE8;
+  --accent:#2448C4; --accent-ink:#FFFFFF; --accent-soft:#E5EBFB;
+  --example:#A4510B; --example-soft:#FCF0E1;
+  --ok:#157A3A; --ok-soft:#E3F4E8; --bad:#B42323; --bad-soft:#FBE7E7;
+  --p1:#0E8A88; --p2:#2448C4; --p3:#7A3FC2; --p4:#B9650E; --p5:#2E8A3A;
+  --s1:#3C6FE0; --s2:#D9822B; --s3:#2E9C6E;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+    --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+    --example:#F1AC62; --example-soft:#33261A;
+    --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+    --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+    --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+  --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+  --example:#F1AC62; --example-soft:#33261A;
+  --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+  --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+  --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:2.2rem}
+h3{font-size:1.1rem;font-weight:600;margin-top:1.4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 14px 24px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px}
+.brand small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;line-height:1.25;display:block;margin-top:2px}
+.progress{padding:0 8px}
+.progress .bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress span{font-size:.8rem;color:var(--muted)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.navlist a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.92rem;line-height:1.3}
+.navlist a:hover{background:var(--surface-2)}
+.navlist a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlist .num{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem;background:var(--surface-2);color:var(--muted)}
+.navlist a[aria-current="page"] .num{background:var(--accent);color:var(--accent-ink)}
+.navlist a.done .num{background:var(--ok-soft);color:var(--ok)}
+.navsep{height:1px;background:var(--line);margin:6px 8px}
+
+main{min-width:0;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{max-width:860px;margin:0 auto}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--accent)}
+.lead{font-size:1.12rem;color:var(--muted);max-width:65ch}
+.prose{max-width:68ch}
+.oneline{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius) var(--radius) 0;font-weight:500}
+.objs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.objs li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);background:var(--surface)}
+
+/* Callouts */
+.callout{margin:1.2rem 0;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.callout>.tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+.callout p:first-of-type{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.ex{background:var(--example-soft);border-color:transparent}
+.ex>.tag{color:var(--example)}
+.exam{background:var(--surface);border:1px solid var(--accent)}
+.exam>.tag{color:var(--accent)}
+.exam ul{margin:.3rem 0 0;padding-left:1.2rem}
+.warn{background:var(--bad-soft);border-color:transparent}
+.warn>.tag{color:var(--bad)}
+
+/* Diagrams */
+.diagram{margin:1.2rem 0;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow-x:auto}
+.diagram figcaption{font-size:.8rem;color:var(--muted);margin-top:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
+.flow .node{flex:1 1 0;min-width:110px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.86rem;line-height:1.35}
+.flow .node b{display:block;font-family:var(--font-display);font-size:.95rem;margin-bottom:2px}
+.flow .arrow{flex:none;align-self:center;color:var(--muted);font-size:1.2rem}
+.flow .node.hl{background:var(--accent-soft);border-color:var(--accent)}
+@media (max-width:640px){
+  .flow.stack{flex-direction:column}
+  .flow.stack .arrow{transform:rotate(90deg)}
+  .flow.stack .node{min-width:0}
+}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.box{padding:12px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.9rem;line-height:1.45;min-width:0}
+.box h4{font-size:.98rem;margin-bottom:4px}
+.box .k{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.box.accent{background:var(--accent-soft);border-color:var(--accent)}
+.box small{color:var(--muted)}
+
+/* Tree */
+.tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:560px}
+.tree .lvl{display:flex;gap:16px;justify-content:center;width:100%}
+.tree .tnode{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:.85rem;text-align:center;line-height:1.3}
+.tree .tnode.root{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tree .tnode.mid{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.tree .branch{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;border-top:2px solid var(--line);position:relative}
+.tree .stem{width:2px;height:14px;background:var(--line)}
+.tree .leaves{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tree .leaf{font-size:.8rem;padding:6px 9px;border-radius:6px;background:var(--surface);border:1px dashed var(--line);text-align:center;line-height:1.3}
+.tree .leaf em{display:block;font-style:normal;color:var(--muted);font-size:.74rem}
+
+/* Lifecycle */
+.cycle{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-width:640px;counter-reset:ph}
+.phase{position:relative;padding:12px;border-radius:10px;background:var(--surface-2);border-top:4px solid var(--c);font-size:.85rem;line-height:1.4}
+.phase .pn{font-family:var(--font-mono);font-size:.72rem;color:var(--c);font-weight:600}
+.phase b{display:block;font-family:var(--font-display);font-size:.95rem;margin:2px 0 6px}
+.phase .topics{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.phase .topics a{font-size:.72rem;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.phase:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:1rem}
+.loopback{margin-top:10px;font-size:.8rem;color:var(--muted);text-align:center;min-width:640px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;margin:1rem 0}
+pre.code .c{color:var(--muted)}
+pre.code .o{color:var(--ok)}
+
+/* Data matrix (dato/obs/variable) */
+.matrix td,.matrix th{text-align:center;font-family:var(--font-mono);font-size:.82rem;transition:background .15s}
+.matrix.show-var td:nth-child(3),.matrix.show-var th:nth-child(3){background:var(--accent-soft);color:var(--accent)}
+.matrix.show-obs tbody tr:nth-child(2) td{background:var(--example-soft);color:var(--example)}
+.matrix.show-dat tbody tr:nth-child(3) td:nth-child(4){background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+/* Buttons & inputs */
+.btn{font:inherit;font-size:.88rem;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+input[type=text],input[type=number]{font:inherit;font-size:.92rem;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.out{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* Interactive SVG */
+svg text{fill:var(--muted);font-family:var(--font-body)}
+.dot{transition:r .2s,opacity .2s}
+.dot.st1{fill:var(--s1)}.dot.st2{fill:var(--s2)}.dot.st3{fill:var(--s3)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px repeat(8,minmax(44px,1fr));min-width:620px;font-size:.8rem}
+.gantt>div{padding:6px 6px;border-bottom:1px solid var(--line);min-height:32px;display:flex;align-items:center}
+.gantt .gh{font-weight:600;color:var(--muted);font-size:.72rem;justify-content:center}
+.gantt .bar{background:var(--surface-2);border-radius:5px;margin:4px 0;padding:0 6px;font-size:.72rem;color:var(--muted)}
+.gantt .bar.crit{background:var(--accent);color:var(--accent-ink)}
+.gantt .bar.mile{background:transparent;justify-content:center;color:var(--example);font-size:1rem}
+
+/* Quiz */
+.quiz{margin-top:2.4rem;padding:20px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.quiz h2{margin-top:0}
+.qitem{padding:14px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0}
+.qitem p.q{font-weight:600;margin:0 0 8px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{text-align:left;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.qopt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.qopt:disabled{cursor:default}
+.qexp{font-size:.86rem;color:var(--muted);margin-top:8px}
+.qscore{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.pager a{flex:1 1 220px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager small{display:block;color:var(--muted);font-size:.75rem}
+.pager a.next{text-align:right}
+.studied{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* Home cards */
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.tcard{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.tcard:hover{border-color:var(--accent)}
+.tcard .n{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.tcard b{font-family:var(--font-display);font-size:1rem;line-height:1.3}
+.tcard span.d{font-size:.84rem;color:var(--muted);line-height:1.4}
+.tcard .st{margin-top:auto;padding-top:6px}
+
+/* Glossary */
+.gloss{display:grid;gap:8px;margin-top:14px}
+.gloss dt{font-weight:600;font-family:var(--font-display)}
+.gloss dd{margin:0 0 6px;color:var(--muted);font-size:.92rem}
+.gloss .gi{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.gloss .gi small{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+
+/* Mobile nav */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .brand,.progress{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .navlist::-webkit-scrollbar{display:none}
+  .navlist a{white-space:nowrap;padding:6px 8px}
+  .navlist a .lbl{display:none}
+  .navlist a[aria-current="page"] .lbl{display:inline}
+  .navsep{width:1px;height:20px;margin:auto 2px}
+  main{padding-block:24px 64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Módulo 3: componentes extra */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyramid>div{padding:12px 16px;border-radius:8px;text-align:center;font-size:.88rem;line-height:1.4;max-width:100%}
+.pyramid b{display:block;font-family:var(--font-display);font-size:1rem}
+.pyramid span{color:var(--muted)}
+.pyramid .lvl3{width:55%;background:var(--accent);color:var(--accent-ink)}
+.pyramid .lvl3 span{color:var(--accent-ink);opacity:.85}
+.pyramid .lvl2{width:75%;background:var(--accent-soft);border:1px solid var(--accent)}
+.pyramid .lvl1{width:95%;background:var(--surface-2);border:1px solid var(--line)}
+@media (max-width:560px){.pyramid>div{width:100%!important}}
+.balbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.balbar .maj{background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:600;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden}
+.balbar .min{background:var(--example);min-width:3px}
+.cm{display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;max-width:520px}
+.cm .cmh{font-size:.78rem;font-weight:600;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;text-align:center}
+.cm .cmh.side{justify-content:flex-start;align-items:center;text-align:left}
+.cm .cell{padding:10px;border-radius:8px;border:1px solid var(--line)}
+.cm .cell.good{background:var(--ok-soft)}
+.cm .cell.badc{background:var(--bad-soft)}
+.cm .cell label{margin-bottom:4px}
+@media (max-width:480px){.cm{grid-template-columns:80px 1fr 1fr}}
+.mini{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--example)}
+.kfold{display:flex;flex-direction:column;gap:6px;min-width:480px}
+.kfrow{display:grid;grid-template-columns:100px repeat(5,1fr);gap:4px;align-items:center}
+.kfrow span{font-size:.75rem;text-align:center;padding:6px 0;border-radius:5px}
+.kfrow .kt{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.kfrow .ktr{background:var(--accent-soft);color:var(--accent)}
+.kfrow .out{text-align:left;color:var(--muted)}
+select.btn{padding-right:8px}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav" aria-label="Temas">
+    <div class="brand"><small>Módulo 5 · Guía de estudio</small><strong>Algoritmia y complejidad en IA</strong></div>
+    <div class="progress"><span id="progText">0 de 10 temas estudiados</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="navlist" id="navlist">
+      <li><a href="./" data-v="__home"><span class="num">⌂</span><span class="lbl">Todos los módulos</span></a></li>
+      <li><a href="#inicio" data-v="inicio"><span class="num">◎</span><span class="lbl">Mapa del módulo</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#tema-1" data-v="tema-1"><span class="num">1</span><span class="lbl">Estrategias de diseño</span></a></li>
+      <li><a href="#tema-2" data-v="tema-2"><span class="num">2</span><span class="lbl">Eficiencia y análisis</span></a></li>
+      <li><a href="#tema-3" data-v="tema-3"><span class="num">3</span><span class="lbl">Algoritmos de ordenación</span></a></li>
+      <li><a href="#tema-4" data-v="tema-4"><span class="num">4</span><span class="lbl">Algoritmos con árboles</span></a></li>
+      <li><a href="#tema-5" data-v="tema-5"><span class="num">5</span><span class="lbl">Heaps y colas de prioridad</span></a></li>
+      <li><a href="#tema-6" data-v="tema-6"><span class="num">6</span><span class="lbl">Algoritmos con grafos</span></a></li>
+      <li><a href="#tema-7" data-v="tema-7"><span class="num">7</span><span class="lbl">Algoritmos greedy</span></a></li>
+      <li><a href="#tema-8" data-v="tema-8"><span class="num">8</span><span class="lbl">Caminos mínimos</span></a></li>
+      <li><a href="#tema-9" data-v="tema-9"><span class="num">9</span><span class="lbl">Greedy sobre grafos</span></a></li>
+      <li><a href="#tema-10" data-v="tema-10"><span class="num">10</span><span class="lbl">Backtracking</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#glosario" data-v="glosario"><span class="num">Aa</span><span class="lbl">Glosario</span></a></li>
+    </ul>
+  </nav>
+
+  <main>
+<!-- ===================== INICIO ===================== -->
+<section class="view" data-view="inicio">
+  <p class="eyebrow">Módulo 5 · 10 temas</p>
+  <h1>Algoritmia y complejidad en inteligencia artificial</h1>
+  <p class="lead">Cómo se diseñan los algoritmos, cómo se mide lo que cuestan y los algoritmos clásicos sobre vectores, árboles y grafos. Con simuladores paso a paso para ver cada algoritmo en marcha.</p>
+
+  <h2>El mapa del módulo</h2>
+  <figure class="diagram">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">DISEÑAR</span><b>Estrategias</b>Recursividad, divide y vencerás, PD, voraces, backtracking.<div class="topics"><a href="#tema-1">T1</a></div></div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">MEDIR</span><b>Eficiencia</b>T(n), O, Ω, Θ, peor/mejor/medio caso.<div class="topics"><a href="#tema-2">T2</a></div></div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">VECTORES Y ÁRBOLES</span><b>Ordenar y estructurar</b>Ordenación, BST, AVL, heaps.<div class="topics"><a href="#tema-3">T3</a><a href="#tema-4">T4</a><a href="#tema-5">T5</a></div></div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">GRAFOS</span><b>Recorrer y optimizar</b>BFS, DFS, Dijkstra, Prim, Kruskal.<div class="topics"><a href="#tema-6">T6</a><a href="#tema-8">T8</a><a href="#tema-9">T9</a></div></div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">BUSCAR SOLUCIONES</span><b>Greedy y backtracking</b>Cambio, mochila, viajante, N reinas.<div class="topics"><a href="#tema-7">T7</a><a href="#tema-10">T10</a></div></div>
+    </div>
+    <p class="loopback">Idea transversal: un algoritmo correcto pero de complejidad exponencial es inútil con datos grandes.</p>
+    <figcaption>Cómo se conectan los 10 temas.</figcaption>
+  </figure>
+
+  <h2>Temas</h2>
+  <div class="tcards" id="tcards"></div>
+
+  <div class="callout exam">
+    <span class="tag">Cómo usar esta guía</span>
+    <ul>
+      <li>Cada tema empieza con una frase resumen y acaba con un test de 5 preguntas.</li>
+      <li>Los recuadros naranjas son <b>ejemplos en mercados</b>; los azules, lo que más se pregunta en el <b>examen</b>.</li>
+      <li>Usa los simuladores paso a paso: ordenación, árbol binario, heap, BFS/DFS, Dijkstra, Prim/Kruskal y N reinas.</li>
+      <li>Tu progreso se guarda en este navegador.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== TEMA 1 ===================== -->
+<section class="view" data-view="tema-1" hidden>
+  <p class="eyebrow">Tema 1</p>
+  <h1>Estrategias de diseño de algoritmos</h1>
+  <p class="oneline">Las grandes estrategias son la <b>recursividad</b> (resolver una versión más pequeña del mismo problema), <b>divide y vencerás</b>, la <b>programación dinámica</b> (guardar soluciones en una tabla), los <b>algoritmos voraces</b>, el <b>backtracking</b> y el <b>branch and bound</b>.</p>
+  <ul class="objs"><li>Recursividad</li><li>Divide y vencerás</li><li>Programación dinámica</li><li>Voraces, backtracking, B&amp;B</li></ul>
+
+  <h2>Recursividad</h2>
+  <p class="prose">Un algoritmo recursivo se llama a sí mismo para resolver una versión más pequeña del problema, hasta llegar a un <b>caso base</b>. Necesita <b>asignación dinámica de memoria</b> (pila de llamadas): con asignación estática, cada llamada sobrescribiría las variables de la anterior.</p>
+  <div class="grid g2">
+<pre class="code" style="margin:0"><span class="c">// Recursivo</span>
+FactorialR(n):
+  si n = 0: devolver 1
+  si no:    devolver n · FactorialR(n − 1)</pre>
+<pre class="code" style="margin:0"><span class="c">// Iterativo</span>
+FactorialI(n):
+  fact := 1
+  para cont := 2 hasta n: fact := fact · cont
+  devolver fact</pre>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4>Ventajas</h4>Soluciones elegantes, claras y modulares para problemas complejos.</div>
+    <div class="box"><h4>Desventajas</h4>1) Sobrecarga de las llamadas. 2) Algunos son ineficientes por naturaleza: recalculan lo mismo muchas veces.</div>
+  </div>
+  <h3>Simulador: la multiplicación de conejos (Fibonacci)</h3>
+  <figure class="diagram">
+    <label for="fibN">n = <b class="out" id="fibNv">7</b></label>
+    <input type="range" id="fibN" min="3" max="32" value="7" style="width:100%">
+    <div class="grid g3" id="fibOut" style="margin-top:12px"></div>
+    <figcaption>ParejasR(n) = ParejasR(n−1) + ParejasR(n−2). El temario indica que para ParejasR(7) se calcula ParejasR(3) <b>5 veces</b>. La versión iterativa calcula cada valor una sola vez.</figcaption>
+  </figure>
+
+  <h2>Divide y vencerás</h2>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node"><b>¿Trivial?</b>Si el problema es pequeño, se resuelve directamente (caso base)</div><div class="arrow">→</div>
+      <div class="node"><b>Dividir</b>En k subproblemas del mismo tipo y menor tamaño</div><div class="arrow">→</div>
+      <div class="node"><b>Resolver</b>Cada uno de forma independiente (recursiva)</div><div class="arrow">→</div>
+      <div class="node hl"><b>Combinar</b>Las soluciones parciales. Si no hace falta combinar, se llama <b>reducción</b></div>
+    </div>
+    <figcaption>Coste típico: <span class="mono">T(n) = a·T(n/b) + c·nᵏ</span>, con a subproblemas y b el factor de reducción. Resultado: Θ(nᵏ) si a &lt; bᵏ; Θ(nᵏ log n) si a = bᵏ; Θ(n^(log_b a)) si a &gt; bᵏ.</figcaption>
+  </figure>
+  <h3>Búsqueda binaria</h3>
+  <p class="prose">En un vector ordenado, se compara con el centro y se descarta la mitad que no puede contener el elemento.</p>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="bsArr">Vector ordenado (precios)</label><input type="text" id="bsArr" value="98, 101, 103, 107, 112, 118, 120, 125, 131, 140, 152, 160"></div>
+      <div><label for="bsX">Buscar</label><input type="number" id="bsX" value="131"></div>
+    </div>
+    <div id="bsOut" style="margin-top:12px"></div>
+    <figcaption>Cada fila es una llamada recursiva: en gris lo descartado, en azul el centro. Como mucho ⌊log₂ n⌋ + 1 comparaciones.</figcaption>
+  </figure>
+
+  <h2>Otras estrategias</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Programación dinámica</h4>Divide en subproblemas cuyas soluciones se guardan en una <b>tabla</b> y se consultan cuando se necesitan. Enfoque de <b>abajo arriba</b>. Útil cuando hay un número polinomial de subproblemas distintos. "Programación" = tablas; "dinámica" = cómo se llenan.</div>
+    <div class="box"><h4>Algoritmos voraces (ávidos)</h4>En cada paso toman la mejor opción local: selección, comprobación de viabilidad y comprobación de solución. No siempre dan el óptimo (<a href="#tema-7">tema 7</a>).</div>
+    <div class="box"><h4>Backtracking</h4>Recorre un <b>árbol implícito</b> de soluciones en profundidad y retrocede cuando una rama no es prometedora (<a href="#tema-10">tema 10</a>).</div>
+    <div class="box"><h4>Branch and bound</h4>Solo para optimización. Recorre el árbol en anchura o por el nodo más prometedor y poda con cotas.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>La valoración de opciones con <b>árboles binomiales</b> es programación dinámica pura: se calcula el valor en los nodos del vencimiento y se retrocede hacia el presente reutilizando los nodos ya calculados. Hacerlo con recursión ingenua repetiría cálculos de forma exponencial; con la tabla, el coste es solo cuadrático en el número de pasos.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Recursividad = caso base + llamada a una versión menor. Requiere asignación dinámica de memoria (pila).</li>
+    <li>Divide y vencerás: trivial → dividir → resolver → combinar (si no hay combinación, reducción).</li>
+    <li>Búsqueda binaria: vector ordenado, descarta la mitad, O(log n).</li>
+    <li>PD: tabla, de abajo arriba. Voraz: óptimo local. Backtracking: profundidad + retroceso. B&amp;B: optimización con poda por cotas.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-1"></div>
+</section>
+
+<!-- ===================== TEMA 2 ===================== -->
+<section class="view" data-view="tema-2" hidden>
+  <p class="eyebrow">Tema 2</p>
+  <h1>Eficiencia y análisis de los algoritmos</h1>
+  <p class="oneline">La eficiencia se mide como una función del tamaño de la entrada, <b>T(n)</b>. Se estudia en el <b>peor</b>, <b>mejor</b> y <b>caso medio</b>, y se expresa con <b>notación asintótica</b> (O, Ω, Θ), que ignora constantes y se queda con el ritmo de crecimiento.</p>
+  <ul class="objs"><li>Tamaño de entrada y T(n)</li><li>Peor, mejor y caso medio</li><li>Notación asintótica y reglas</li><li>Análisis matemático y empírico</li></ul>
+
+  <h2>Medir</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Tamaño de entrada n</h4>Longitud del vector a ordenar, dimensión de la matriz, nº de vértices o aristas del grafo.</div>
+    <div class="box"><h4>T(n)</h4>Nº de instrucciones de un ordenador idealizado para una entrada de tamaño n. Ej.: T(n) = c·n².</div>
+    <div class="box"><h4>Constante oculta</h4>Dos implementaciones del mismo algoritmo difieren en una constante multiplicativa. La notación asintótica la ignora, pero en la práctica puede importar.</div>
+  </div>
+
+  <h2>Notación asintótica</h2>
+  <div class="grid g3">
+    <div class="box accent"><h4>O (cota superior)</h4>"Como mucho crece así". La más usada, ligada al peor caso.</div>
+    <div class="box"><h4>Ω (cota inferior)</h4>"Como poco crece así".</div>
+    <div class="box"><h4>Θ (cota exacta)</h4>Crece exactamente a ese ritmo: O y Ω a la vez.</div>
+  </div>
+  <figure class="diagram">
+    <label for="grN">n = <b class="out" id="grNv">20</b></label>
+    <input type="range" id="grN" min="1" max="64" value="20" style="width:100%">
+    <svg id="grSvg" viewBox="0 0 600 240" width="100%" style="display:block;margin-top:8px" role="img" aria-label="Crecimiento de las funciones de complejidad"></svg>
+    <div class="table-wrap" style="margin-top:8px"><table id="grTable"></table></div>
+    <figcaption>Operaciones aproximadas para cada orden de complejidad (escala logarítmica en el gráfico). Con n = 64, un algoritmo 2ⁿ ya necesita 18 trillones de pasos.</figcaption>
+  </figure>
+  <h3>Reglas de cálculo</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Regla de la suma</h4>Fragmentos secuenciales: <span class="mono">O(f) + O(g) = O(max(f, g))</span>. O(n²) + O(n³) + O(n log n) = O(n³).</div>
+    <div class="box"><h4>Regla del producto</h4>Anidados: <span class="mono">O(f)·O(g) = O(f·g)</span>. Un bucle dentro de otro: O(n²).</div>
+    <div class="box"><h4>Constantes</h4><span class="mono">O(c·f) = O(f)</span>: O(n²/2) = O(n²).</div>
+  </div>
+
+  <h2>Peor, mejor y caso medio</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Caso</th><th>Qué es</th><th>Búsqueda lineal</th><th>Interés</th></tr></thead>
+    <tbody>
+      <tr><td><b>Peor</b></td><td>La entrada que más operaciones exige</td><td>x no está: Θ(n)</td><td>El más usado: garantiza una cota superior</td></tr>
+      <tr><td><b>Medio</b></td><td>Promedio sobre todas las entradas</td><td>Θ(n), suponiendo casos uniformes (n + 1)</td><td>El más realista, pero exige conocer la distribución</td></tr>
+      <tr><td><b>Mejor</b></td><td>La entrada más favorable</td><td>x en la primera posición: Θ(1)</td><td>Casi nunca informa</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Algunos algoritmos no tienen peor ni mejor caso: <b>merge sort</b> es siempre Θ(n log n). Quicksort con pivote en un extremo tiene su peor caso con el vector ya ordenado; inserción, con el vector ordenado al revés.</p>
+
+  <h2>Análisis matemático</h2>
+  <div class="grid g2">
+    <div class="box"><h4>No recursivos</h4>1) Parámetro n · 2) operación básica · 3) ¿peor/medio/mejor? · 4) sumatorio de operaciones · 5) simplificar con reglas.<br><small>MaxElement: <span class="mono">Σᵢ₌₁ⁿ⁻¹ 1 = n − 1 ∈ Θ(n)</span>.</small></div>
+    <div class="box"><h4>Recursivos</h4>Plantear una <b>relación de recurrencia</b> con condición inicial y resolverla (p. ej. sustitución hacia atrás).<br><small>Factorial: <span class="mono">M(n) = M(n−1) + 1, M(0) = 0 → M(n) = n</span>: lineal.</small></div>
+  </div>
+  <p class="prose"><b>Análisis empírico</b>: implementar y ejecutar en la misma máquina, con los mismos datos y el mismo entorno. Los datos de prueba (reales, aleatorios o extremos) son clave, y la carga del sistema influye.</p>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>En trading de alta frecuencia la "constante oculta" importa: dos algoritmos O(n) pueden diferir en microsegundos por operación, y eso decide quién ejecuta primero. Por otro lado, un modelo de riesgo que compara todos los pares de activos es O(n²): con 500 acciones son unos 125.000 pares, pero con 10.000 ya son 50 millones.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>O = cota superior, Ω = inferior, Θ = exacta.</li>
+    <li>Suma: O(max). Producto: O(f·g). Constantes fuera.</li>
+    <li>Peor caso (el más usado), caso medio (necesita la distribución), mejor caso (poco útil).</li>
+    <li>Recursivos: recurrencia + sustitución hacia atrás. Empírico: misma máquina, mismos datos.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-2"></div>
+</section>
+
+<!-- ===================== TEMA 3 ===================== -->
+<section class="view" data-view="tema-3" hidden>
+  <p class="eyebrow">Tema 3</p>
+  <h1>Algoritmos de ordenación</h1>
+  <p class="oneline">Cinco algoritmos clásicos: <b>burbuja</b>, <b>selección</b> e <b>inserción</b> son sencillos pero O(n²); <b>merge sort</b> y <b>quicksort</b> aplican divide y vencerás y bajan a O(n log n).</p>
+  <ul class="objs"><li>Burbuja</li><li>Selección</li><li>Inserción</li><li>Merge sort</li><li>Quicksort</li></ul>
+
+  <h2>Simulador de ordenación</h2>
+  <figure class="diagram" id="sorter">
+    <div class="btnrow" role="group" aria-label="Algoritmo">
+      <button class="btn" data-sort="bubble" aria-pressed="true">Burbuja</button>
+      <button class="btn" data-sort="selection" aria-pressed="false">Selección</button>
+      <button class="btn" data-sort="insertion" aria-pressed="false">Inserción</button>
+      <button class="btn" data-sort="merge" aria-pressed="false">Merge sort</button>
+      <button class="btn" data-sort="quick" aria-pressed="false">Quicksort</button>
+    </div>
+    <div class="btnrow">
+      <button class="btn primary" id="sPlay">▶ Reproducir</button>
+      <button class="btn" id="sStep">Paso</button>
+      <button class="btn" id="sShuffle">Nuevos datos</button>
+      <button class="btn" id="sSorted">Datos ya ordenados</button>
+      <button class="btn" id="sReverse">Orden inverso</button>
+    </div>
+    <svg id="sortSvg" viewBox="0 0 600 220" width="100%" style="display:block" role="img" aria-label="Barras que se ordenan"></svg>
+    <p class="out" id="sortInfo"></p>
+    <figcaption>24 valores. Naranja: elementos que se comparan. Verde: ya en su posición final. Compara el número de comparaciones entre algoritmos y con datos ya ordenados o en orden inverso.</figcaption>
+  </figure>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Algoritmo</th><th>Idea</th><th>Mejor</th><th>Medio</th><th>Peor</th><th>Memoria extra</th><th>Estable</th></tr></thead>
+    <tbody>
+      <tr><td><b>Burbuja</b></td><td>Intercambia vecinos desordenados; el mayor "sube" al final en cada pasada</td><td class="mono">O(n)*</td><td class="mono">O(n²)</td><td class="mono">O(n²)</td><td class="mono">O(1)</td><td>Sí</td></tr>
+      <tr><td><b>Selección</b></td><td>Busca el mínimo del resto y lo coloca en su sitio</td><td class="mono">O(n²)</td><td class="mono">O(n²)</td><td class="mono">O(n²)</td><td class="mono">O(1)</td><td>No</td></tr>
+      <tr><td><b>Inserción</b></td><td>Inserta cada elemento en la parte ya ordenada</td><td class="mono">O(n)</td><td class="mono">O(n²)</td><td class="mono">O(n²)</td><td class="mono">O(1)</td><td>Sí</td></tr>
+      <tr><td><b>Merge sort</b></td><td>Divide en mitades, ordena cada una y las mezcla</td><td class="mono">O(n log n)</td><td class="mono">O(n log n)</td><td class="mono">O(n log n)</td><td class="mono">O(n)</td><td>Sí</td></tr>
+      <tr><td><b>Quicksort</b></td><td>Elige un pivote, parte en menores y mayores, recursión</td><td class="mono">O(n log n)</td><td class="mono">O(n log n)</td><td class="mono">O(n²)</td><td class="mono">O(log n)</td><td>No</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose" style="font-size:.9rem;color:var(--muted)">* Burbuja con la mejora de parar si una pasada no hace intercambios. <b>Estable</b>: mantiene el orden relativo de elementos iguales. Heapsort (<a href="#tema-5">tema 5</a>) es O(n log n) en todos los casos, in situ y no estable.</p>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un <b>libro de órdenes</b> se ordena por precio y, a igual precio, por hora de llegada (prioridad precio-tiempo). Por eso importa la <b>estabilidad</b>: si dos órdenes tienen el mismo precio, un algoritmo estable conserva quién llegó primero. Ordenar 10.000 operaciones con un O(n²) cuesta unos 100 millones de comparaciones; con un O(n log n), unas 140.000.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>O(n²): burbuja, selección, inserción. O(n log n): merge sort (siempre), quicksort (medio).</li>
+    <li>Quicksort tiene peor caso O(n²) con un mal pivote (p. ej. vector ya ordenado y pivote en un extremo).</li>
+    <li>Inserción es O(n) si el vector ya está ordenado.</li>
+    <li>Merge sort y quicksort aplican divide y vencerás.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-3"></div>
+</section>
+
+<!-- ===================== TEMA 4 ===================== -->
+<section class="view" data-view="tema-4" hidden>
+  <p class="eyebrow">Tema 4</p>
+  <h1>Algoritmos con árboles</h1>
+  <p class="oneline">Un árbol es una estructura no secuencial definida de forma recursiva: vacía, o un nodo con subárboles (como mucho 2 en un <b>árbol binario</b>). Se recorre en <b>preorden</b>, <b>inorden</b> o <b>postorden</b>. Si está ordenado es un <b>árbol binario de búsqueda</b>; si además está equilibrado, un <b>AVL</b>.</p>
+  <ul class="objs"><li>Conceptos y terminología</li><li>Recorridos</li><li>Árboles de expresión</li><li>Ordenados y AVL</li></ul>
+
+  <h2>Terminología</h2>
+  <div class="grid g4" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <div class="box"><h4>Raíz</h4>Nodo sin predecesor.</div>
+    <div class="box"><h4>Rama</h4>Arista entre dos nodos.</div>
+    <div class="box"><h4>Hoja</h4>Nodo sin descendientes (grado 0).</div>
+    <div class="box"><h4>Nodo interno</h4>Con al menos un hijo.</div>
+    <div class="box"><h4>Grado</h4>Nº de hijos directos.</div>
+    <div class="box"><h4>Nivel</h4>Ramas desde la raíz (la raíz es nivel 1 por convención).</div>
+    <div class="box"><h4>Altura</h4>El nivel más alto.</div>
+    <div class="box"><h4>Ancho</h4>Máximo nº de nodos en un nivel.</div>
+  </div>
+  <p class="prose">Visto como grafo, un árbol es un <b>grafo acíclico, conexo y no dirigido</b>: hay exactamente un camino entre cada par de nodos.</p>
+
+  <h2>Simulador: árbol binario de búsqueda</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="bstIn">Insertar en este orden</label><input type="text" id="bstIn" value="50, 25, 70, 8, 30, 60, 90, 27"></div>
+      <div class="btnrow" style="align-items:flex-end;margin:0"><button class="btn" id="bstSorted">Insertar ordenados (degenera)</button><button class="btn" id="bstReset">Ejemplo del temario</button></div>
+    </div>
+    <svg id="bstSvg" viewBox="0 0 600 260" width="100%" style="display:block;margin-top:10px" role="img" aria-label="Árbol binario de búsqueda"></svg>
+    <div class="table-wrap" style="margin:8px 0 0"><table id="bstTable"></table></div>
+    <p class="out" id="bstInfo"></p>
+    <figcaption>Junto a cada nodo, su factor de equilibrio (altura izquierda − altura derecha). Si algún |factor| ≥ 2, el árbol no es AVL. El <b>inorden</b> de un árbol de búsqueda devuelve siempre los valores ordenados.</figcaption>
+  </figure>
+
+  <h2>Recorridos en profundidad</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Preorden</h4>Nodo → izquierdo → derecho.<br><small>Ejemplo del temario: a, b, d, c, e, f</small></div>
+    <div class="box"><h4>Inorden</h4>Izquierdo → nodo → derecho.<br><small>b, d, a, e, c, f</small></div>
+    <div class="box"><h4>Postorden</h4>Izquierdo → derecho → nodo.<br><small>d, b, e, f, c, a. Sirve para <b>borrar</b> un árbol sin perder enlaces.</small></div>
+  </div>
+  <p class="prose">Con el preorden y el inorden se puede reconstruir el árbol: el primero del preorden es la raíz; en el inorden, lo que está a su izquierda forma el subárbol izquierdo y lo que está a su derecha, el derecho.</p>
+
+  <h2>Árboles de expresión</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Reglas</h4>Las hojas son operandos; la raíz y los nodos internos, operadores; cada subárbol es una subexpresión.<br>Inorden → notación infija; preorden → prefija; postorden → postfija.</div>
+    <div class="box"><h4>Ejemplo: a * (b + c) + d</h4><span class="mono">(((a * (b + c)) + d))</span>. Raíz "+", hijo izquierdo "*" (con a y "b + c"), hijo derecho d. Paréntesis completos: <span class="mono">(((a*c)+(e/g))−(b+d))</span>.</div>
+  </div>
+
+  <h2>Árboles ordenados y balanceados</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Árbol binario de búsqueda (ordenado)</h4>Todo el subárbol izquierdo &lt; nodo &lt; todo el subárbol derecho. Buscar cuesta O(altura): O(log n) si está equilibrado, O(n) si degenera en una lista.</div>
+    <div class="box accent"><h4>AVL (Adelson-Velski y Landis)</h4>BST en el que, para cada nodo, <span class="mono">|altura(izq) − altura(der)| &lt; 2</span>. Altura del árbol vacío = −1. Tras insertar o borrar se reequilibra con <b>rotaciones</b>: simple a la derecha, simple a la izquierda, doble izquierda-derecha, doble derecha-izquierda.</div>
+  </div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Los motores de casación de órdenes suelen guardar los niveles de precio en <b>árboles equilibrados</b> (AVL o rojo-negro): insertar, borrar y buscar un precio cuesta O(log n) incluso con miles de niveles, y el recorrido inorden da el libro ordenado por precio.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Árbol = grafo acíclico, conexo y no dirigido. Binario: como mucho 2 hijos.</li>
+    <li>Preorden (N-I-D), inorden (I-N-D), postorden (I-D-N, para borrar).</li>
+    <li>Árbol de expresión: hojas = operandos; internos = operadores.</li>
+    <li>AVL: |h(izq) − h(der)| ≤ 1; 4 casos de rotación (2 simples y 2 dobles).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-4"></div>
+</section>
+
+<!-- ===================== TEMA 5 ===================== -->
+<section class="view" data-view="tema-5" hidden>
+  <p class="eyebrow">Tema 5</p>
+  <h1>Algoritmos con heaps</h1>
+  <p class="oneline">Un <b>heap</b> (montículo) es un árbol binario completo donde cada nodo es ≥ que sus hijos (<b>max-heap</b>) o ≤ (<b>min-heap</b>). Se guarda en un vector y da acceso inmediato al máximo o mínimo. Es la base del <b>heapsort</b> y de las <b>colas de prioridad</b>.</p>
+  <ul class="objs"><li>Propiedades del heap</li><li>Operaciones</li><li>Heapsort</li><li>Colas de prioridad</li></ul>
+
+  <h2>El heap</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Forma</h4>Árbol binario <b>completo</b>: las hojas están en los dos últimos niveles y el último se llena de izquierda a derecha.</div>
+    <div class="box"><h4>Orden parcial</h4>Max-heap: padre ≥ hijos, así que la raíz es el máximo. Min-heap: al revés.</div>
+    <div class="box"><h4>En un vector</h4>Para el índice i (desde 0): hijo izquierdo <span class="mono">2i+1</span>, derecho <span class="mono">2i+2</span>, padre <span class="mono">⌊(i−1)/2⌋</span>. (Desde 1: hijos 2i y 2i+1.)</div>
+    <div class="box"><h4>Operaciones</h4>Add (insertar y reordenar), GetTop, RemoveTop, Heapify. En C++: <code>push_heap</code>, <code>pop_heap</code>, <code>make_heap</code>, <code>sort_heap</code>.</div>
+  </div>
+
+  <h2>Simulador: max-heap</h2>
+  <figure class="diagram">
+    <div class="btnrow">
+      <input type="number" id="hpVal" value="73" style="max-width:110px" aria-label="Valor a insertar">
+      <button class="btn primary" id="hpAdd">Insertar</button>
+      <button class="btn" id="hpPop">Extraer máximo</button>
+      <button class="btn" id="hpSort">Heapsort completo</button>
+      <button class="btn" id="hpReset">Ejemplo del temario</button>
+    </div>
+    <svg id="hpSvg" viewBox="0 0 600 230" width="100%" style="display:block" role="img" aria-label="Max-heap en forma de árbol"></svg>
+    <div id="hpArr" class="out" style="margin-top:6px"></div>
+    <p class="out" id="hpInfo"></p>
+    <figcaption>Al insertar, el valor entra al final y "flota" hacia arriba mientras sea mayor que su padre. Al extraer, el último sube a la raíz y "se hunde". Ambas operaciones cuestan O(log n).</figcaption>
+  </figure>
+
+  <h2>Heapsort</h2>
+  <div class="flow stack">
+    <div class="node"><b>1. Construir</b>el montículo de abajo arriba (de derecha a izquierda)</div><div class="arrow">→</div>
+    <div class="node"><b>2. Extraer</b>la raíz (el máximo) y llevarla al final del vector</div><div class="arrow">→</div>
+    <div class="node hl"><b>3. Repetir</b>con el resto hasta vaciar el heap</div>
+  </div>
+  <div class="grid g4" style="margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div class="box">Williams, 1964.</div>
+    <div class="box">Peor caso <b>O(n log n)</b>.</div>
+    <div class="box"><b>In situ</b>: memoria extra constante.</div>
+    <div class="box"><b>No estable</b>.</div>
+  </div>
+
+  <h2>Colas de prioridad</h2>
+  <p class="prose">Sale primero el elemento de mayor prioridad; a igual prioridad, el que llegó antes. Operaciones: <b>insert</b>, <b>eliminar</b> (el de mayor prioridad) y <b>getHighestPriority</b>. Con un heap, insertar y extraer cuestan O(log n).</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Nivel (triage IMSS)</th><th>Color</th><th>Ejemplo</th><th>Espera máxima</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Reanimación</td><td><span class="pill bad">Rojo</span></td><td>Insuficiencia respiratoria severa</td><td>Inmediata</td></tr>
+      <tr><td>2 · Emergencia</td><td><span class="pill" style="background:var(--example-soft);color:var(--example)">Naranja</span></td><td>Quemadura química en ojos</td><td>10 min</td></tr>
+      <tr><td>3 · Urgencia</td><td><span class="pill" style="background:var(--example-soft);color:var(--example)">Amarillo</span></td><td>Fractura de tobillo</td><td>30 min</td></tr>
+      <tr><td>4 · Semiurgencia</td><td><span class="pill ok">Verde</span></td><td>Traumatismo craneal leve</td><td>60 min</td></tr>
+      <tr><td>5 · No urgencia</td><td><span class="pill neutral">Azul</span></td><td>Gastroenteritis</td><td>120 min</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Otros usos: simulación por eventos, planificación de tareas, el k-ésimo mayor, filtros antispam, la mediana de un flujo de datos (con dos heaps) y <b>Dijkstra</b> (<a href="#tema-8">tema 8</a>).</p>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>El <b>libro de órdenes</b> es una pareja de colas de prioridad: las órdenes de compra en un max-heap (la de mayor precio arriba) y las de venta en un min-heap (la de menor precio arriba). Hay casación cuando la mejor compra ≥ la mejor venta, y consultar ambas cuesta O(1).</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Heap = árbol binario completo + orden parcial (max o min).</li>
+    <li>Índices: hijos 2i+1 y 2i+2, padre (i−1)/2 (desde 0).</li>
+    <li>Heapsort: Williams 1964, O(n log n), in situ, inestable.</li>
+    <li>Cola de prioridad: sale el de mayor prioridad; a igualdad, por orden de llegada.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-5"></div>
+</section>
+
+<!-- ===================== TEMA 6 ===================== -->
+<section class="view" data-view="tema-6" hidden>
+  <p class="eyebrow">Tema 6</p>
+  <h1>Algoritmos con grafos</h1>
+  <p class="oneline">Un grafo se representa con una <b>lista de aristas</b>, una <b>matriz de adyacencia</b> o una <b>lista de adyacencia</b>. Se recorre en <b>anchura</b> (BFS, con una cola) o en <b>profundidad</b> (DFS, recursivo). Con DFS se obtiene el <b>orden topológico</b> de un grafo acíclico dirigido.</p>
+  <ul class="objs"><li>Representaciones</li><li>Recorrido en anchura</li><li>Recorrido en profundidad</li><li>Ordenación topológica</li></ul>
+
+  <h2>Representaciones</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Espacio</th><th>¿Existe la arista (i, j)?</th><th>Vecinos de i</th><th>Mejor para</th></tr></thead>
+    <tbody>
+      <tr><td><b>Lista de aristas</b></td><td class="mono">Θ(E)</td><td class="mono">O(E)</td><td class="mono">O(E)</td><td>Algoritmos que recorren todas las aristas (Kruskal)</td></tr>
+      <tr><td><b>Matriz de adyacencia</b></td><td class="mono">Θ(V²)</td><td class="mono">O(1)</td><td class="mono">O(V)</td><td>Grafos densos. Simétrica si no es dirigido</td></tr>
+      <tr><td><b>Lista de adyacencia</b></td><td class="mono">Θ(V + E)</td><td class="mono">O(grado)</td><td class="mono">O(grado)</td><td>Grafos dispersos. 2E entradas si no es dirigido</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Simulador: BFS y DFS</h2>
+  <figure class="diagram">
+    <div class="btnrow" role="group" aria-label="Recorrido">
+      <button class="btn" data-trav="bfs" aria-pressed="true">Anchura (BFS)</button>
+      <button class="btn" data-trav="dfs" aria-pressed="false">Profundidad (DFS)</button>
+      <button class="btn primary" id="tvStep">Paso</button>
+      <button class="btn" id="tvRun">Completo</button>
+      <button class="btn" id="tvReset">Reiniciar</button>
+    </div>
+    <svg id="tvSvg" viewBox="0 0 600 260" width="100%" style="display:block" role="img" aria-label="Recorrido de un grafo"></svg>
+    <p class="out" id="tvInfo"></p>
+    <figcaption>Colores del temario: <b>blanco</b> sin descubrir, <b>gris</b> descubierto pendiente de explorar, <b>negro</b> explorado. BFS usa una <b>cola</b> y visita todos los nodos a distancia k antes que los de distancia k + 1; DFS avanza al vecino de menor índice y retrocede al agotarlos.</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>BFS (anchura)</h4>Por cada vértice guarda <b>distancia</b>, <b>predecesor</b> y <b>color</b>. Siguiendo los predecesores se obtiene el camino más corto en nº de aristas (la "escalera de palabras" FOOL → SAGE del temario).</div>
+    <div class="box"><h4>DFS (profundidad)</h4>Guarda <b>tiempo de descubrimiento</b> y de <b>finalización</b>. Si genera varios árboles, forma un <b>bosque en profundidad</b>.</div>
+  </div>
+
+  <h2>Ordenación topológica</h2>
+  <p class="prose">Ordena linealmente los vértices de un <b>grafo acíclico dirigido</b> (DAG) de modo que si existe la arista (v, w), v va antes que w. Algoritmo: 1) DFS para calcular los tiempos de finalización, 2) ordenar los vértices por tiempo de finalización <b>decreciente</b>.</p>
+  <figure class="diagram">
+    <div class="flow stack">
+      <div class="node">3/4 taza de leche</div><div class="arrow">→</div>
+      <div class="node">1 huevo</div><div class="arrow">→</div>
+      <div class="node">1 cda. de aceite</div><div class="arrow">→</div>
+      <div class="node">1 taza de mezcla</div><div class="arrow">→</div>
+      <div class="node">Calentar jarabe</div><div class="arrow">→</div>
+      <div class="node">Calentar la plancha</div><div class="arrow">→</div>
+      <div class="node">Verter 1/4 de taza</div><div class="arrow">→</div>
+      <div class="node">Voltear al burbujear</div><div class="arrow">→</div>
+      <div class="node hl">Comer</div>
+    </div>
+    <figcaption>Un orden topológico de la receta de tortitas del temario, que respeta todas las dependencias. Hay otros válidos.</figcaption>
+  </figure>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un <b>pipeline</b> de datos de un fondo cuantitativo es un DAG: descargar precios → ajustar por dividendos y splits → calcular factores → entrenar el modelo → generar órdenes. Herramientas de orquestación como Apache Airflow ejecutan las tareas en orden topológico. Y una red de exposiciones entre bancos se recorre con BFS para ver hasta dónde se propagaría un impago.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Lista de aristas Θ(E); matriz Θ(V²) con consulta O(1); lista de adyacencia Θ(V + E).</li>
+    <li>BFS: cola, distancias por niveles, colores blanco/gris/negro.</li>
+    <li>DFS: recursivo, tiempos de descubrimiento y finalización, bosque en profundidad.</li>
+    <li>Orden topológico: DAG + DFS + finalización decreciente.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-6"></div>
+</section>
+
+<!-- ===================== TEMA 7 ===================== -->
+<section class="view" data-view="tema-7" hidden>
+  <p class="eyebrow">Tema 7</p>
+  <h1>Algoritmos greedy</h1>
+  <p class="oneline">Un algoritmo <b>greedy</b> (voraz) elige en cada paso la mejor opción local y <b>nunca deshace</b> una decisión. Es rápido y fácil de implementar, pero <b>no siempre</b> da el óptimo: hay que demostrar que es correcto para cada problema.</p>
+  <ul class="objs"><li>La estrategia greedy</li><li>Sus 6 elementos</li><li>Cambio de monedas</li><li>Viajante y mochila</li></ul>
+
+  <h2>Los 6 elementos</h2>
+  <div class="grid g3">
+    <div class="box"><b>1. Candidatos</b>: elementos que se pueden elegir.</div>
+    <div class="box"><b>2. Solución parcial</b>: los candidatos ya elegidos.</div>
+    <div class="box"><b>3. Función de selección</b>: el mejor candidato restante.</div>
+    <div class="box"><b>4. Función de viabilidad</b>: ¿se puede completar con él?</div>
+    <div class="box"><b>5. Criterio de solución</b>: ¿ya es una solución?</div>
+    <div class="box"><b>6. Función objetivo</b>: el valor a maximizar o minimizar.</div>
+  </div>
+<pre class="code">función voraz(C):
+  S := ∅
+  mientras no solución(S) y C ≠ ∅:
+    x := el elemento de C que maximiza seleccionar(x)
+    C := C \ {x}
+    si completable(S ∪ {x}): S := S ∪ {x}
+  si solución(S): devolver S   si no: "no hay solución"</pre>
+  <p class="prose">Funciona cuando el problema tiene <b>subestructura óptima</b> (la solución óptima contiene soluciones óptimas de subproblemas) y una propiedad de elección voraz demostrable, como en Kruskal, Prim o Dijkstra.</p>
+
+  <h2>Cambio de monedas</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="cnCoins">Monedas disponibles</label><input type="text" id="cnCoins" value="25, 10, 5, 1"></div>
+      <div><label for="cnAmt">Cantidad a devolver</label><input type="number" id="cnAmt" value="63" min="1" max="2000"></div>
+    </div>
+    <div class="btnrow"><button class="btn" data-cn="25,10,5,1|63">25-10-5-1 · 63</button><button class="btn" data-cn="11,5,1|15">11-5-1 · 15</button><button class="btn" data-cn="10,6,5,1|12">10-6-5-1 · 12</button><button class="btn" data-cn="5,2|6">5-2 · 6</button></div>
+    <div class="grid g2" id="cnOut"></div>
+    <figcaption>Voraz: siempre la moneda más grande que quepa. Óptimo: calculado con programación dinámica. Los tres primeros ejemplos son del temario. En el último, el voraz no encuentra solución aunque la hay (3 × 2).</figcaption>
+  </figure>
+
+  <h2>Problema del viajante (TSP)</h2>
+  <p class="prose">Ciclo de coste mínimo que pasa por todas las ciudades (ciclo de Hamilton). Es <b>NP-completo</b>: con 25 ciudades hay 25! ≈ 1,55·10²⁵ recorridos; a mil millones por segundo serían unos 491 millones de años.</p>
+  <div class="grid g2">
+    <div class="box"><h4>Heurística 1: candidatos = nodos</h4>Desde una ciudad, ir siempre a la más cercana no visitada. Del ejemplo del temario: coste 140 (desde el nodo 1) o 125 (desde el 5).</div>
+    <div class="box"><h4>Heurística 2: candidatos = aristas</h4>Como Kruskal: la arista más barata que no cierre ciclo antes de tiempo ni deje un nodo con grado &gt; 2. Coste 140.</div>
+  </div>
+  <p class="prose">Ninguna garantiza el óptimo, pero suelen dar soluciones cercanas en un tiempo ínfimo. Mejoras: probar varios orígenes y aplicar búsqueda local.</p>
+
+  <h2>Problema de la mochila</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="kpCap">Presupuesto (miles de €)</label><input type="number" id="kpCap" value="50" min="1" max="200"></div>
+      <div class="btnrow" style="align-items:flex-end;margin:0"><button class="btn" id="kpReset">Restaurar ejemplo</button></div>
+    </div>
+    <div class="table-wrap" style="margin-top:10px"><table id="kpTable"></table></div>
+    <div class="grid g3" id="kpOut"></div>
+    <figcaption>Proyectos de inversión <b>de ejemplo</b> con su coste y rentabilidad esperada. El voraz ordena por rentabilidad / coste (O(n log n)). En la mochila <b>fraccionaria</b> el voraz es óptimo; en la mochila <b>0/1</b> (proyectos indivisibles) puede no serlo. El temario da un caso: voraz 945 $ frente a 955 $ con backtracking.</figcaption>
+  </figure>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Greedy: óptimo local, nunca deshace, rápido, sin garantía de óptimo global.</li>
+    <li>6 elementos: candidatos, solución parcial, selección, viabilidad, solución, objetivo.</li>
+    <li>Monedas {11, 5, 1} y 15: voraz 11+1+1+1+1 (5 monedas) frente al óptimo 5+5+5 (3).</li>
+    <li>TSP: NP-completo, heurísticas por nodos o aristas. Mochila: ordenar por beneficio/peso.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-7"></div>
+</section>
+
+<!-- ===================== TEMA 8 ===================== -->
+<section class="view" data-view="tema-8" hidden>
+  <p class="eyebrow">Tema 8</p>
+  <h1>Búsqueda de caminos mínimos</h1>
+  <p class="oneline">Buscar el camino de menor peso entre vértices. <b>Dijkstra</b> (1959) resuelve "un origen, todos los destinos" con pesos <b>no negativos</b>. Con <b>pesos negativos</b> falla, y puede haber <b>ciclos negativos</b> que hacen que el camino mínimo no exista: ahí se usa <b>Bellman-Ford</b>, O(V·E).</p>
+  <ul class="objs"><li>El problema del camino mínimo</li><li>Dijkstra paso a paso</li><li>Arcos negativos y ciclos</li><li>Bellman-Ford</li></ul>
+
+  <h2>Versiones del problema</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Un origen, varios destinos</h4>Caminos mínimos desde un nodo a todos los demás: la solución es un árbol de caminos mínimos con raíz en el origen.</div>
+    <div class="box"><h4>Un origen, un destino</h4>El camino mínimo entre un par de nodos: una secuencia de aristas.</div>
+  </div>
+  <p class="prose">La distancia de un nodo a sí mismo es 0. También se puede resolver con el método Símplex, pero Dijkstra y Bellman-Ford son más eficientes; el temario menciona además el algoritmo de <b>Floyd</b> (todos los pares).</p>
+
+  <h2>Simulador: Dijkstra</h2>
+  <figure class="diagram">
+    <div class="btnrow">
+      <label for="djSrc" style="margin:auto 6px auto 0">Origen</label>
+      <select id="djSrc" class="btn"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option></select>
+      <button class="btn primary" id="djStep">Paso</button>
+      <button class="btn" id="djRun">Completo</button>
+      <button class="btn" id="djReset">Reiniciar</button>
+    </div>
+    <svg id="djSvg" viewBox="0 0 600 260" width="100%" style="display:block" role="img" aria-label="Dijkstra sobre un grafo ponderado"></svg>
+    <div class="table-wrap" style="margin:6px 0 0"><table id="djTable"></table></div>
+    <p class="out" id="djInfo"></p>
+    <figcaption>Conjunto S (seleccionados, en azul), vector D (distancias) y vector P (predecesores), como en el temario. En cada paso se elige el candidato con menor D y se <b>relajan</b> sus aristas: si D[u] + peso(u, v) &lt; D[v], se actualiza D[v] y P[v] = u.</figcaption>
+  </figure>
+<pre class="code">DIJKSTRA(G, s):
+  para cada u: distancia[u] := ∞; padre[u] := NULL; visto[u] := falso
+  distancia[s] := 0; añadir(cola, (s, 0))
+  mientras cola no vacía:
+    u := extraer_mínimo(cola); visto[u] := cierto
+    para cada v adyacente a u, no visto:
+      si distancia[v] &gt; distancia[u] + peso(u, v):
+        distancia[v] := distancia[u] + peso(u, v); padre[v] := u
+        añadir(cola, (v, distancia[v]))</pre>
+  <p class="prose">Con una cola de prioridad (heap), Dijkstra cuesta <b>O((V + E) log V)</b>.</p>
+
+  <h2>Arcos negativos y ciclos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Por qué falla Dijkstra</h4>Da por cerrado un vértice al seleccionarlo, pero un arco negativo posterior podría mejorar su distancia. El resultado puede ser incorrecto.</div>
+    <div class="box"><h4>Ciclo negativo</h4>Un ciclo (camino con origen = destino) cuyo peso total es &lt; 0: recorrerlo una y otra vez baja el coste sin límite, así que el camino mínimo <b>no está definido</b>. El algoritmo debe detectarlo.</div>
+  </div>
+  <div class="box accent" style="margin-top:12px"><h4>Solución del temario (estilo Bellman-Ford)</h4>Cola simple en lugar de cola de prioridad; volver a procesar un vértice cada vez que mejora su distancia; contar las visitas: si un vértice se procesa más de V veces, hay un ciclo negativo. Coste <b>O(E·V)</b>.</div>
+  <div class="callout ex"><span class="tag">Ejemplo real: arbitraje de divisas</span><p>Si cada divisa es un vértice y cada arista pesa <span class="mono">−log(tipo de cambio)</span>, un <b>ciclo negativo</b> equivale a una cadena de cambios que acaba con más dinero del que empezó (por ejemplo EUR → USD → JPY → EUR). Bellman-Ford detecta esos ciclos: es la base algorítmica clásica de la detección de <b>arbitraje triangular</b>. En la práctica las oportunidades duran milisegundos y las comisiones suelen anularlas.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Dijkstra: Edsger Dijkstra (concebido en 1956, publicado en 1959), pesos ≥ 0, conjuntos S y C, vectores D y P.</li>
+    <li>Relajación: D[v] = min(D[v], D[u] + w(u, v)).</li>
+    <li>Pesos negativos → Dijkstra puede fallar. Ciclo negativo → no hay camino mínimo.</li>
+    <li>Detección: más de V visitas a un vértice. Coste O(E·V).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-8"></div>
+</section>
+
+<!-- ===================== TEMA 9 ===================== -->
+<section class="view" data-view="tema-9" hidden>
+  <p class="eyebrow">Tema 9</p>
+  <h1>Algoritmos greedy sobre grafos</h1>
+  <p class="oneline">El <b>árbol de recubrimiento mínimo</b> (MST) conecta todos los vértices de un grafo conexo, no dirigido y ponderado con el menor coste total. Dos algoritmos voraces lo construyen: <b>Prim</b> (hace crecer un árbol desde un vértice) y <b>Kruskal</b> (añade las aristas más baratas que no forman ciclo).</p>
+  <ul class="objs"><li>Árbol de recubrimiento mínimo</li><li>Prim</li><li>Kruskal</li><li>Análisis de complejidad</li></ul>
+
+  <h2>Árbol de recubrimiento mínimo</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Definición</h4>Árbol libre que conecta todos los vértices; coste = suma de sus aristas. Usa exactamente <b>n − 1</b> aristas y ningún ciclo.</div>
+    <div class="box"><h4>Propiedad clave</h4>Si U ⊂ V y (u, v) es la arista más barata con u ∈ U y v ∈ V − U, existe un MST que la contiene. Por eso los voraces son correctos aquí.</div>
+  </div>
+
+  <h2>Simulador: Prim y Kruskal</h2>
+  <figure class="diagram">
+    <div class="btnrow" role="group" aria-label="Algoritmo">
+      <button class="btn" data-mst="kruskal" aria-pressed="true">Kruskal</button>
+      <button class="btn" data-mst="prim" aria-pressed="false">Prim (desde D)</button>
+      <button class="btn primary" id="mstStep">Paso</button>
+      <button class="btn" id="mstRun">Completo</button>
+      <button class="btn" id="mstReset">Reiniciar</button>
+    </div>
+    <svg id="mstSvg" viewBox="0 0 600 270" width="100%" style="display:block" role="img" aria-label="Árbol de recubrimiento mínimo"></svg>
+    <p class="out" id="mstInfo"></p>
+    <figcaption>El grafo del temario (vértices A–G). Verde: aristas del árbol. Rojo discontinuo: descartadas por formar ciclo. Los dos algoritmos llegan a un árbol de peso <b>39</b>.</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>Prim</h4>1) Marcar un vértice inicial. 2) Elegir la arista más barata que une un vértice marcado con uno no marcado. 3) Repetir hasta marcar todos. Con matriz de adyacencia: <b>O(n²)</b>.</div>
+    <div class="box"><h4>Kruskal</h4>1) Ordenar las aristas por peso. 2) Añadir la más barata que no forme ciclo (estructura <b>unión-búsqueda</b>). 3) Parar con |V| − 1 aristas. Tiempo <b>O(a log n)</b> por la ordenación; espacio O(n²) con matriz.</div>
+  </div>
+  <p class="prose">También existe el <b>borrado inverso</b>: partir de todas las aristas y quitar las más caras mientras el grafo siga conexo.</p>
+
+  <h2>Análisis de complejidad</h2>
+  <p class="prose">Mide los recursos (tiempo y memoria) en función del tamaño del problema, antes de programar. Ejemplo del temario, sumar N números: inicializar (1) + leer y sumar cada número (2N) + imprimir (1) → <span class="mono">T(N) = 2N + 2</span>, es decir O(N).</p>
+  <div class="callout ex"><span class="tag">Ejemplo real: árboles de correlación</span><p>Rosario Mantegna (1999) propuso construir el <b>MST de la red de correlaciones</b> entre acciones, con distancia <span class="mono">d = √(2(1 − ρ))</span>. El árbol resultante agrupa las acciones por sectores de forma natural y es una técnica clásica de la econofísica para visualizar la estructura del mercado y diversificar.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>MST: n − 1 aristas, sin ciclos, coste mínimo. Grafo conexo, no dirigido y ponderado.</li>
+    <li>Prim: crece desde un vértice; O(n²) con matriz.</li>
+    <li>Kruskal: ordena aristas + unión-búsqueda; O(a log n).</li>
+    <li>Ambos son voraces y óptimos para el MST. Peso en el ejemplo: 39.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-9"></div>
+</section>
+
+<!-- ===================== TEMA 10 ===================== -->
+<section class="view" data-view="tema-10" hidden>
+  <p class="eyebrow">Tema 10</p>
+  <h1>Backtracking</h1>
+  <p class="oneline">El <b>backtracking</b> (vuelta atrás) construye soluciones paso a paso en un árbol de búsqueda en profundidad y <b>retrocede</b> cuando una solución parcial ya no puede completarse. Explora sistemáticamente todo el espacio, pero la <b>poda</b> evita ramas inútiles. Alternativas: branch and bound, voraces y programación dinámica.</p>
+  <ul class="objs"><li>Esquema general</li><li>8 reinas, Sudoku, Prolog</li><li>Poda y mejoras</li><li>Técnicas alternativas</li></ul>
+
+  <h2>Esquema general</h2>
+<pre class="code">Bt(A, k):
+  si ¿Solución?(A, k): procesarSolución(A, k)
+  si no: para cada c en Sucesores(A, k):
+           A[k] := c
+           Bt(A, k + 1)
+           si terminar: devolver</pre>
+  <p class="prose">La solución se modela como un vector <span class="mono">a = (a₁, …, aₙ)</span> donde cada aᵢ sale de un conjunto finito ordenado Sᵢ; un candidato parcial se amplía añadiendo un elemento al final. El término "backtrack" lo propuso <b>D. H. Lehmer</b> en los años 50.</p>
+
+  <h2>Simulador: N reinas</h2>
+  <figure class="diagram">
+    <div class="btnrow">
+      <label for="qN" style="margin:auto 6px auto 0">N =</label>
+      <select id="qN" class="btn"><option>4</option><option>5</option><option>6</option><option>7</option><option selected>8</option></select>
+      <button class="btn primary" id="qStep">Paso</button>
+      <button class="btn" id="qRun">Hasta la primera solución</button>
+      <button class="btn" id="qNext">Siguiente solución</button>
+      <button class="btn" id="qReset">Reiniciar</button>
+    </div>
+    <div class="grid g2" style="align-items:start">
+      <div id="qBoard"></div>
+      <div class="grid" style="gap:10px" id="qStats"></div>
+    </div>
+    <figcaption>Una reina por fila: la solución es un vector de columnas. Se coloca la reina de la fila k en la primera columna segura; si no hay ninguna, se retrocede a la fila k − 1 y se prueba su siguiente columna. Para N = 8 hay 92 soluciones.</figcaption>
+  </figure>
+
+  <h3>Otros problemas del temario</h3>
+  <div class="grid g3">
+    <div class="box"><h4>Cambio con billetes</h4>Billetes de 2.000, 5.000 y 10.000 para devolver 21.000: el voraz da 2 × 10.000 y se atasca con los 1.000 restantes; el backtracking prueba alternativas (10.000 + 5.000 + 3 × 2.000).</div>
+    <div class="box"><h4>Sudoku</h4>Matriz Sol[1..9, 1..9] y una matriz de celdas iniciales fijas. <code>es_factible</code> comprueba fila, columna y subcuadro 3×3. Árbol de altura m + 1 (m celdas vacías), 9 hijos por nodo.</div>
+    <div class="box"><h4>Prolog</h4>El motor de Prolog resuelve consultas por backtracking en profundidad sobre la base de conocimiento: prueba cada hijo e ítem y retrocede si una condición falla.</div>
+  </div>
+
+  <h2>Mejoras: podar el árbol</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Exclusiones previas</h4>Descartar casos imposibles de antemano (una reina por fila).</div>
+    <div class="box"><h4>Fusión de ramas</h4>Evitar explorar ramas simétricas que llevan a la misma solución.</div>
+    <div class="box"><h4>Ramificación y cota</h4>En optimización, abandonar una rama si ya supera la mejor solución conocida (TSP: cortar si se supera T).</div>
+    <div class="box"><h4>Reordenar la búsqueda</h4>Explorar primero las ramas más prometedoras.</div>
+  </div>
+
+  <h2>Backtracking frente a sus alternativas</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Backtracking</th><th>Branch and bound</th><th>Voraz</th><th>Programación dinámica</th></tr></thead>
+    <tbody>
+      <tr><td><b>Recorrido</b></td><td>Profundidad</td><td>Por nodos activos (no necesariamente profundidad)</td><td>Una sola elección por etapa</td><td>Tabla de subproblemas</td></tr>
+      <tr><td><b>Nodos activos</b></td><td>Solo el camino actual</td><td>Varios, en una lista</td><td>—</td><td>—</td></tr>
+      <tr><td><b>Poda</b></td><td>Fallo de factibilidad</td><td>Cotas (inferior/superior)</td><td>No explora</td><td>No repite cálculos</td></tr>
+      <tr><td><b>¿Óptimo?</b></td><td>Sí (explora todo)</td><td>Sí</td><td>No siempre</td><td>Sí, si hay subestructura óptima</td></tr>
+      <tr><td><b>Coste</b></td><td>Exponencial en el peor caso</td><td>Exponencial, pero eficaz en la práctica</td><td>Muy bajo</td><td>Polinomial si hay pocos subproblemas</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Elegir qué activos incluir en una cartera con restricciones (máximo 10 valores, sectores limitados, presupuesto) es un problema combinatorio. Los optimizadores lo atacan con <b>branch and bound</b>: exploran combinaciones y descartan ramas cuya mejor rentabilidad posible ya es peor que la mejor cartera encontrada.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Backtracking: profundidad + retroceso; vector solución (a₁, …, aₙ). Término de D. H. Lehmer (años 50).</li>
+    <li>8 reinas (vector de columnas), Sudoku (es_factible), Prolog.</li>
+    <li>Poda: exclusiones previas, fusión de ramas, ramificación y cota, reordenación.</li>
+    <li>B&amp;B: varios nodos activos y poda por cotas; voraz: sin garantía; PD: tabla.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-10"></div>
+</section>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section class="view" data-view="glosario" hidden>
+  <p class="eyebrow">Consulta rápida</p>
+  <h1>Glosario</h1>
+  <p class="lead">Los términos clave del módulo 5. Escribe para filtrar.</p>
+  <label for="glossQ" style="margin-top:16px">Buscar término</label>
+  <input type="text" id="glossQ" placeholder="Por ejemplo: Dijkstra, heap, Θ…">
+  <div class="gloss" id="glossList"></div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  const TOPICS = [
+    {id:"tema-1", t:"Estrategias de diseño", d:"Recursividad, divide y vencerás, PD, voraces, backtracking."},
+    {id:"tema-2", t:"Eficiencia y análisis", d:"T(n), O, Ω, Θ, peor/mejor/medio caso, recurrencias."},
+    {id:"tema-3", t:"Algoritmos de ordenación", d:"Burbuja, selección, inserción, merge sort y quicksort."},
+    {id:"tema-4", t:"Algoritmos con árboles", d:"Recorridos, árboles de expresión, BST y AVL."},
+    {id:"tema-5", t:"Heaps y colas de prioridad", d:"Max-heap, heapsort y triage."},
+    {id:"tema-6", t:"Algoritmos con grafos", d:"Representaciones, BFS, DFS y orden topológico."},
+    {id:"tema-7", t:"Algoritmos greedy", d:"Cambio de monedas, viajante y mochila."},
+    {id:"tema-8", t:"Caminos mínimos", d:"Dijkstra, arcos negativos y ciclos."},
+    {id:"tema-9", t:"Greedy sobre grafos", d:"Árbol de recubrimiento mínimo: Prim y Kruskal."},
+    {id:"tema-10", t:"Backtracking", d:"N reinas, Sudoku, poda y branch and bound."}
+  ];
+  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (x,d=2) => isFinite(x) ? x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d}) : "—";
+  const parse = s => s.split(/[;\s]*,[;\s]*|\s+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(isFinite);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function gaussFrom(r){ return function(){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
+
+  // ---------- Storage ----------
+  const KEY = "algoritmia-m5-v1";
+  let state = {studied:{}, scores:{}};
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---------- Router ----------
+  const views = document.querySelectorAll(".view");
+  const navLinks = document.querySelectorAll("#navlist a");
+  function route(){
+    let h = (location.hash || "#inicio").slice(1);
+    if (!document.querySelector('.view[data-view="'+h+'"]')) h = "inicio";
+    views.forEach(v => v.hidden = v.dataset.view !== h);
+    navLinks.forEach(a => { if (a.dataset.v === h) { a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Quiz ----------
+  const QUIZ = {
+    "tema-1":[
+      {q:"¿Qué necesita un lenguaje para permitir la recursividad?", o:["Asignación estática de memoria","Asignación dinámica de memoria (pila de llamadas)","Un compilador optimizador"], a:1, e:"Cada llamada necesita su propia copia de parámetros y variables locales."},
+      {q:"En divide y vencerás, si no hace falta combinar las soluciones de los subproblemas, se habla de…", o:["Reducción","Programación dinámica","Poda"], a:0, e:"Es el caso de la búsqueda binaria."},
+      {q:"¿Qué requisito tiene la búsqueda binaria?", o:["Que el vector esté ordenado","Que no haya repetidos","Que n sea potencia de 2"], a:0, e:"Así puede descartar la mitad en cada comparación."},
+      {q:"La programación dinámica se caracteriza por…", o:["Elegir siempre el óptimo local","Guardar las soluciones de subproblemas en una tabla","Explorar en profundidad y retroceder"], a:1, e:"Enfoque de abajo arriba: no recalcula."},
+      {q:"¿Por qué ParejasR (Fibonacci recursivo) es ineficiente?", o:["Usa demasiadas variables","Calcula el mismo valor muchas veces","No tiene caso base"], a:1, e:"Para ParejasR(7) calcula ParejasR(3) cinco veces."}
+    ],
+    "tema-2":[
+      {q:"Fragmentos secuenciales de O(n²), O(n³) y O(n log n) suman…", o:["O(n⁶ log n)","O(n³)","O(n²)"], a:1, e:"Regla de la suma: O(max)."},
+      {q:"¿Qué notación representa una cota inferior?", o:["O","Ω","Θ"], a:1, e:"O es superior; Θ, exacta."},
+      {q:"El mejor caso de la búsqueda lineal es…", o:["Θ(1)","Θ(log n)","Θ(n)"], a:0, e:"El elemento está en la primera posición."},
+      {q:"M(n) = M(n−1) + 1 con M(0) = 0 da…", o:["M(n) = log n","M(n) = n","M(n) = 2ⁿ"], a:1, e:"Sustitución hacia atrás: M(n) = M(n−i) + i → n."},
+      {q:"¿Qué caso se usa más para analizar algoritmos?", o:["El mejor","El peor","Ninguno"], a:1, e:"Garantiza una cota superior; el medio exige conocer la distribución."}
+    ],
+    "tema-3":[
+      {q:"¿Qué algoritmo es O(n log n) en todos los casos?", o:["Quicksort","Merge sort","Inserción"], a:1, e:"Quicksort puede degenerar a O(n²)."},
+      {q:"Inserción sobre un vector ya ordenado cuesta…", o:["O(n)","O(n log n)","O(n²)"], a:0, e:"Cada elemento ya está en su sitio: una comparación por elemento."},
+      {q:"El peor caso de quicksort con pivote en un extremo se da con…", o:["Datos aleatorios","El vector ya ordenado","Todos distintos"], a:1, e:"Las particiones quedan de tamaño 0 y n − 1."},
+      {q:"Un algoritmo de ordenación estable…", o:["Usa memoria constante","Conserva el orden relativo de los elementos iguales","Siempre es O(n log n)"], a:1, e:"Importa, p. ej., para la prioridad precio-tiempo de un libro de órdenes."},
+      {q:"¿Qué estrategia usan merge sort y quicksort?", o:["Voraz","Divide y vencerás","Backtracking"], a:1, e:"Dividen, resuelven recursivamente y combinan."}
+    ],
+    "tema-4":[
+      {q:"El recorrido izquierdo → nodo → derecho es…", o:["Preorden","Inorden","Postorden"], a:1, e:"En un BST devuelve los valores ordenados."},
+      {q:"¿Qué recorrido permite borrar un árbol sin perder enlaces?", o:["Preorden","Inorden","Postorden"], a:2, e:"Los hijos se eliminan antes que el padre."},
+      {q:"En un árbol de expresión, las hojas son…", o:["Operadores","Operandos","Paréntesis"], a:1, e:"La raíz y los nodos internos son operadores."},
+      {q:"Un árbol AVL exige que para cada nodo…", o:["Tenga dos hijos","|altura(izq) − altura(der)| ≤ 1","Sea mayor que sus hijos"], a:1, e:"Se reequilibra con rotaciones."},
+      {q:"Si insertas 10, 20, 30, 40 en ese orden en un BST sin equilibrar…", o:["Queda equilibrado","Degenera en una lista (búsqueda O(n))","Se convierte en un heap"], a:1, e:"Cada nodo solo tiene hijo derecho."}
+    ],
+    "tema-5":[
+      {q:"En un max-heap guardado en un vector desde 0, los hijos del índice i están en…", o:["i+1 e i+2","2i+1 y 2i+2","2i y 2i−1"], a:1, e:"Y el padre en ⌊(i−1)/2⌋."},
+      {q:"¿Qué complejidad tiene heapsort en el peor caso?", o:["O(n²)","O(n log n)","O(n)"], a:1, e:"Además es in situ y no estable."},
+      {q:"¿Quién propuso heapsort y cuándo?", o:["Williams, 1964","Dijkstra, 1959","Hoare, 1961"], a:0, e:"J. W. J. Williams en 1964."},
+      {q:"En una cola de prioridad, si dos elementos tienen la misma prioridad…", o:["Sale cualquiera","Sale el que llegó antes","Se descartan"], a:1, e:"Se respeta el orden de llegada."},
+      {q:"¿Qué condición de forma debe cumplir un heap?", o:["Ser un árbol binario completo","Ser un AVL","Tener todas las hojas al mismo nivel"], a:0, e:"El último nivel se llena de izquierda a derecha."}
+    ],
+    "tema-6":[
+      {q:"¿Qué representación permite saber en O(1) si existe la arista (i, j)?", o:["Lista de aristas","Matriz de adyacencia","Lista de adyacencia"], a:1, e:"A cambio ocupa Θ(V²)."},
+      {q:"¿Qué estructura usa el recorrido en anchura?", o:["Pila","Cola","Heap"], a:1, e:"Visita por niveles de distancia."},
+      {q:"En BFS, un vértice gris es…", o:["No descubierto","Descubierto pero no explorado del todo","Totalmente explorado"], a:1, e:"Blanco: no descubierto; negro: explorado."},
+      {q:"La ordenación topológica se aplica a…", o:["Grafos no dirigidos con ciclos","Grafos acíclicos dirigidos (DAG)","Árboles binarios"], a:1, e:"Si hay arista (v, w), v va antes que w."},
+      {q:"La ordenación topológica ordena los vértices por…", o:["Tiempo de descubrimiento creciente","Tiempo de finalización decreciente (DFS)","Grado"], a:1, e:"Se llama a DFS y se ordena por finalización de mayor a menor."}
+    ],
+    "tema-7":[
+      {q:"Con monedas {11, 5, 1} y 15, el algoritmo voraz da…", o:["5 + 5 + 5","11 + 1 + 1 + 1 + 1","11 + 5"], a:1, e:"5 monedas, frente a las 3 del óptimo."},
+      {q:"Una vez que un voraz incluye un candidato en la solución…", o:["Puede quitarlo después","No lo deshace nunca","Lo revisa al final"], a:1, e:"Las decisiones son definitivas."},
+      {q:"El problema del viajante es…", o:["Polinomial","NP-completo","Lineal"], a:1, e:"25 ciudades → 25! recorridos posibles."},
+      {q:"En la mochila, el voraz ordena los objetos por…", o:["Peso creciente","Beneficio / peso decreciente","Beneficio decreciente"], a:1, e:"Así no mete un objeto caro pero muy pesado antes que otros más rentables por unidad."},
+      {q:"¿Cuál NO es uno de los elementos de un algoritmo voraz?", o:["Función de selección","Función de viabilidad","Pila de retroceso"], a:2, e:"La pila de retroceso es propia del backtracking."}
+    ],
+    "tema-8":[
+      {q:"Dijkstra no es adecuado cuando el grafo tiene…", o:["Muchos nodos","Aristas de peso negativo","Pesos enteros"], a:1, e:"Da por cerrados vértices que un arco negativo podría mejorar."},
+      {q:"Si existe un ciclo de peso negativo alcanzable…", o:["Dijkstra lo resuelve","El camino mínimo no está definido","El camino mínimo es 0"], a:1, e:"Se puede bajar el coste sin límite recorriéndolo."},
+      {q:"Según el temario, se detecta un ciclo negativo cuando un vértice se procesa…", o:["Dos veces","Más de V veces","Ninguna vez"], a:1, e:"La eficiencia de este método es O(E·V)."},
+      {q:"En Dijkstra, el vector P guarda…", o:["Los pesos","El predecesor de cada nodo en el camino mínimo","Los nodos pendientes"], a:1, e:"D guarda las distancias."},
+      {q:"¿Qué estructura de datos hace eficiente a Dijkstra?", o:["Cola de prioridad (heap)","Pila","Lista de aristas"], a:0, e:"Para extraer el mínimo en O(log V)."}
+    ],
+    "tema-9":[
+      {q:"¿Cuántas aristas tiene un árbol de recubrimiento de n vértices?", o:["n","n − 1","n²"], a:1, e:"Más aristas formarían un ciclo."},
+      {q:"Kruskal ordena las aristas y añade la más barata que…", o:["Toque el último vértice","No forme ciclo","Sea adyacente al origen"], a:1, e:"Usa una estructura de unión-búsqueda."},
+      {q:"Prim hace crecer el árbol…", o:["Desde un vértice inicial, con la arista más barata hacia un vértice nuevo","Uniendo componentes sueltas","Quitando las aristas más caras"], a:0, e:"Lo de quitar aristas caras es el borrado inverso."},
+      {q:"¿Qué complejidad temporal tiene Kruskal según el temario?", o:["O(a log n)","O(n³)","O(2ⁿ)"], a:0, e:"Dominada por la ordenación de las aristas."},
+      {q:"En el ejemplo del temario, el peso del árbol mínimo es…", o:["39","41","45"], a:0, e:"Aristas AD, CE, DF, AB, BE, EG."}
+    ],
+    "tema-10":[
+      {q:"El backtracking recorre el árbol de soluciones…", o:["En anchura","En profundidad","Al azar"], a:1, e:"Y retrocede cuando una rama no es prometedora."},
+      {q:"En las 8 reinas, la solución se representa como…", o:["Una matriz 8×8 completa","Un vector con la columna de la reina de cada fila","Una lista de diagonales"], a:1, e:"Una exclusión previa: una reina por fila."},
+      {q:"¿Qué diferencia a branch and bound del backtracking?", o:["No poda","Mantiene varios nodos activos y poda con cotas","Solo sirve para Sudoku"], a:1, e:"Se usa para optimización."},
+      {q:"¿Quién propuso el término \"backtrack\"?", o:["D. H. Lehmer, años 50","Dijkstra, 1959","Holland, 1975"], a:0, e:"Matemático estadounidense."},
+      {q:"En el Sudoku, la función es_factible comprueba…", o:["Solo la fila","Fila, columna y subcuadro 3×3","Solo las celdas iniciales"], a:1, e:"Así se poda cada valor inválido."}
+    ]
+  };
+  function renderProgress(){
+    const n = TOPICS.filter(t => state.studied[t.id]).length;
+    document.getElementById("progText").textContent = n + " de 10 temas estudiados";
+    document.getElementById("progBar").style.width = (n*10) + "%";
+    navLinks.forEach(a => a.classList.toggle("done", !!state.studied[a.dataset.v]));
+    document.getElementById("tcards").innerHTML = TOPICS.map((t,i) => {
+      const sc = state.scores[t.id];
+      const st = state.studied[t.id] ? '<span class="pill ok">Estudiado</span>' : '<span class="pill neutral">Pendiente</span>';
+      const scs = sc!=null ? ' <span class="pill neutral">Test: '+sc+'/'+QUIZ[t.id].length+'</span>' : '';
+      return '<a class="tcard" href="#'+t.id+'"><span class="n">TEMA '+(i+1)+'</span><b>'+t.t+'</b><span class="d">'+t.d+'</span><span class="st">'+st+scs+'</span></a>';
+    }).join("");
+    document.querySelectorAll(".studied button").forEach(b => {
+      const on = !!state.studied[b.dataset.t];
+      b.setAttribute("aria-pressed", on);
+      b.textContent = on ? "✓ Estudiado" : "Marcar como estudiado";
+    });
+  }
+
+  document.querySelectorAll(".quiz").forEach(box => {
+    const id = box.dataset.quiz, qs = QUIZ[id];
+    let answered = 0, right = 0;
+    box.innerHTML = '<h2>Autoevaluación</h2><p style="color:var(--muted);font-size:.9rem;margin-top:4px">' + qs.length + ' preguntas. Elige una respuesta para ver la explicación.</p>' +
+      qs.map((q,i) => '<div class="qitem"><p class="q">'+(i+1)+'. '+q.q+'</p><div class="qopts">'+q.o.map((o,j)=>'<button class="qopt" data-i="'+i+'" data-j="'+j+'">'+o+'</button>').join("")+'</div><p class="qexp" hidden></p></div>').join("") +
+      '<div class="qscore"><span class="out" data-score>0 de '+qs.length+' respondidas</span><button class="btn" data-reset>Repetir test</button></div>' +
+      '<div class="studied"><button class="btn primary" data-t="'+id+'" aria-pressed="false">Marcar como estudiado</button></div>';
+    box.addEventListener("click", ev => {
+      const b = ev.target.closest(".qopt");
+      if (b){
+        const i = +b.dataset.i, j = +b.dataset.j, q = qs[i], item = b.closest(".qitem");
+        item.querySelectorAll(".qopt").forEach((x,k) => { x.disabled = true; if (k===q.a) x.classList.add("right"); });
+        if (j !== q.a) b.classList.add("wrong"); else right++;
+        answered++;
+        const exp = item.querySelector(".qexp");
+        exp.textContent = (j===q.a ? "Correcto. " : "No es correcto. ") + q.e; exp.hidden = false;
+        box.querySelector("[data-score]").textContent = answered < qs.length ? (answered+" de "+qs.length+" respondidas · "+right+" aciertos") : ("Resultado: "+right+" de "+qs.length+" aciertos");
+        if (answered === qs.length){ state.scores[id] = right; if (right >= qs.length-1) state.studied[id] = true; save(); renderProgress(); }
+        return;
+      }
+      if (ev.target.closest("[data-reset]")){
+        answered = 0; right = 0;
+        box.querySelectorAll(".qopt").forEach(x => { x.disabled=false; x.classList.remove("right","wrong"); });
+        box.querySelectorAll(".qexp").forEach(x => x.hidden = true);
+        box.querySelector("[data-score]").textContent = "0 de "+qs.length+" respondidas";
+        return;
+      }
+      if (ev.target.closest(".studied button")){ state.studied[id] = !state.studied[id]; save(); renderProgress(); }
+    });
+  });
+
+  TOPICS.forEach((t,i) => {
+    const sec = document.querySelector('.view[data-view="'+t.id+'"]');
+    const prev = i>0 ? TOPICS[i-1] : null, next = i<TOPICS.length-1 ? TOPICS[i+1] : null;
+    const div = document.createElement("div"); div.className = "pager";
+    div.innerHTML = (prev ? '<a href="#'+prev.id+'"><small>← Tema '+i+'</small>'+prev.t+'</a>' : '<a href="#inicio"><small>←</small>Mapa del módulo</a>') +
+                    (next ? '<a class="next" href="#'+next.id+'"><small>Tema '+(i+2)+' →</small>'+next.t+'</a>' : '<a class="next" href="#glosario"><small>→</small>Glosario</a>');
+    sec.appendChild(div);
+  });
+
+  const SVGE = (tag, a, txt) => '<'+tag+' '+Object.entries(a).map(([k,v])=>k+'="'+v+'"').join(" ")+(txt!=null?'>'+txt+'</'+tag+'>':'/>');
+
+  // ---------- T1: Fibonacci ----------
+  function fib(){
+    const n=+document.getElementById("fibN").value; document.getElementById("fibNv").textContent=n;
+    const F=[0,1,1]; for(let i=3;i<=n;i++) F[i]=F[i-1]+F[i-2];
+    const C=[0,1,1]; for(let i=3;i<=n;i++) C[i]=1+C[i-1]+C[i-2];
+    const K=[0,0,0,1]; for(let i=4;i<=n;i++) K[i]=K[i-1]+K[i-2];
+    const box=(l,v,s,cls)=>'<div class="box '+(cls||'')+'"><small>'+l+'</small><div class="k" style="font-size:1.25rem">'+v+'</div><small>'+s+'</small></div>';
+    document.getElementById("fibOut").innerHTML=box("ParejasR("+n+")",fmt(F[n],0),"resultado")+box("Llamadas recursivas",fmt(C[n],0),"ParejasR(3) se calcula "+fmt(K[n],0)+" veces")+box("Iteraciones (ParejasI)",fmt(Math.max(0,n-2),0),"cada valor una sola vez","accent");
+  }
+  document.getElementById("fibN").addEventListener("input",fib); fib();
+
+  // ---------- T1: búsqueda binaria ----------
+  function bsearch(){
+    const a=parse(document.getElementById("bsArr").value), x=+document.getElementById("bsX").value, out=document.getElementById("bsOut");
+    const sorted=a.every((v,i)=>i===0||a[i-1]<=v);
+    if(!a.length||!sorted){ out.innerHTML='<p class="out">El vector debe estar ordenado de menor a mayor.</p>'; return; }
+    let i=0,d=a.length-1,h="",steps=0,found=-1;
+    while(i<=d){ const c=Math.floor((i+d)/2); steps++;
+      h+='<div style="display:flex;gap:3px;flex-wrap:wrap;margin:4px 0">'+a.map((v,k)=>{ const st= k===c?'background:var(--accent);color:var(--accent-ink)':(k<i||k>d)?'opacity:.3':'background:var(--surface-2)'; return '<span class="mono" style="padding:4px 7px;border-radius:5px;border:1px solid var(--line);'+st+'">'+v+'</span>'; }).join("")+'<span class="out" style="margin-left:6px;align-self:center">'+(a[c]===x?'= '+x+' ✓':(a[c]>x?a[c]+' > '+x+' → izquierda':a[c]+' < '+x+' → derecha'))+'</span></div>';
+      if(a[c]===x){found=c;break;} if(a[c]>x) d=c-1; else i=c+1; }
+    out.innerHTML=h+'<p class="out">'+(found>=0?'Encontrado en la posición '+found:'No está')+' tras '+steps+' comparaciones (máximo posible: '+(Math.floor(Math.log2(a.length))+1)+').</p>';
+  }
+  ["bsArr","bsX"].forEach(id=>document.getElementById(id).addEventListener("input",bsearch)); bsearch();
+
+  // ---------- T2: crecimiento ----------
+  const GROW=[["O(1)",n=>1,"var(--ok)"],["O(log n)",n=>Math.max(1,Math.log2(n)),"var(--p1)"],["O(n)",n=>n,"var(--accent)"],["O(n log n)",n=>n*Math.max(1,Math.log2(n)),"var(--p3)"],["O(n²)",n=>n*n,"var(--example)"],["O(n³)",n=>n**3,"var(--s2)"],["O(2ⁿ)",n=>2**n,"var(--bad)"]];
+  function grow(){
+    const N=+document.getElementById("grN").value; document.getElementById("grNv").textContent=N;
+    const X=n=>50+(n-1)/63*520, maxL=Math.log10(2**64), Y=v=>210-Math.log10(Math.max(1,v))/maxL*190;
+    let h=SVGE("line",{x1:50,y1:210,x2:570,y2:210,stroke:"var(--line)"})+SVGE("line",{x1:50,y1:20,x2:50,y2:210,stroke:"var(--line)"});
+    [0,5,10,15].forEach(e=>{ h+=SVGE("text",{x:44,y:Y(10**e)+4,"text-anchor":"end","font-size":10},"10"+(e?'<tspan dy="-5" font-size="8">'+e+'</tspan>':'')); });
+    GROW.forEach(([l,f,c])=>{ let p=""; for(let n=1;n<=64;n++) p+=(p?"L":"M")+X(n).toFixed(1)+" "+Y(f(n)).toFixed(1); h+=SVGE("path",{d:p,fill:"none",stroke:c,"stroke-width":2}); h+=SVGE("text",{x:X(Math.min(64,l==="O(2ⁿ)"?40:64))+4,y:Y(f(l==="O(2ⁿ)"?40:64))-3,"font-size":10,style:"fill:"+c},l); });
+    h+=SVGE("line",{x1:X(N),x2:X(N),y1:20,y2:210,stroke:"var(--ink)","stroke-dasharray":"4 3"});
+    h+=SVGE("text",{x:310,y:232,"text-anchor":"middle","font-size":11},"Tamaño de la entrada n");
+    document.getElementById("grSvg").innerHTML=h;
+    const f=v=>v<1e7?fmt(v,v%1?1:0):v.toExponential(2).replace("e+"," · 10^");
+    document.getElementById("grTable").innerHTML='<thead><tr>'+GROW.map(g=>'<th class="num">'+g[0]+'</th>').join("")+'</tr></thead><tbody><tr>'+GROW.map(g=>'<td class="num">'+f(g[1](N))+'</td>').join("")+'</tr></tbody>';
+  }
+  document.getElementById("grN").addEventListener("input",grow); grow();
+
+  // ---------- T3: ordenación ----------
+  let sAlgo="bubble", sBase=[], sGen=null, sState=null, sTimer=null, sCmp=0, sMov=0;
+  function* bubbleG(a){ const n=a.length, done=new Set(); for(let i=0;i<n-1;i++){ let sw=false; for(let j=0;j<n-1-i;j++){ sCmp++; yield {a,c:[j,j+1],done}; if(a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]];sw=true;sMov++; yield {a,c:[j,j+1],done};} } done.add(n-1-i); if(!sw){ for(let k=0;k<n;k++) done.add(k); break; } } for(let k=0;k<n;k++) done.add(k); yield {a,c:[],done}; }
+  function* selectionG(a){ const n=a.length, done=new Set(); for(let i=0;i<n-1;i++){ let m=i; for(let j=i+1;j<n;j++){ sCmp++; yield {a,c:[m,j],done}; if(a[j]<a[m]) m=j; } if(m!==i){[a[i],a[m]]=[a[m],a[i]];sMov++;} done.add(i); yield {a,c:[i],done}; } for(let k=0;k<n;k++) done.add(k); yield {a,c:[],done}; }
+  function* insertionG(a){ const n=a.length, done=new Set(); for(let i=1;i<n;i++){ let j=i; while(j>0){ sCmp++; yield {a,c:[j-1,j],done}; if(a[j-1]>a[j]){[a[j-1],a[j]]=[a[j],a[j-1]];sMov++;j--;} else break; } } for(let k=0;k<n;k++) done.add(k); yield {a,c:[],done}; }
+  function* mergeG(a){ const done=new Set(); function* ms(l,r){ if(r-l<1) return; const m=(l+r)>>1; yield* ms(l,m); yield* ms(m+1,r); const L=a.slice(l,m+1), R=a.slice(m+1,r+1); let i=0,j=0,k=l; while(i<L.length&&j<R.length){ sCmp++; yield {a,c:[l+i,m+1+j],done}; a[k++]= L[i]<=R[j]?L[i++]:R[j++]; sMov++; yield {a,c:[k-1],done}; } while(i<L.length){a[k++]=L[i++];sMov++;} while(j<R.length){a[k++]=R[j++];sMov++;} yield {a,c:[],done}; } yield* ms(0,a.length-1); for(let k=0;k<a.length;k++) done.add(k); yield {a,c:[],done}; }
+  function* quickG(a){ const done=new Set(); function* qs(l,r){ if(l>r) return; if(l===r){done.add(l);return;} const p=a[r]; let i=l; for(let j=l;j<r;j++){ sCmp++; yield {a,c:[j,r],done}; if(a[j]<p){[a[i],a[j]]=[a[j],a[i]];sMov++;i++;} } [a[i],a[r]]=[a[r],a[i]];sMov++; done.add(i); yield {a,c:[i],done}; yield* qs(l,i-1); yield* qs(i+1,r); } yield* qs(0,a.length-1); for(let k=0;k<a.length;k++) done.add(k); yield {a,c:[],done}; }
+  const SG={bubble:bubbleG,selection:selectionG,insertion:insertionG,merge:mergeG,quick:quickG};
+  const SN={bubble:"Burbuja",selection:"Selección",insertion:"Inserción",merge:"Merge sort",quick:"Quicksort (pivote: último)"};
+  function sDraw(){ const st=sState||{a:sBase,c:[],done:new Set()}, n=st.a.length, w=560/n;
+    let h=""; st.a.forEach((v,i)=>{ const col=st.c.includes(i)?'var(--example)':st.done.has(i)?'var(--ok)':'var(--accent)'; const hh=v/100*190; h+=SVGE("rect",{x:(20+i*w+1).toFixed(1),y:(205-hh).toFixed(1),width:(w-2).toFixed(1),height:hh.toFixed(1),rx:2,fill:col,"fill-opacity":st.done.has(i)&&!st.c.includes(i)?.85:.7}); });
+    document.getElementById("sortSvg").innerHTML=h;
+    document.getElementById("sortInfo").textContent=SN[sAlgo]+" · comparaciones: "+sCmp+" · movimientos: "+sMov+(sGen===null&&sState?" · terminado":"");
+  }
+  function sStop(){ if(sTimer){clearInterval(sTimer);sTimer=null;} document.getElementById("sPlay").textContent="▶ Reproducir"; }
+  function sInit(arr){ sStop(); if(arr) sBase=arr; sCmp=0; sMov=0; sGen=SG[sAlgo](sBase.slice()); sState=null; sDraw(); }
+  function sStepOnce(){ if(!sGen) return false; const r=sGen.next(); if(r.done){ sGen=null; sStop(); sDraw(); return false; } sState=r.value; sDraw(); return true; }
+  const sr=mulberry32(9); const rnd=()=>Array.from({length:24},()=>8+Math.floor(sr()*92));
+  document.querySelectorAll("[data-sort]").forEach(b=>b.addEventListener("click",()=>{ sAlgo=b.dataset.sort; document.querySelectorAll("[data-sort]").forEach(x=>x.setAttribute("aria-pressed",x===b)); sInit(); }));
+  document.getElementById("sStep").addEventListener("click",()=>{ sStop(); if(!sGen) sInit(); sStepOnce(); });
+  document.getElementById("sPlay").addEventListener("click",()=>{ if(sTimer){ sStop(); return; } if(!sGen) sInit(); document.getElementById("sPlay").textContent="❚❚ Pausa"; sTimer=setInterval(()=>{ if(!sStepOnce()) sStop(); },45); });
+  document.getElementById("sShuffle").addEventListener("click",()=>sInit(rnd()));
+  document.getElementById("sSorted").addEventListener("click",()=>sInit(rnd().sort((a,b)=>a-b)));
+  document.getElementById("sReverse").addEventListener("click",()=>sInit(rnd().sort((a,b)=>b-a)));
+  sInit(rnd());
+
+  // ---------- T4: BST ----------
+  function bstBuild(vals){ let root=null; const ins=(n,v)=>{ if(!n) return {v,l:null,r:null}; if(v<n.v) n.l=ins(n.l,v); else if(v>n.v) n.r=ins(n.r,v); return n; }; vals.forEach(v=>root=ins(root,v)); return root; }
+  function bstRender(vals){
+    const root=bstBuild(vals), nodes=[]; let idx=0;
+    const ht=n=>n?1+Math.max(ht(n.l),ht(n.r)):-1;
+    (function walk(n,d){ if(!n) return; walk(n.l,d+1); n.x=idx++; n.d=d; n.bf=ht(n.l)-ht(n.r); nodes.push(n); walk(n.r,d+1); })(root,0);
+    const maxD=Math.max(0,...nodes.map(n=>n.d)), X=i=>30+(nodes.length>1?i/(nodes.length-1):0.5)*540, Y=d=>30+d*(200/Math.max(1,maxD));
+    let h=""; nodes.forEach(n=>{ [n.l,n.r].forEach(c=>{ if(c) h+=SVGE("line",{x1:X(n.x),y1:Y(n.d),x2:X(c.x),y2:Y(c.d),stroke:"var(--line)","stroke-width":2}); }); });
+    nodes.forEach(n=>{ const bad=Math.abs(n.bf)>=2; h+=SVGE("circle",{cx:X(n.x),cy:Y(n.d),r:15,fill:bad?"var(--bad-soft)":"var(--accent-soft)",stroke:bad?"var(--bad)":"var(--accent)","stroke-width":2})+SVGE("text",{x:X(n.x),y:Y(n.d)+4,"text-anchor":"middle","font-size":11,style:"fill:var(--ink);font-weight:600"},n.v)+SVGE("text",{x:X(n.x)+19,y:Y(n.d)-10,"font-size":9,style:"fill:"+(bad?"var(--bad)":"var(--muted)")},(n.bf>0?"+":"")+n.bf); });
+    document.getElementById("bstSvg").innerHTML=h;
+    const pre=[],ino=[],post=[]; (function t(n){ if(!n) return; pre.push(n.v); t(n.l); ino.push(n.v); t(n.r); post.push(n.v); })(root);
+    document.getElementById("bstTable").innerHTML='<tbody><tr><td><b>Preorden</b></td><td class="mono">'+pre.join(", ")+'</td></tr><tr><td><b>Inorden</b></td><td class="mono">'+ino.join(", ")+'</td></tr><tr><td><b>Postorden</b></td><td class="mono">'+post.join(", ")+'</td></tr></tbody>';
+    const avl=nodes.every(n=>Math.abs(n.bf)<2);
+    document.getElementById("bstInfo").innerHTML='Nodos: '+nodes.length+' · altura: '+(maxD+1)+' niveles · '+(avl?'<span class="pill ok">Es AVL</span>':'<span class="pill bad">No es AVL: hace falta rotar</span>');
+  }
+  const bstIn=document.getElementById("bstIn");
+  const bstGo=()=>bstRender(parse(bstIn.value).slice(0,31));
+  bstIn.addEventListener("input",bstGo);
+  document.getElementById("bstSorted").addEventListener("click",()=>{ bstIn.value="10, 20, 30, 40, 50, 60, 70"; bstGo(); });
+  document.getElementById("bstReset").addEventListener("click",()=>{ bstIn.value="50, 25, 70, 8, 30, 60, 90, 27"; bstGo(); });
+  bstGo();
+
+  // ---------- T5: heap ----------
+  let HP=[], hpHi=[];
+  const HP0=[80,73,68,65,53,49,15,8];
+  function hpDraw(msg){
+    const n=HP.length, lv=i=>Math.floor(Math.log2(i+1)), maxL=n?lv(n-1):0;
+    const pos=i=>{ const l=lv(i), k=i-(2**l-1), cnt=2**l; return [30+(k+0.5)/cnt*540, 28+l*(180/Math.max(1,maxL))]; };
+    let h=""; for(let i=1;i<n;i++){ const [x1,y1]=pos(i),[x2,y2]=pos((i-1)>>1); h+=SVGE("line",{x1,y1,x2,y2,stroke:"var(--line)","stroke-width":2}); }
+    for(let i=0;i<n;i++){ const [x,y]=pos(i), on=hpHi.includes(i); h+=SVGE("circle",{cx:x,cy:y,r:16,fill:on?"var(--example-soft)":"var(--accent-soft)",stroke:on?"var(--example)":"var(--accent)","stroke-width":2})+SVGE("text",{x,y:y+4,"text-anchor":"middle","font-size":11,style:"fill:var(--ink);font-weight:600"},HP[i])+SVGE("text",{x,y:y+30,"text-anchor":"middle","font-size":9},"["+i+"]"); }
+    document.getElementById("hpSvg").innerHTML=h||SVGE("text",{x:300,y:110,"text-anchor":"middle","font-size":13},"Heap vacío");
+    document.getElementById("hpArr").textContent="Vector: ["+HP.join(", ")+"]";
+    if(msg!=null) document.getElementById("hpInfo").textContent=msg;
+  }
+  function hpUp(i){ const path=[i]; while(i>0){ const p=(i-1)>>1; if(HP[p]>=HP[i]) break; [HP[p],HP[i]]=[HP[i],HP[p]]; i=p; path.push(i);} return path; }
+  function hpDown(i){ const n=HP.length, path=[i]; for(;;){ const l=2*i+1,r=l+1; let m=i; if(l<n&&HP[l]>HP[m]) m=l; if(r<n&&HP[r]>HP[m]) m=r; if(m===i) break; [HP[m],HP[i]]=[HP[i],HP[m]]; i=m; path.push(i);} return path; }
+  document.getElementById("hpAdd").addEventListener("click",()=>{ const v=Math.round(+document.getElementById("hpVal").value); if(!isFinite(v)) return; if(HP.length>=31){ hpDraw("El simulador admite hasta 31 nodos."); return; } HP.push(v); hpHi=hpUp(HP.length-1); hpDraw("Insertado "+v+": sube por "+(hpHi.length-1)+" niveles."); });
+  document.getElementById("hpPop").addEventListener("click",()=>{ if(!HP.length){ hpDraw("Heap vacío."); return; } const top=HP[0], last=HP.pop(); if(HP.length){ HP[0]=last; hpHi=hpDown(0);} else hpHi=[]; hpDraw("Extraído el máximo: "+top+". El último elemento sube a la raíz y se hunde."); });
+  document.getElementById("hpSort").addEventListener("click",()=>{ const out=[]; const bak=HP.slice(); while(HP.length){ out.unshift(HP[0]); const last=HP.pop(); if(HP.length){HP[0]=last; hpDown(0);} } HP=bak; hpHi=[]; hpDraw("Heapsort: extrayendo el máximo "+bak.length+" veces → ["+out.join(", ")+"]"); });
+  document.getElementById("hpReset").addEventListener("click",()=>{ HP=HP0.slice(); hpHi=[]; hpDraw("Heap de ejemplo (figura del temario). Prueba a insertar 90."); });
+  HP=HP0.slice(); hpDraw("Heap de ejemplo (figura del temario). Prueba a insertar 90.");
+
+  // ---------- Grafos: utilidades ----------
+  function drawGraph(svgId,N,E,o){
+    o=o||{}; let h="";
+    E.forEach((e,i)=>{ const a=N[e[0]], b=N[e[1]], st=(o.edgeStyle&&o.edgeStyle(i,e))||{}; h+=SVGE("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:st.c||"var(--line)","stroke-width":st.w||2,"stroke-dasharray":st.d||"none"}); if(e[2]!=null){ const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; h+=SVGE("rect",{x:mx-11,y:my-9,width:22,height:16,rx:4,fill:"var(--surface)"})+SVGE("text",{x:mx,y:my+3,"text-anchor":"middle","font-size":10,style:"fill:var(--ink)"},e[2]); } });
+    N.forEach((n,i)=>{ const st=(o.nodeStyle&&o.nodeStyle(i))||{}; h+=SVGE("circle",{cx:n.x,cy:n.y,r:17,fill:st.f||"var(--surface)",stroke:st.s||"var(--ink)","stroke-width":2})+SVGE("text",{x:n.x,y:n.y+4,"text-anchor":"middle","font-size":12,style:"font-weight:600;fill:"+(st.t||"var(--ink)")},n.l); if(st.sub) h+=SVGE("text",{x:n.x,y:n.y+32,"text-anchor":"middle","font-size":10,style:"fill:var(--accent);font-weight:600"},st.sub); });
+    document.getElementById(svgId).innerHTML=h;
+  }
+
+  // ---------- T6: BFS / DFS ----------
+  const TN=[{l:"1",x:80,y:60},{l:"2",x:200,y:40},{l:"3",x:200,y:150},{l:"4",x:330,y:60},{l:"5",x:330,y:170},{l:"6",x:460,y:60},{l:"7",x:460,y:180},{l:"8",x:540,y:120}];
+  const TE=[[0,1],[0,2],[1,3],[2,4],[1,2],[3,5],[4,6],[3,4],[5,7],[6,7]];
+  const ADJ=TN.map((_,i)=>TE.flatMap(e=>e[0]===i?[e[1]]:e[1]===i?[e[0]]:[]).sort((a,b)=>a-b));
+  let tvMode="bfs", tvEv=[], tvK=0;
+  function tvBuild(){
+    const ev=[], col=TN.map(()=>"w");
+    if(tvMode==="bfs"){ const q=[0], dist=TN.map(()=>null); dist[0]=0; col[0]="g"; ev.push({col:col.slice(),info:"Inicio en 1 (gris). Cola: [1]",dist:dist.slice()});
+      while(q.length){ const u=q.shift(); ADJ[u].forEach(v=>{ if(col[v]==="w"){ col[v]="g"; dist[v]=dist[u]+1; q.push(v); ev.push({col:col.slice(),info:"Desde "+TN[u].l+" se descubre "+TN[v].l+" (distancia "+dist[v]+"). Cola: ["+q.map(x=>TN[x].l).join(", ")+"]",dist:dist.slice(),cur:u}); } }); col[u]="b"; ev.push({col:col.slice(),info:TN[u].l+" explorado (negro). Cola: ["+q.map(x=>TN[x].l).join(", ")+"]",dist:dist.slice(),cur:u}); }
+    } else { let t=0; const d=TN.map(()=>null), f=TN.map(()=>null);
+      (function visit(u){ col[u]="g"; d[u]=++t; ev.push({col:col.slice(),info:"Se visita "+TN[u].l+" (descubrimiento "+t+")",d:d.slice(),f:f.slice(),cur:u}); ADJ[u].forEach(v=>{ if(col[v]==="w") visit(v); }); col[u]="b"; f[u]=++t; ev.push({col:col.slice(),info:TN[u].l+" terminado (finalización "+t+"); se retrocede",d:d.slice(),f:f.slice(),cur:u}); })(0);
+    }
+    tvEv=ev; tvK=0; tvDraw();
+  }
+  function tvDraw(){
+    const s=tvEv[tvK], order=[];
+    drawGraph("tvSvg",TN,TE,{nodeStyle:i=>{ const c=s.col[i]; return {f:c==="w"?"var(--surface)":c==="g"?"var(--muted)":"var(--ink)",s:i===s.cur?"var(--example)":"var(--ink)",t:c==="w"?"var(--ink)":"var(--bg)",sub:tvMode==="bfs"?(s.dist[i]!=null?"d="+s.dist[i]:""):(s.d[i]!=null?s.d[i]+"/"+(s.f[i]??"·"):"")}; }});
+    document.getElementById("tvInfo").textContent="Paso "+(tvK+1)+"/"+tvEv.length+" · "+s.info;
+  }
+  document.querySelectorAll("[data-trav]").forEach(b=>b.addEventListener("click",()=>{ tvMode=b.dataset.trav; document.querySelectorAll("[data-trav]").forEach(x=>x.setAttribute("aria-pressed",x===b)); tvBuild(); }));
+  document.getElementById("tvStep").addEventListener("click",()=>{ if(tvK<tvEv.length-1){tvK++;tvDraw();} });
+  document.getElementById("tvRun").addEventListener("click",()=>{ tvK=tvEv.length-1; tvDraw(); });
+  document.getElementById("tvReset").addEventListener("click",()=>{ tvK=0; tvDraw(); });
+  tvBuild();
+
+  // ---------- T7: monedas ----------
+  function coins(){
+    const C=parse(document.getElementById("cnCoins").value).filter(c=>c>0&&Number.isInteger(c)).sort((a,b)=>b-a), A=Math.round(+document.getElementById("cnAmt").value), out=document.getElementById("cnOut");
+    if(!C.length||!(A>0)||A>5000){ out.innerHTML='<p class="out">Introduce monedas enteras positivas y una cantidad entre 1 y 5.000.</p>'; return; }
+    let r=A; const g=[]; C.forEach(c=>{ while(r>=c){ g.push(c); r-=c; } });
+    const dp=new Array(A+1).fill(Infinity), pr=new Array(A+1).fill(-1); dp[0]=0;
+    for(let v=1;v<=A;v++) C.forEach(c=>{ if(c<=v&&dp[v-c]+1<dp[v]){ dp[v]=dp[v-c]+1; pr[v]=c; } });
+    const opt=[]; if(isFinite(dp[A])){ let v=A; while(v>0){ opt.push(pr[v]); v-=pr[v]; } }
+    const show=arr=>{ const m={}; arr.forEach(c=>m[c]=(m[c]||0)+1); return Object.keys(m).sort((a,b)=>b-a).map(k=>m[k]+" × "+k).join(" + "); };
+    const gOk=r===0, same=gOk&&g.length===opt.length;
+    out.innerHTML='<div class="box '+(gOk&&same?'':'')+'"><h4>Voraz</h4>'+(gOk?show(g)+'<br><b>'+g.length+' monedas</b>':'<span class="pill bad">No encuentra solución</span><br>se atasca con '+r+' por devolver')+'</div>'+
+      '<div class="box accent"><h4>Óptimo (programación dinámica)</h4>'+(opt.length?show(opt)+'<br><b>'+opt.length+' monedas</b> '+(same?'<span class="pill ok">El voraz acierta</span>':'<span class="pill bad">El voraz no es óptimo</span>'):'No existe solución')+'</div>';
+  }
+  ["cnCoins","cnAmt"].forEach(id=>document.getElementById(id).addEventListener("input",coins));
+  document.querySelectorAll("[data-cn]").forEach(b=>b.addEventListener("click",()=>{ const [c,a]=b.dataset.cn.split("|"); document.getElementById("cnCoins").value=c.split(",").join(", "); document.getElementById("cnAmt").value=a; coins(); }));
+  coins();
+
+  // ---------- T7: mochila ----------
+  const KP=[["Proyecto A",10,60],["Proyecto B",20,100],["Proyecto C",30,120],["Proyecto D",5,22],["Proyecto E",40,150]];
+  function knap(){
+    const cap=Math.max(1,Math.min(200,Math.round(+document.getElementById("kpCap").value||1)));
+    const it=KP.map(([n,w,v],i)=>({n,w,v,i,r:v/w})).sort((a,b)=>b.r-a.r);
+    let left=cap, gv=0; const gSel=new Set(); it.forEach(o=>{ if(o.w<=left){ gSel.add(o.i); left-=o.w; gv+=o.v; } });
+    let fl=cap, fv=0; const frac={}; it.forEach(o=>{ if(fl<=0) return; const t=Math.min(1,fl/o.w); frac[o.i]=t; fl-=t*o.w; fv+=t*o.v; });
+    const n=KP.length, dp=Array.from({length:n+1},()=>new Array(cap+1).fill(0));
+    for(let i=1;i<=n;i++) for(let c=0;c<=cap;c++){ dp[i][c]=dp[i-1][c]; const [,w,v]=KP[i-1]; if(w<=c) dp[i][c]=Math.max(dp[i][c],dp[i-1][c-w]+v); }
+    const oSel=new Set(); let c=cap; for(let i=n;i>0;i--) if(dp[i][c]!==dp[i-1][c]){ oSel.add(i-1); c-=KP[i-1][1]; }
+    document.getElementById("kpTable").innerHTML='<thead><tr><th>Proyecto</th><th class="num">Coste</th><th class="num">Rentabilidad</th><th class="num">Rent./coste</th><th>Voraz 0/1</th><th>Óptimo 0/1</th><th>Fraccionaria</th></tr></thead><tbody>'+
+      KP.map(([nm,w,v],i)=>'<tr><td>'+nm+'</td><td class="num">'+w+'</td><td class="num">'+v+'</td><td class="num">'+fmt(v/w,2)+'</td><td>'+(gSel.has(i)?'<span class="pill ok">Sí</span>':'—')+'</td><td>'+(oSel.has(i)?'<span class="pill ok">Sí</span>':'—')+'</td><td class="num">'+(frac[i]?fmt(frac[i]*100,0)+' %':'—')+'</td></tr>').join("")+'</tbody>';
+    const box=(l,v,s,cls)=>'<div class="box '+(cls||'')+'"><small>'+l+'</small><div class="k" style="font-size:1.25rem">'+v+'</div><small>'+s+'</small></div>';
+    document.getElementById("kpOut").innerHTML=box("Voraz 0/1",fmt(gv,0),gv===dp[n][cap]?"coincide con el óptimo":"no es óptimo")+box("Óptimo 0/1",fmt(dp[n][cap],0),"programación dinámica","accent")+box("Fraccionaria (voraz)",fmt(fv,1),"cota superior; el voraz es óptimo aquí");
+  }
+  document.getElementById("kpCap").addEventListener("input",knap);
+  document.getElementById("kpReset").addEventListener("click",()=>{ document.getElementById("kpCap").value=50; knap(); });
+  knap();
+
+  // ---------- T8: Dijkstra ----------
+  const DN=[{l:"A",x:70,y:130},{l:"B",x:210,y:45},{l:"C",x:210,y:215},{l:"D",x:370,y:45},{l:"E",x:370,y:215},{l:"F",x:520,y:130}];
+  const DE=[[0,1,7],[0,2,9],[0,5,14],[1,2,10],[1,3,15],[2,3,11],[2,5,2],[3,4,6],[4,5,9]];
+  let djSteps=[], djK=0;
+  function djBuild(){
+    const s=DN.findIndex(n=>n.l===document.getElementById("djSrc").value), n=DN.length, D=new Array(n).fill(Infinity), P=new Array(n).fill(null), S=new Set();
+    D[s]=0; djSteps=[{D:D.slice(),P:P.slice(),S:new Set(S),u:null,info:"Inicio: D["+DN[s].l+"] = 0; el resto, ∞."}];
+    while(S.size<n){ let u=-1; for(let i=0;i<n;i++) if(!S.has(i)&&(u<0||D[i]<D[u])) u=i; if(u<0||D[u]===Infinity) break; S.add(u); const ch=[];
+      DE.forEach(([a,b,w])=>{ const v=a===u?b:b===u?a:-1; if(v<0||S.has(v)) return; if(D[u]+w<D[v]){ D[v]=D[u]+w; P[v]=u; ch.push(DN[v].l+" → "+D[v]); } });
+      djSteps.push({D:D.slice(),P:P.slice(),S:new Set(S),u,info:"Se selecciona "+DN[u].l+" (D = "+D[u]+"). "+(ch.length?"Se relaja: "+ch.join(", "):"No mejora ningún vecino")+"."}); }
+    djK=0; djDraw();
+  }
+  function djDraw(){
+    const st=djSteps[djK], tree=new Set(); st.P.forEach((p,v)=>{ if(p!=null) tree.add(Math.min(p,v)+"-"+Math.max(p,v)); });
+    drawGraph("djSvg",DN,DE,{edgeStyle:(i,e)=>tree.has(Math.min(e[0],e[1])+"-"+Math.max(e[0],e[1]))?{c:"var(--accent)",w:3.5}:null,nodeStyle:i=>({f:st.S.has(i)?"var(--accent)":"var(--surface)",s:i===st.u?"var(--example)":"var(--ink)",t:st.S.has(i)?"var(--accent-ink)":"var(--ink)",sub:st.D[i]===Infinity?"∞":String(st.D[i])})});
+    document.getElementById("djTable").innerHTML='<thead><tr><th></th>'+DN.map(n=>'<th class="num">'+n.l+'</th>').join("")+'</tr></thead><tbody><tr><td><b>D</b></td>'+st.D.map(d=>'<td class="num">'+(d===Infinity?"∞":d)+'</td>').join("")+'</tr><tr><td><b>P</b></td>'+st.P.map(p=>'<td class="num">'+(p==null?"—":DN[p].l)+'</td>').join("")+'</tr></tbody>';
+    document.getElementById("djInfo").textContent="Paso "+(djK+1)+"/"+djSteps.length+" · "+st.info;
+  }
+  document.getElementById("djSrc").addEventListener("change",djBuild);
+  document.getElementById("djStep").addEventListener("click",()=>{ if(djK<djSteps.length-1){djK++;djDraw();} });
+  document.getElementById("djRun").addEventListener("click",()=>{ djK=djSteps.length-1; djDraw(); });
+  document.getElementById("djReset").addEventListener("click",()=>{ djK=0; djDraw(); });
+  djBuild();
+
+  // ---------- T9: Prim y Kruskal ----------
+  const MN=[{l:"A",x:80,y:50},{l:"B",x:270,y:50},{l:"C",x:470,y:50},{l:"D",x:80,y:150},{l:"E",x:330,y:150},{l:"F",x:180,y:240},{l:"G",x:430,y:240}];
+  const ME=[[0,1,7],[0,3,5],[1,2,8],[1,3,9],[1,4,7],[2,4,5],[3,4,15],[3,5,6],[4,5,8],[4,6,9],[5,6,11]];
+  let mstMode="kruskal", mstSteps=[], mstK=0;
+  function mstBuild(){
+    const steps=[{inT:new Set(),rej:new Set(),vis:new Set(),info:"Inicio: ninguna arista seleccionada."}];
+    if(mstMode==="kruskal"){ const order=ME.map((e,i)=>i).sort((a,b)=>ME[a][2]-ME[b][2]||a-b), par=MN.map((_,i)=>i), f=x=>par[x]===x?x:(par[x]=f(par[x])), T=new Set(), R=new Set(); let tot=0;
+      for(const i of order){ if(T.size===MN.length-1) break; const [a,b,w]=ME[i], ra=f(a), rb=f(b);
+        if(ra!==rb){ par[ra]=rb; T.add(i); tot+=w; steps.push({inT:new Set(T),rej:new Set(R),vis:new Set(),info:"Se añade "+MN[a].l+MN[b].l+" ("+w+"). Total: "+tot+(T.size===MN.length-1?" · terminado ("+T.size+" aristas = |V| − 1)":"")}); }
+        else { R.add(i); steps.push({inT:new Set(T),rej:new Set(R),vis:new Set(),info:"Se descarta "+MN[a].l+MN[b].l+" ("+w+"): formaría un ciclo."}); } }
+    } else { const V=new Set([3]), T=new Set(); let tot=0; steps[0]={inT:new Set(),rej:new Set(),vis:new Set(V),info:"Inicio: se marca el vértice D."};
+      while(V.size<MN.length){ let best=-1; ME.forEach((e,i)=>{ if(V.has(e[0])!==V.has(e[1])&&(best<0||e[2]<ME[best][2])) best=i; }); const [a,b,w]=ME[best], nv=V.has(a)?b:a; V.add(nv); T.add(best); tot+=w;
+        steps.push({inT:new Set(T),rej:new Set(),vis:new Set(V),info:"Arista más barata desde el árbol: "+MN[a].l+MN[b].l+" ("+w+") → se marca "+MN[nv].l+". Total: "+tot}); } }
+    mstSteps=steps; mstK=0; mstDraw();
+  }
+  function mstDraw(){ const st=mstSteps[mstK];
+    drawGraph("mstSvg",MN,ME,{edgeStyle:i=>st.inT.has(i)?{c:"var(--ok)",w:4}:st.rej.has(i)?{c:"var(--bad)",w:2,d:"5 4"}:null,nodeStyle:i=>st.vis.has(i)?{f:"var(--ok-soft)",s:"var(--ok)"}:null});
+    document.getElementById("mstInfo").textContent="Paso "+(mstK+1)+"/"+mstSteps.length+" · "+st.info; }
+  document.querySelectorAll("[data-mst]").forEach(b=>b.addEventListener("click",()=>{ mstMode=b.dataset.mst; document.querySelectorAll("[data-mst]").forEach(x=>x.setAttribute("aria-pressed",x===b)); mstBuild(); }));
+  document.getElementById("mstStep").addEventListener("click",()=>{ if(mstK<mstSteps.length-1){mstK++;mstDraw();} });
+  document.getElementById("mstRun").addEventListener("click",()=>{ mstK=mstSteps.length-1; mstDraw(); });
+  document.getElementById("mstReset").addEventListener("click",()=>{ mstK=0; mstDraw(); });
+  mstBuild();
+
+  // ---------- T10: N reinas ----------
+  let qN=8, qGen=null, qS=null, qStepsN=0, qBack=0, qSol=0;
+  function* queens(n){ const cols=[]; const safe=(r,c)=>cols.every((cc,rr)=>cc!==c&&Math.abs(cc-c)!==r-rr);
+    function* place(r){ if(r===n){ qSol++; yield {cols:cols.slice(),row:r,act:"sol"}; return; }
+      for(let c=0;c<n;c++){ yield {cols:cols.slice(),row:r,try:c,act:"try"}; if(safe(r,c)){ cols.push(c); yield {cols:cols.slice(),row:r+1,act:"place"}; yield* place(r+1); cols.pop(); qBack++; yield {cols:cols.slice(),row:r,act:"back"}; } } }
+    yield* place(0); yield {cols:[],row:0,act:"end"}; }
+  function qDraw(){ const s=qS||{cols:[],row:0,act:"start"}, n=qN, cell=Math.min(40,Math.floor(320/n));
+    let h='<div style="display:grid;grid-template-columns:repeat('+n+','+cell+'px);border:2px solid var(--ink);width:max-content;max-width:100%">';
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++){ const dark=(r+c)%2, q=s.cols[r]===c, tr=s.act==="try"&&s.row===r&&s.try===c;
+      h+='<div style="width:'+cell+'px;height:'+cell+'px;display:grid;place-items:center;font-size:'+(cell*0.6)+'px;background:'+(tr?'var(--example-soft)':dark?'var(--surface-2)':'var(--surface)')+';color:'+(s.act==="sol"?'var(--ok)':'var(--accent)')+'">'+(q?'♛':tr?'<span style="color:var(--example);font-size:.6em">?</span>':'')+'</div>'; }
+    document.getElementById("qBoard").innerHTML=h+'</div>';
+    const msg={start:"Pulsa «Paso».",try:"Fila "+(s.row+1)+": ¿columna "+((s.try??0)+1)+"?",place:"Reina colocada; se pasa a la fila "+(s.row+1)+".",back:"Sin salida en la fila "+(s.row+2)+": se retrocede a la fila "+(s.row+1)+".",sol:"¡Solución encontrada!",end:"Búsqueda completa."}[s.act];
+    const box=(l,v)=>'<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.25rem">'+v+'</div></div>';
+    document.getElementById("qStats").innerHTML=box("Estado",'<span style="font-size:.95rem">'+msg+'</span>')+box("Pasos",qStepsN)+box("Retrocesos",qBack)+box("Soluciones halladas",qSol);
+  }
+  function qReset(){ qN=+document.getElementById("qN").value; qGen=queens(qN); qS=null; qStepsN=0; qBack=0; qSol=0; qDraw(); }
+  function qOne(){ const r=qGen.next(); if(r.done) return null; qS=r.value; qStepsN++; return qS; }
+  document.getElementById("qStep").addEventListener("click",()=>{ if(qS&&qS.act==="end") return; qOne(); qDraw(); });
+  const qUntilSol=()=>{ let s, guard=0; while((s=qOne())&&s.act!=="sol"&&s.act!=="end"&&guard++<500000); qDraw(); };
+  document.getElementById("qRun").addEventListener("click",()=>{ if(qS&&qS.act==="sol") return qDraw(); qUntilSol(); });
+  document.getElementById("qNext").addEventListener("click",qUntilSol);
+  document.getElementById("qReset").addEventListener("click",qReset);
+  document.getElementById("qN").addEventListener("change",qReset);
+  qReset();
+  // ---------- Glosario ----------
+  const GL = [
+    ["Árbol","Grafo acíclico, conexo y no dirigido; estructura recursiva de nodos.",4],
+    ["Árbol binario de búsqueda","Izquierda < nodo < derecha; búsqueda O(altura).",4],
+    ["Árbol de expresión","Hojas = operandos; nodos internos = operadores.",4],
+    ["Árbol de recubrimiento mínimo","Árbol que une todos los vértices con coste mínimo (n − 1 aristas).",9],
+    ["AVL","BST con |h(izq) − h(der)| ≤ 1 en cada nodo; se equilibra con rotaciones.",4],
+    ["Backtracking","Búsqueda en profundidad que retrocede cuando una rama no es prometedora.",10],
+    ["Bellman-Ford","Caminos mínimos con pesos negativos; detecta ciclos negativos; O(V·E).",8],
+    ["BFS","Recorrido en anchura con una cola.",6],
+    ["Branch and bound","Ramificación y poda por cotas, para optimización.",10],
+    ["Búsqueda binaria","Divide y vencerás sobre un vector ordenado; O(log n).",1],
+    ["Caso peor / mejor / medio","Entrada más costosa / más favorable / promedio.",2],
+    ["Ciclo negativo","Ciclo de peso total negativo: el camino mínimo no existe.",8],
+    ["Cola de prioridad","Sale primero el elemento de mayor prioridad.",5],
+    ["DAG","Grafo acíclico dirigido; admite orden topológico.",6],
+    ["DFS","Recorrido en profundidad, recursivo, con tiempos de descubrimiento y finalización.",6],
+    ["Dijkstra","Caminos mínimos desde un origen con pesos no negativos (1959).",8],
+    ["Divide y vencerás","Dividir en subproblemas, resolverlos y combinar.",1],
+    ["Estable (ordenación)","Mantiene el orden relativo de elementos iguales.",3],
+    ["Greedy (voraz)","Elige el óptimo local en cada paso y no deshace decisiones.",7],
+    ["Heap","Árbol binario completo con orden parcial (max o min).",5],
+    ["Heapsort","Ordenación con un heap; O(n log n), in situ, inestable (Williams, 1964).",5],
+    ["Inorden / preorden / postorden","I-N-D / N-I-D / I-D-N.",4],
+    ["Kruskal","MST añadiendo las aristas más baratas sin formar ciclos; O(a log n).",9],
+    ["Lista de adyacencia","Para cada vértice, la lista de sus vecinos; Θ(V + E).",6],
+    ["Matriz de adyacencia","Matriz V×V; consulta de arista en O(1); Θ(V²).",6],
+    ["Merge sort","Divide en mitades y mezcla; siempre O(n log n).",3],
+    ["Mochila","Maximizar valor con capacidad limitada; voraz por beneficio/peso.",7],
+    ["Notación O / Ω / Θ","Cota superior / inferior / exacta del crecimiento.",2],
+    ["NP-completo","Problema sin algoritmo polinomial conocido (p. ej. el viajante).",7],
+    ["Orden topológico","Orden lineal de un DAG que respeta todas las aristas.",6],
+    ["Prim","MST que crece desde un vértice con la arista más barata hacia uno nuevo.",9],
+    ["Programación dinámica","Guardar soluciones de subproblemas en una tabla.",1],
+    ["Quicksort","Partición respecto a un pivote; O(n log n) de media, O(n²) en el peor caso.",3],
+    ["Recursividad","Un algoritmo que se llama a sí mismo sobre una versión menor del problema.",1],
+    ["Relajación","Actualizar D[v] si D[u] + w(u, v) es menor.",8],
+    ["T(n)","Tiempo de ejecución en función del tamaño de la entrada.",2]
+  ];
+  function gloss(){
+    const q = document.getElementById("glossQ").value.trim().toLowerCase();
+    const items = GL.filter(g => !q || (g[0]+" "+g[1]).toLowerCase().includes(q));
+    document.getElementById("glossList").innerHTML = items.length ? items.map(g => '<div class="gi"><dl style="margin:0"><dt>'+g[0]+'</dt><dd>'+g[1]+'</dd></dl><small><a href="#tema-'+g[2]+'">Tema '+g[2]+'</a></small></div>').join("") : '<p style="color:var(--muted)">No hay términos que coincidan. Prueba con otra palabra.</p>';
+  }
+  document.getElementById("glossQ").addEventListener("input", gloss); gloss();
+
+  renderProgress();
+  route();
+})();
+</script>
+
+</body>
+</html>

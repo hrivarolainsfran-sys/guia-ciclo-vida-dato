@@ -1075,10 +1075,10 @@ img{max-width:100%}
   ["cvF","cvImg"].forEach(id=>$(id).addEventListener("change",cvRun)); cvRun();
 
   // ---------- T5: propagación hacia delante ----------
-  let fpSeed=3, FP=null;
+  let fpSeed=5, FP=null;
   $("fpIn").innerHTML=slider("fp0","Momentum",-1,1,0.1,0.6)+slider("fp1","Volumen relativo",-1,1,0.1,0.3)+slider("fp2","Sentimiento",-1,1,0.1,-0.2);
   function fpInit(){ const r=mulberry32(fpSeed*911), m=$("fpInit").value, s=m==="zero"?0:m==="big"?3:0.6;
-    FP={W1:Array.from({length:4},()=>[0,1,2].map(()=>s*gauss(r))),b1:Array(4).fill(0),W2:Array.from({length:3},()=>[0,1,2,3].map(()=>s*gauss(r))),b2:Array(3).fill(0)}; }
+    FP={W1:Array.from({length:4},()=>[0,1,2].map(()=>s*gauss(r))),b1:Array(4).fill(m==="zero"?0:0.2),W2:Array.from({length:3},()=>[0,1,2,3].map(()=>s*gauss(r))),b2:Array(3).fill(0)}; }
   function fpRun(){ const x=[0,1,2].map(i=>+$("fp"+i).value); [0,1,2].forEach(i=>bindV("fp"+i));
     const z1=FP.W1.map((w,j)=>w.reduce((s,v,k)=>s+v*x[k],FP.b1[j])), h=z1.map(v=>Math.max(0,v)), z2=FP.W2.map((w,j)=>w.reduce((s,v,k)=>s+v*h[k],FP.b2[j])), mx=Math.max(...z2), e=z2.map(v=>Math.exp(v-mx)), S=e.reduce((a,b)=>a+b,0), p=e.map(v=>v/S);
     const L=[x,h,p], P=[[0,1,2].map(j=>[70,70+j*60]),[0,1,2,3].map(j=>[300,40+j*60]),[0,1,2].map(j=>[530,70+j*60])], labs=[["Mom.","Vol.","Sent."],["h1","h2","h3","h4"],["baja","lateral","sube"]];
@@ -1086,8 +1086,8 @@ img{max-width:100%}
     P.forEach((col,l)=>col.forEach(([cx,cy],j)=>{ g+=SVGE("circle",{cx,cy,r:22,fill:"var(--surface)",stroke:"var(--ink)","stroke-width":1.5})+SVGE("text",{x:cx,y:cy-3,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)"},labs[l][j])+SVGE("text",{x:cx,y:cy+11,"text-anchor":"middle","font-size":11,style:"fill:var(--ink);font-weight:700"},l===2?fmt(L[l][j]*100,0)+"%":fmt(L[l][j],2)); }));
     g+=SVGE("text",{x:70,y:250,"text-anchor":"middle","font-size":10},"Entrada")+SVGE("text",{x:300,y:258,"text-anchor":"middle","font-size":10},"Oculta (ReLU)")+SVGE("text",{x:530,y:250,"text-anchor":"middle","font-size":10},"Salida (softmax)");
     $("fpSvg").innerHTML=g;
-    const same=h.every(v=>Math.abs(v-h[0])<1e-9);
-    $("fpOut").textContent="z¹ = W¹·x + b¹ = ["+z1.map(v=>fmt(v,2)).join(", ")+"]\nh  = ReLU(z¹)  = ["+h.map(v=>fmt(v,2)).join(", ")+"]\nz² = W²·h + b² = ["+z2.map(v=>fmt(v,2)).join(", ")+"]  (logits)\nŷ  = softmax(z²) = ["+p.map(v=>fmt(v,3)).join(", ")+"]  → suman "+fmt(p.reduce((a,b)=>a+b,0),2)+"\nPredicción: "+["baja","lateral","sube"][p.indexOf(Math.max(...p))]+(same?"\n\n⚠ Todas las neuronas ocultas valen lo mismo: con pesos iguales la red no puede diferenciarlas (simetría).":"")+(Math.max(...p)>0.99?"\n\n⚠ Salida saturada: con pesos grandes la softmax da probabilidades extremas y los gradientes casi desaparecen.":""); }
+    const same=$("fpInit").value==="zero", dead=!same&&h.every(v=>v===0);
+    $("fpOut").textContent="z¹ = W¹·x + b¹ = ["+z1.map(v=>fmt(v,2)).join(", ")+"]\nh  = ReLU(z¹)  = ["+h.map(v=>fmt(v,2)).join(", ")+"]\nz² = W²·h + b² = ["+z2.map(v=>fmt(v,2)).join(", ")+"]  (logits)\nŷ  = softmax(z²) = ["+p.map(v=>fmt(v,3)).join(", ")+"]  → suman "+fmt(p.reduce((a,b)=>a+b,0),2)+"\nPredicción: "+(Math.max(...p)-Math.min(...p)<1e-9?"empate (la red no distingue)":["baja","lateral","sube"][p.indexOf(Math.max(...p))])+(same?"\n\n⚠ Todas las neuronas ocultas valen lo mismo: con pesos iguales la red no puede diferenciarlas (simetría).":"")+(dead?"\n\n⚠ Con esta entrada ninguna neurona oculta se activa (ReLU devuelve 0). Prueba otros valores o pesos.":"")+(Math.max(...p)>0.99?"\n\n⚠ Salida saturada: con pesos grandes la softmax da probabilidades extremas y los gradientes casi desaparecen.":""); }
   [0,1,2].forEach(i=>$("fp"+i).addEventListener("input",fpRun));
   $("fpInit").addEventListener("change",()=>{ fpInit(); fpRun(); }); $("fpNew").addEventListener("click",()=>{ fpSeed++; fpInit(); fpRun(); });
   fpInit(); fpRun();

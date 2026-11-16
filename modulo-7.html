@@ -1241,7 +1241,7 @@ añadir la regla por defecto {} → y'</pre>
   ["lgA","lgB"].forEach(id=>$(id).addEventListener("input",lgRun)); lgRun();
 
   // ---------- T9: clustering jerárquico ----------
-  const HC=[["Eléctrica A",6,14],["Eléctrica B",7,15],["Gasista",5.5,13],["Banco A",9,25],["Banco B",10,27],["Banco C",8.5,24],["Tecno A",15,32],["Tecno B",17,35],["Tecno C",14,30],["Farma A",7,18],["Farma B",8,19],["Minera cripto",25,70]];
+  const HC=[["Eléctrica A",6,14],["Eléctrica B",7,15],["Gasista",5.5,13],["Banco A",9,25],["Banco B",10,27],["Banco C",8.5,24],["Tecno A",15,32],["Tecno B",17,35],["Tecno C",14,30],["Farma A",7,18],["Farma B",8,19],["Minera cripto",21,46]];
   const HCZ=(()=>{ const m=[1,2].map(k=>HC.reduce((s,r)=>s+r[k],0)/HC.length), sd=[1,2].map((k,i)=>Math.sqrt(HC.reduce((s,r)=>s+(r[k]-m[i])**2,0)/HC.length)); return HC.map(r=>[(r[1]-m[0])/sd[0],(r[2]-m[1])/sd[1]]); })();
   const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
   function hcBuild(link){ let C=HC.map((_,i)=>({id:i,m:[i],h:0})); const merges=[]; let nid=HC.length;
@@ -1256,12 +1256,12 @@ añadir la regla por defecto {} → y'</pre>
     const M=hcBuild(link), N=HC.length, root=M[M.length-1];
     const groups=[]; (function cut(n){ if(n.m.length===1||M.indexOf(n)<N-k){ groups.push(n.m); return; } cut(n.l); cut(n.r); })(root);
     const lab=Array(N); groups.forEach((g,c)=>g.forEach(i=>lab[i]=c));
-    const SX=v=>30+(v+1.6)/4.8*255, SY=v=>230-(v+1.4)/4.4*215;
+    const xs=HCZ.map(p=>p[0]), ys=HCZ.map(p=>p[1]), x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys), SX=v=>32+(v-x0)/(x1-x0)*200, SY=v=>225-(v-y0)/(y1-y0)*205;
     let s=SVGE("text",{x:160,y:254,"text-anchor":"middle","font-size":10},"Rentabilidad (z) →")+SVGE("text",{x:12,y:120,"text-anchor":"middle","font-size":10,transform:"rotate(-90 12 120)"},"Volatilidad (z) →");
     HCZ.forEach(([x,y],i)=>{ s+=SVGE("circle",{cx:SX(x).toFixed(1),cy:SY(y).toFixed(1),r:6,fill:HCOL[lab[i]%HCOL.length]})+SVGE("text",{x:(SX(x)+8).toFixed(1),y:(SY(y)+3).toFixed(1),"font-size":8.5},esc(HC[i][0])); });
     $("hcSc").innerHTML=s;
     const order=[]; (function walk(n){ if(n.m.length===1&&!n.l){ order.push(n.m[0]); return; } walk(n.l); walk(n.r); })(root);
-    const hmax=Math.max(...M.map(m=>m.h)), DX=i=>20+order.indexOf(i)*(270/(N-1)), DY=v=>200-v/hmax*185;
+    const hmax=Math.max(...M.map(m=>m.h)), DX=i=>42+order.indexOf(i)*(248/(N-1)), DY=v=>200-v/hmax*185;
     const pos=new Map(); HC.forEach((_,i)=>pos.set(i,[DX(i),200]));
     let d=""; M.forEach(m=>{ const a=m.l.m.length===1&&!m.l.l?pos.get(m.l.m[0]):pos.get("c"+m.l.id), b=m.r.m.length===1&&!m.r.l?pos.get(m.r.m[0]):pos.get("c"+m.r.id), y=DY(m.h);
       d+=SVGE("path",{d:"M"+a[0].toFixed(1)+" "+a[1].toFixed(1)+"V"+y.toFixed(1)+"H"+b[0].toFixed(1)+"V"+b[1].toFixed(1),fill:"none",stroke:"var(--ink)","stroke-width":1.4}); pos.set("c"+m.id,[(a[0]+b[0])/2,y]); });

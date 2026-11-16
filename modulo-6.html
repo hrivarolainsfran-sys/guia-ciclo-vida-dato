@@ -1305,7 +1305,7 @@ Fin repetir</pre>
       B=B.filter(b=>filters.every(([v,op,n])=>{ const x=parseFloat(b[v]); if(!isFinite(x)) return false; return op==="<"?x<n:op===">"?x>n:op==="<="?x<=n:op===">="?x>=n:op==="="?x===n:x!==n; }));
       let vars=m[1].trim()==="*"?[...new Set(pats.flat().filter(x=>x.startsWith("?")))]:m[1].trim().split(/\s+/);
       $("spRes").innerHTML='<thead><tr>'+vars.map(v=>'<th>'+esc(v)+'</th>').join("")+'</tr></thead><tbody>'+(B.length?B.map(b=>'<tr>'+vars.map(v=>'<td class="mono">'+esc(b[v]??"")+'</td>').join("")+'</tr>').join(""):'<tr><td colspan="'+vars.length+'"><i>Sin resultados</i></td></tr>')+'</tbody>';
-      info.textContent=B.length+" resultado"+(B.length===1?"":"s")+" · "+pats.length+" patrón"+(pats.length===1?"":"es")+(filters.length?" · "+filters.length+" FILTER":"");
+      info.textContent=B.length+" resultado"+(B.length===1?"":"s")+" · "+pats.length+(pats.length===1?" patrón":" patrones")+(filters.length?" · "+filters.length+" FILTER":"");
     }catch(e){ $("spRes").innerHTML=""; info.textContent="Error: "+e; }
   }
   exButtons("spEx",[["Acciones de banca","SELECT ?accion WHERE {\n  ?accion a ex:Accion .\n  ?accion ex:sector ex:Banca .\n}"],["Bonos, emisor y sector","SELECT ?bono ?emisor ?sector WHERE {\n  ?bono a ex:Bono .\n  ?bono ex:emisor ?emisor .\n  ?emisor ex:sector ?sector .\n}"],["Precio > 10 (FILTER)","SELECT ?x ?p WHERE {\n  ?x ex:precio ?p .\n  FILTER(?p > 10)\n}"],["Todo sobre ex:SAN","SELECT ?prop ?valor WHERE {\n  ex:SAN ?prop ?valor .\n}"]],v=>{ $("spQ").value=v; spRun(); });
@@ -1400,7 +1400,7 @@ mismo_sector(X, Y) :- sector(X, S), sector(Y, S), X \\= Y.`;
       const goals=plSplit(q).map(plTerm), qv=[...new Set(goals.flatMap(g=>g.args).filter(x=>isVar(x)&&x!=="_"))], out=[]; plSolve(goals,{},0,out);
       if(!qv.length){ $("plOut").innerHTML=out.length?'<b style="color:var(--ok)">true.</b>':'<b style="color:var(--bad)">false.</b>'; return; }
       const seen=new Set(), rows=[]; out.forEach(s=>{ const r=qv.map(v=>v+" = "+walk(v,s)).join(", "); if(!seen.has(r)){ seen.add(r); rows.push(r); } });
-      $("plOut").innerHTML=rows.length?rows.map(r=>'<div class="mono">'+esc(r)+' ;</div>').join("")+'<div class="mono" style="color:var(--muted)">('+rows.length+' solución'+(rows.length>1?'es':'')+')</div>':'<b style="color:var(--bad)">false.</b>';
+      $("plOut").innerHTML=rows.length?rows.map(r=>'<div class="mono">'+esc(r)+' ;</div>').join("")+'<div class="mono" style="color:var(--muted)">('+rows.length+(rows.length>1?' soluciones':' solución')+')</div>':'<b style="color:var(--bad)">false.</b>';
     }catch(e){ $("plOut").textContent="Error: "+e; } }
   $("plQ").addEventListener("input",plRun);
   exButtons("plEx",[["¿san es banca?","sector(san, banca)."],["¿Qué cotiza en el CAC 40?","cotiza(X, cac40)."],["Mismo sector que san","mismo_sector(san, Y)."],["Bonos y sector del emisor","emite(E, B), sector(E, S)."],["Energía del IBEX","accion(X), cotiza(X, ibex35), sector(X, energia)."]],v=>{ $("plQ").value=v; plRun(); });

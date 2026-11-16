@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aprendizaje automático</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: guía de estudio con índice lateral fijo (10 temas + glosario) y una vista por tema; en móvil el índice pasa a barra superior deslizable. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#141C29; --muted:#566275; --line:#D9DFE8;
+  --accent:#2448C4; --accent-ink:#FFFFFF; --accent-soft:#E5EBFB;
+  --example:#A4510B; --example-soft:#FCF0E1;
+  --ok:#157A3A; --ok-soft:#E3F4E8; --bad:#B42323; --bad-soft:#FBE7E7;
+  --p1:#0E8A88; --p2:#2448C4; --p3:#7A3FC2; --p4:#B9650E; --p5:#2E8A3A;
+  --s1:#3C6FE0; --s2:#D9822B; --s3:#2E9C6E;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+    --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+    --example:#F1AC62; --example-soft:#33261A;
+    --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+    --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+    --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+  --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+  --example:#F1AC62; --example-soft:#33261A;
+  --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+  --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+  --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:2.2rem}
+h3{font-size:1.1rem;font-weight:600;margin-top:1.4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 14px 24px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px}
+.brand small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;line-height:1.25;display:block;margin-top:2px}
+.progress{padding:0 8px}
+.progress .bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress span{font-size:.8rem;color:var(--muted)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.navlist a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.92rem;line-height:1.3}
+.navlist a:hover{background:var(--surface-2)}
+.navlist a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlist .num{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem;background:var(--surface-2);color:var(--muted)}
+.navlist a[aria-current="page"] .num{background:var(--accent);color:var(--accent-ink)}
+.navlist a.done .num{background:var(--ok-soft);color:var(--ok)}
+.navsep{height:1px;background:var(--line);margin:6px 8px}
+
+main{min-width:0;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{max-width:860px;margin:0 auto}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--accent)}
+.lead{font-size:1.12rem;color:var(--muted);max-width:65ch}
+.prose{max-width:68ch}
+.oneline{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius) var(--radius) 0;font-weight:500}
+.objs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.objs li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);background:var(--surface)}
+
+/* Callouts */
+.callout{margin:1.2rem 0;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.callout>.tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+.callout p:first-of-type{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.ex{background:var(--example-soft);border-color:transparent}
+.ex>.tag{color:var(--example)}
+.exam{background:var(--surface);border:1px solid var(--accent)}
+.exam>.tag{color:var(--accent)}
+.exam ul{margin:.3rem 0 0;padding-left:1.2rem}
+.warn{background:var(--bad-soft);border-color:transparent}
+.warn>.tag{color:var(--bad)}
+
+/* Diagrams */
+.diagram{margin:1.2rem 0;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow-x:auto}
+.diagram figcaption{font-size:.8rem;color:var(--muted);margin-top:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
+.flow .node{flex:1 1 0;min-width:110px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.86rem;line-height:1.35}
+.flow .node b{display:block;font-family:var(--font-display);font-size:.95rem;margin-bottom:2px}
+.flow .arrow{flex:none;align-self:center;color:var(--muted);font-size:1.2rem}
+.flow .node.hl{background:var(--accent-soft);border-color:var(--accent)}
+@media (max-width:640px){
+  .flow.stack{flex-direction:column}
+  .flow.stack .arrow{transform:rotate(90deg)}
+  .flow.stack .node{min-width:0}
+}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.box{padding:12px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.9rem;line-height:1.45;min-width:0}
+.box h4{font-size:.98rem;margin-bottom:4px}
+.box .k{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.box.accent{background:var(--accent-soft);border-color:var(--accent)}
+.box small{color:var(--muted)}
+
+/* Tree */
+.tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:560px}
+.tree .lvl{display:flex;gap:16px;justify-content:center;width:100%}
+.tree .tnode{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:.85rem;text-align:center;line-height:1.3}
+.tree .tnode.root{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tree .tnode.mid{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.tree .branch{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;border-top:2px solid var(--line);position:relative}
+.tree .stem{width:2px;height:14px;background:var(--line)}
+.tree .leaves{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tree .leaf{font-size:.8rem;padding:6px 9px;border-radius:6px;background:var(--surface);border:1px dashed var(--line);text-align:center;line-height:1.3}
+.tree .leaf em{display:block;font-style:normal;color:var(--muted);font-size:.74rem}
+
+/* Lifecycle */
+.cycle{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-width:640px;counter-reset:ph}
+.phase{position:relative;padding:12px;border-radius:10px;background:var(--surface-2);border-top:4px solid var(--c);font-size:.85rem;line-height:1.4}
+.phase .pn{font-family:var(--font-mono);font-size:.72rem;color:var(--c);font-weight:600}
+.phase b{display:block;font-family:var(--font-display);font-size:.95rem;margin:2px 0 6px}
+.phase .topics{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.phase .topics a{font-size:.72rem;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.phase:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:1rem}
+.loopback{margin-top:10px;font-size:.8rem;color:var(--muted);text-align:center;min-width:640px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;margin:1rem 0}
+pre.code .c{color:var(--muted)}
+pre.code .o{color:var(--ok)}
+
+/* Data matrix (dato/obs/variable) */
+.matrix td,.matrix th{text-align:center;font-family:var(--font-mono);font-size:.82rem;transition:background .15s}
+.matrix.show-var td:nth-child(3),.matrix.show-var th:nth-child(3){background:var(--accent-soft);color:var(--accent)}
+.matrix.show-obs tbody tr:nth-child(2) td{background:var(--example-soft);color:var(--example)}
+.matrix.show-dat tbody tr:nth-child(3) td:nth-child(4){background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+/* Buttons & inputs */
+.btn{font:inherit;font-size:.88rem;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+input[type=text],input[type=number]{font:inherit;font-size:.92rem;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.out{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* Interactive SVG */
+svg text{fill:var(--muted);font-family:var(--font-body)}
+.dot{transition:r .2s,opacity .2s}
+.dot.st1{fill:var(--s1)}.dot.st2{fill:var(--s2)}.dot.st3{fill:var(--s3)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px repeat(8,minmax(44px,1fr));min-width:620px;font-size:.8rem}
+.gantt>div{padding:6px 6px;border-bottom:1px solid var(--line);min-height:32px;display:flex;align-items:center}
+.gantt .gh{font-weight:600;color:var(--muted);font-size:.72rem;justify-content:center}
+.gantt .bar{background:var(--surface-2);border-radius:5px;margin:4px 0;padding:0 6px;font-size:.72rem;color:var(--muted)}
+.gantt .bar.crit{background:var(--accent);color:var(--accent-ink)}
+.gantt .bar.mile{background:transparent;justify-content:center;color:var(--example);font-size:1rem}
+
+/* Quiz */
+.quiz{margin-top:2.4rem;padding:20px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.quiz h2{margin-top:0}
+.qitem{padding:14px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0}
+.qitem p.q{font-weight:600;margin:0 0 8px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{text-align:left;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.qopt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.qopt:disabled{cursor:default}
+.qexp{font-size:.86rem;color:var(--muted);margin-top:8px}
+.qscore{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.pager a{flex:1 1 220px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager small{display:block;color:var(--muted);font-size:.75rem}
+.pager a.next{text-align:right}
+.studied{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* Home cards */
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.tcard{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.tcard:hover{border-color:var(--accent)}
+.tcard .n{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.tcard b{font-family:var(--font-display);font-size:1rem;line-height:1.3}
+.tcard span.d{font-size:.84rem;color:var(--muted);line-height:1.4}
+.tcard .st{margin-top:auto;padding-top:6px}
+
+/* Glossary */
+.gloss{display:grid;gap:8px;margin-top:14px}
+.gloss dt{font-weight:600;font-family:var(--font-display)}
+.gloss dd{margin:0 0 6px;color:var(--muted);font-size:.92rem}
+.gloss .gi{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.gloss .gi small{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+
+/* Mobile nav */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .brand,.progress{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .navlist::-webkit-scrollbar{display:none}
+  .navlist a{white-space:nowrap;padding:6px 8px}
+  .navlist a .lbl{display:none}
+  .navlist a[aria-current="page"] .lbl{display:inline}
+  .navsep{width:1px;height:20px;margin:auto 2px}
+  main{padding-block:24px 64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Módulo 3: componentes extra */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyramid>div{padding:12px 16px;border-radius:8px;text-align:center;font-size:.88rem;line-height:1.4;max-width:100%}
+.pyramid b{display:block;font-family:var(--font-display);font-size:1rem}
+.pyramid span{color:var(--muted)}
+.pyramid .lvl3{width:55%;background:var(--accent);color:var(--accent-ink)}
+.pyramid .lvl3 span{color:var(--accent-ink);opacity:.85}
+.pyramid .lvl2{width:75%;background:var(--accent-soft);border:1px solid var(--accent)}
+.pyramid .lvl1{width:95%;background:var(--surface-2);border:1px solid var(--line)}
+@media (max-width:560px){.pyramid>div{width:100%!important}}
+.balbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.balbar .maj{background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:600;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden}
+.balbar .min{background:var(--example);min-width:3px}
+.cm{display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;max-width:520px}
+.cm .cmh{font-size:.78rem;font-weight:600;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;text-align:center}
+.cm .cmh.side{justify-content:flex-start;align-items:center;text-align:left}
+.cm .cell{padding:10px;border-radius:8px;border:1px solid var(--line)}
+.cm .cell.good{background:var(--ok-soft)}
+.cm .cell.badc{background:var(--bad-soft)}
+.cm .cell label{margin-bottom:4px}
+@media (max-width:480px){.cm{grid-template-columns:80px 1fr 1fr}}
+.mini{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--example)}
+.kfold{display:flex;flex-direction:column;gap:6px;min-width:480px}
+.kfrow{display:grid;grid-template-columns:100px repeat(5,1fr);gap:4px;align-items:center}
+.kfrow span{font-size:.75rem;text-align:center;padding:6px 0;border-radius:5px}
+.kfrow .kt{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.kfrow .ktr{background:var(--accent-soft);color:var(--accent)}
+.kfrow .out{text-align:left;color:var(--muted)}
+select.btn{padding-right:8px}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav" aria-label="Temas">
+    <div class="brand"><small>Módulo 7 · Guía de estudio</small><strong>Aprendizaje automático y minería de datos</strong></div>
+    <div class="progress"><span id="progText">0 de 10 temas estudiados</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="navlist" id="navlist">
+      <li><a href="./" data-v="__home"><span class="num">⌂</span><span class="lbl">Todos los módulos</span></a></li>
+      <li><a href="#inicio" data-v="inicio"><span class="num">◎</span><span class="lbl">Mapa del módulo</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#tema-1" data-v="tema-1"><span class="num">1</span><span class="lbl">KDD y conceptos de ML</span></a></li>
+      <li><a href="#tema-2" data-v="tema-2"><span class="num">2</span><span class="lbl">Exploración y preprocesamiento</span></a></li>
+      <li><a href="#tema-3" data-v="tema-3"><span class="num">3</span><span class="lbl">Árboles de decisión</span></a></li>
+      <li><a href="#tema-4" data-v="tema-4"><span class="num">4</span><span class="lbl">Evaluación de clasificadores</span></a></li>
+      <li><a href="#tema-5" data-v="tema-5"><span class="num">5</span><span class="lbl">Reglas de clasificación</span></a></li>
+      <li><a href="#tema-6" data-v="tema-6"><span class="num">6</span><span class="lbl">Redes neuronales</span></a></li>
+      <li><a href="#tema-7" data-v="tema-7"><span class="num">7</span><span class="lbl">Métodos bayesianos</span></a></li>
+      <li><a href="#tema-8" data-v="tema-8"><span class="num">8</span><span class="lbl">Regresión</span></a></li>
+      <li><a href="#tema-9" data-v="tema-9"><span class="num">9</span><span class="lbl">Clustering</span></a></li>
+      <li><a href="#tema-10" data-v="tema-10"><span class="num">10</span><span class="lbl">Minería de textos y NLP</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#glosario" data-v="glosario"><span class="num">Aa</span><span class="lbl">Glosario</span></a></li>
+    </ul>
+  </nav>
+
+  <main>
+<!-- ===================== INICIO ===================== -->
+<section class="view" data-view="inicio">
+  <p class="eyebrow">Módulo 7 · 10 temas</p>
+  <h1>Aprendizaje automático y minería de datos</h1>
+  <p class="lead">El proceso KDD de principio a fin: preparar los datos, construir modelos de clasificación (árboles, reglas, redes neuronales, Bayes), de regresión y de agrupamiento, evaluarlos bien y aplicarlos también a texto. Cada tema tiene un simulador para ver el algoritmo funcionando.</p>
+
+  <h2>El mapa del módulo</h2>
+  <figure class="diagram">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">PROCESO</span><b>KDD</b>Etapas, tipos de aprendizaje, sobreajuste.<div class="topics"><a href="#tema-1">T1</a></div></div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">DATOS</span><b>Preparar</b>Tipos, transformaciones, histogramas, atípicos.<div class="topics"><a href="#tema-2">T2</a></div></div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">CLASIFICAR</span><b>Modelos supervisados</b>Árboles, reglas, redes, Bayes.<div class="topics"><a href="#tema-3">T3</a><a href="#tema-5">T5</a><a href="#tema-6">T6</a><a href="#tema-7">T7</a></div></div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">MEDIR</span><b>Evaluar</b>Matriz de confusión, Kappa, ROC.<div class="topics"><a href="#tema-4">T4</a></div></div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">MÁS ALLÁ</span><b>Regresión, clústeres, texto</b>Respuesta continua, agrupamiento y NLP.<div class="topics"><a href="#tema-8">T8</a><a href="#tema-9">T9</a><a href="#tema-10">T10</a></div></div>
+    </div>
+    <p class="loopback">Idea transversal: un modelo vale lo que valen sus <b>datos</b> ("basura entra, basura sale") y lo que demuestra con datos que <b>no ha visto</b>.</p>
+    <figcaption>Cómo se conectan los 10 temas.</figcaption>
+  </figure>
+
+  <h2>Temas</h2>
+  <div class="tcards" id="tcards"></div>
+
+  <div class="callout exam">
+    <span class="tag">Cómo usar esta guía</span>
+    <ul>
+      <li>Cada tema empieza con una frase resumen y acaba con un test de 5 preguntas.</li>
+      <li>Los recuadros naranjas son <b>ejemplos en mercados</b>; los azules, lo que más se pregunta en el <b>examen</b>.</li>
+      <li>Simuladores: sobreajuste, histograma y normalización, ID3 paso a paso, umbral y curva ROC, recubrimiento secuencial, red neuronal con backpropagation, Naive Bayes, regresión (beta de una acción), clustering jerárquico con dendrograma y procesamiento de titulares.</li>
+      <li>Tu progreso se guarda en este navegador.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== TEMA 1 ===================== -->
+<section class="view" data-view="tema-1" hidden>
+  <p class="eyebrow">Tema 1</p>
+  <h1>Descubrimiento del conocimiento (KDD) y conceptos de aprendizaje automático</h1>
+  <p class="oneline"><b>KDD</b> es el proceso de descubrir en los datos conocimiento <b>válido, novedoso, útil y comprensible</b>. Es <b>iterativo</b> (se puede volver atrás) e <b>interactivo</b> (necesita expertos del dominio). La <b>minería de datos</b> es su etapa central. El aprendizaje puede ser <b>supervisado</b>, <b>no supervisado</b> o <b>por refuerzo</b>.</p>
+  <ul class="objs"><li>Historia del KDD</li><li>Etapas</li><li>Técnicas</li><li>Tipos de aprendizaje y generalización</li></ul>
+
+  <h2>Historia</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Época</th><th>Fase</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1960</td><td>Colección de datos. Los estadísticos hablan de <i>data fishing</i>, minería y "arqueología" de datos</td></tr>
+      <tr><td class="num">1980</td><td>Acceso a datos. Agrawal, Wiederhold, Blum, <b>Piatetsky-Shapiro</b> unen minería de datos y KDD</td></tr>
+      <tr><td class="num">1989</td><td>Se acuña el término <b>KDD</b> (descubrimiento de conocimiento en bases de datos)</td></tr>
+      <tr><td class="num">Inicio 90</td><td>Almacén de datos y apoyo a las decisiones</td></tr>
+      <tr><td class="num">Final 90</td><td>Minería de datos inteligente</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Proceso del conocimiento en una organización: <b>generación</b>, <b>codificación</b> y <b>transferencia</b>.</p>
+
+  <h2>Etapas del KDD</h2>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>Recopilación</b>Almacén de datos</div><div class="arrow">→</div>
+      <div class="node"><b>Selección</b>Datos relevantes</div><div class="arrow">→</div>
+      <div class="node"><b>Limpieza</b>Ruido, faltantes</div><div class="arrow">→</div>
+      <div class="node"><b>Transformación</b>Mapeo + generación de código</div><div class="arrow">→</div>
+      <div class="node"><b>Integración</b>ETL, fuentes heterogéneas</div><div class="arrow">→</div>
+      <div class="node hl"><b>Minería</b>Extraer patrones</div><div class="arrow">→</div>
+      <div class="node"><b>Evaluación</b>Patrones interesantes</div><div class="arrow">→</div>
+      <div class="node"><b>Representación</b>Visualización, informes</div>
+    </div>
+    <figcaption>Técnicas de minería: agrupamiento, redes neuronales, regresión, árboles de decisión, análisis de asociación y algoritmos genéticos.</figcaption>
+  </figure>
+
+  <h2>Tipos de aprendizaje</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Supervisado</h4>Datos <b>etiquetados</b>: el modelo aprende la relación entrada → salida. Clasificación (clase) y regresión (valor continuo).</div>
+    <div class="box"><h4>No supervisado</h4>Sin etiquetas: descubre estructura. Agrupamiento, reducción de dimensión, asociación.</div>
+    <div class="box"><h4>Por refuerzo</h4>Un agente aprende por prueba y error maximizando una recompensa.</div>
+  </div>
+  <p class="prose">Buenos escenarios para ML: decisiones <b>repetitivas</b> que necesitan resultados consistentes, criterios <b>difíciles de explicar</b> con reglas y existencia de <b>ejemplos</b> con la respuesta correcta. Se pasa de la inteligencia basada en reglas a la basada en datos (Netflix, Spotify, Amazon).</p>
+
+  <h2>Simulador: generalizar o memorizar</h2>
+  <figure class="diagram">
+    <label for="ofD">Complejidad del modelo (grado del polinomio) = <b class="out" id="ofDV">3</b></label>
+    <input type="range" id="ofD" min="1" max="12" value="3" style="width:100%">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><button class="btn" id="ofNew">Otra muestra</button></div>
+    <div class="grid g2" style="margin-top:8px">
+      <svg id="ofSvg" viewBox="0 0 300 220" width="100%" style="display:block" role="img" aria-label="Ajuste del modelo"></svg>
+      <svg id="ofErr" viewBox="0 0 300 220" width="100%" style="display:block" role="img" aria-label="Error de entrenamiento y de prueba"></svg>
+    </div>
+    <p class="out" id="ofInfo"></p>
+    <figcaption>Puntos azules: entrenamiento; naranjas: prueba (datos no vistos). Con poca complejidad el modelo <b>infraajusta</b>; con mucha, memoriza el ruido (<b>sobreajuste</b>): el error de entrenamiento baja pero el de prueba se dispara.</figcaption>
+  </figure>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>El sobreajuste es el gran enemigo del trading cuantitativo: una estrategia con 12 parámetros optimizados sobre 5 años de histórico "acierta" el pasado perfectamente y fracasa en real. Por eso se separan datos de entrenamiento y de prueba (<i>out-of-sample</i>) y se desconfía de los backtests demasiado buenos.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>KDD: conocimiento válido, novedoso, útil y comprensible; proceso iterativo e interactivo; término de 1989.</li>
+    <li>Etapas: recopilación, selección, limpieza, transformación, integración, minería, evaluación, representación.</li>
+    <li>Evolución: colección (60), acceso (80), almacén y DSS (inicio 90), minería inteligente (final 90).</li>
+    <li>Supervisado (etiquetas) vs no supervisado vs refuerzo.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-1"></div>
+</section>
+
+<!-- ===================== TEMA 2 ===================== -->
+<section class="view" data-view="tema-2" hidden>
+  <p class="eyebrow">Tema 2</p>
+  <h1>Exploración y preprocesamiento de datos</h1>
+  <p class="oneline">"<b>Basura entra, basura sale</b>": antes de modelar hay que conocer los <b>tipos de datos</b>, <b>transformarlos</b> (tipos, nulos, duplicados, agregaciones, normalización) y <b>explorarlos visualmente</b>: histogramas para variables continuas, barras para categóricas, diagramas de caja y de dispersión para detectar atípicos y covarianza.</p>
+  <ul class="objs"><li>Tratamiento de datos</li><li>Tipos de datos</li><li>Transformaciones</li><li>Visualización y atípicos</li></ul>
+
+  <h2>Tipos de datos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Cualitativos (categóricos)</h4><b>Nominales</b> (sin orden: sector, país), <b>binarios</b> (sí/no) y <b>ordinales</b> (con orden: rating AAA &gt; AA &gt; A). Se obtienen con entrevistas, grupos de discusión, observación…</div>
+    <div class="box"><h4>Cuantitativos (numéricos)</h4><b>Discretos</b> (número de operaciones) y <b>continuos</b> (precio, rentabilidad: infinitos valores entre dos cualesquiera).</div>
+  </div>
+  <p class="prose">El procesamiento usa enteros o punto fijo; el <b>análisis de datos</b> trabaja sobre todo con <b>punto flotante</b> y algoritmos estadísticos de alta exactitud.</p>
+
+  <h2>Transformaciones</h2>
+  <p class="prose">Convertir datos de un formato o estructura a otro: cambiar tipos, eliminar nulos y duplicados, enriquecer, agregar, convertir fechas o concatenar. Dos pasos: <b>mapeo</b> (origen → destino) y <b>generación de código</b> de la transformación; el resultado se envía al almacén de destino.</p>
+
+  <h2>Simulador: explora una serie de rentabilidades</h2>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div><label for="exBin">Ancho de clase (binwidth) = <b class="out" id="exBinV">0,5 %</b></label><input type="range" id="exBin" min="0.1" max="2" step="0.1" value="0.5" style="width:100%"></div>
+      <div><label for="exNorm">Transformación</label><select id="exNorm" class="btn" style="width:100%"><option value="raw">Ninguna (% diario)</option><option value="z">Estandarizar (z-score)</option><option value="mm">Min-max [0, 1]</option></select></div>
+      <div><label style="display:flex;gap:6px;align-items:center;margin-top:22px"><input type="checkbox" id="exOut" checked> Incluir atípicos (error de carga)</label></div>
+    </div>
+    <svg id="exHist" viewBox="0 0 600 200" width="100%" style="display:block;margin-top:8px" role="img" aria-label="Histograma"></svg>
+    <svg id="exBox" viewBox="0 0 600 60" width="100%" style="display:block" role="img" aria-label="Diagrama de caja"></svg>
+    <div class="grid g3" id="exStats"></div>
+    <figcaption>250 rentabilidades diarias simuladas más tres valores erróneos (un precio a 0 y dos desplazamientos de coma). Fíjate en cómo los atípicos deforman la media, la desviación y la escala min-max, mientras que la mediana apenas cambia.</figcaption>
+  </figure>
+  <div class="grid g2">
+    <div class="box"><h4>¿Qué hacer con un atípico?</h4>Repetir el análisis con y sin él. Si apenas influye y no se entiende su origen, sustituirlo por valor faltante. Si influye mucho, <b>no se elimina sin justificarlo</b>.</div>
+    <div class="box"><h4>Covarianza</h4>La varianza describe el comportamiento <i>dentro</i> de una variable; la covarianza, <i>entre</i> variables. Se ve con diagramas de dispersión (<span class="mono">geom_point</span>, con transparencia <span class="mono">alpha</span> si hay muchos puntos) o con cajas por tramos (<span class="mono">cut_width</span>).</div>
+  </div>
+<pre class="code"><span class="c"># R / tidyverse (ejemplos del temario)</span>
+ggplot(diamonds, aes(x = carat, color = cut)) + geom_freqpoly(binwidth = 0.1)
+ggplot(diamonds) + geom_histogram(aes(x = y), binwidth = 0.5) + coord_cartesian(ylim = c(0, 50))
+unusual &lt;- diamonds %&gt;% filter(y &lt; 3 | y &gt; 20) %&gt;% arrange(y)</pre>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Las rentabilidades bursátiles tienen <b>colas gruesas</b>: el histograma muestra más días extremos de los que predice una normal. Antes de entrenar un modelo hay que distinguir un día de crisis real (que no se debe borrar) de un error de datos (precio a 0, <i>split</i> no ajustado), y <b>estandarizar</b> las variables para que un indicador en euros no pese más que otro en porcentaje.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Cualitativos: nominales, binarios, ordinales. Cuantitativos: discretos y continuos.</li>
+    <li>Transformación: mapeo + generación de código.</li>
+    <li>Continuas → histograma (binwidth); categóricas → barras; atípicos → cajas; covarianza → dispersión.</li>
+    <li>Atípicos: analizar con y sin ellos; no eliminarlos sin justificación.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-2"></div>
+</section>
+
+<!-- ===================== TEMA 3 ===================== -->
+<section class="view" data-view="tema-3" hidden>
+  <p class="eyebrow">Tema 3</p>
+  <h1>Árboles de decisión</h1>
+  <p class="oneline">Un árbol divide los datos recursivamente: cada <b>nodo</b> pregunta por un atributo, cada <b>arco</b> es un valor y cada <b>hoja</b> una clase. <b>ID3</b> (Quinlan, 1983) elige el atributo con mayor <b>ganancia de información</b> (reducción de entropía); <b>C4.5</b> (1993) usa la <b>razón de ganancia</b> y admite atributos continuos y valores perdidos. La <b>poda</b> evita el sobreajuste.</p>
+  <ul class="objs"><li>Entropía y ganancia</li><li>ID3</li><li>C4.5 y sucesores</li><li>Sobreajuste y poda</li></ul>
+
+  <h2>Entropía y ganancia de información</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Entropía</h4><span class="mono">H(S) = −Σ p(x)·log₂ p(x)</span><br>Incertidumbre del conjunto. Bolsa con 3 bolas blancas y 3 negras → H = 1 (máxima). Bolsa con 6 negras → H = 0.</div>
+    <div class="box"><h4>Ganancia</h4><span class="mono">Ganancia(A) = I(p, n) − E(A)</span><br>con <span class="mono">E(A) = Σ (pᵢ+nᵢ)/(p+n) · I(pᵢ, nᵢ)</span>. Se elige el atributo con mayor ganancia.</div>
+  </div>
+
+  <h2>Simulador: ID3 sobre solicitudes de crédito</h2>
+  <figure class="diagram">
+    <div class="table-wrap"><table id="idData"></table></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" id="idStep">Siguiente división</button>
+      <button class="btn" id="idAll">Construir árbol completo</button>
+      <button class="btn" id="idReset">Reiniciar</button>
+    </div>
+    <div id="idGain" style="margin-top:8px"></div>
+    <div id="idTree" class="box" style="margin-top:8px;font-family:var(--font-mono,monospace);font-size:.85rem;white-space:pre"></div>
+    <figcaption>14 solicitudes ficticias. En cada paso, ID3 calcula la ganancia de cada atributo en el nodo pendiente y divide por el mejor (estrategia voraz, de arriba abajo). Un nodo puro (entropía 0) se convierte en hoja.</figcaption>
+  </figure>
+
+  <h2>ID3 y C4.5</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>ID3 (1983)</th><th>C4.5 (1993)</th></tr></thead>
+    <tbody>
+      <tr><td><b>Criterio</b></td><td>Ganancia de información</td><td><b>Razón de ganancia</b> I(Xᵢ, C)/H(Xᵢ): no favorece a atributos con muchos valores</td></tr>
+      <tr><td><b>Atributos continuos</b></td><td>No</td><td>Sí, prueba binaria A ≤ Z / A &gt; Z</td></tr>
+      <tr><td><b>Valores perdidos</b></td><td>No</td><td>Sí (se estiman con el valor más frecuente del nodo)</td></tr>
+      <tr><td><b>Pruebas</b></td><td>Una rama por valor</td><td>Estándar, binaria (umbral) y compleja (grupos de valores)</td></tr>
+      <tr><td><b>Otros</b></td><td>Voraz, óptimo local; favorece atributos con muchos valores</td><td>Pesos distintos por atributo; poda; implementado en Weka como <b>J48</b>; sucesores C5.0 (Unix) y See5 (Windows)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Ambos pertenecen a la familia <b>TDIDT</b> (Top-Down Induction of Decision Trees). Son adecuados cuando los ejemplos son pares atributo-valor, la clase es discreta, puede haber ruido o valores desconocidos.</p>
+
+  <h2>Sobreentrenamiento y poda</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Prepoda</h4>Detiene el crecimiento antes: profundidad máxima, mínimo de ejemplos por hoja, ganancia mínima.</div>
+    <div class="box"><h4>Pospoda</h4>Construye el árbol completo y luego sustituye subárboles por hojas si no empeora el error en validación (como hace C4.5).</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Los árboles son muy usados en <b>scoring de crédito</b> porque el banco puede explicar al cliente y al supervisor por qué se rechazó su solicitud ("deuda alta y sin historial"). Los modelos más potentes, como <i>random forest</i> o <i>gradient boosting</i>, combinan cientos de árboles.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Elementos: nodos (atributos), arcos (valores), hojas (clases).</li>
+    <li>ID3: Quinlan 1983, TDIDT, entropía y ganancia; voraz; óptimo local.</li>
+    <li>C4.5: Quinlan 1993, razón de ganancia, continuos, perdidos, poda; J48 en Weka; C5.0 / See5.</li>
+    <li>Entropía 1 = máxima incertidumbre (50/50); 0 = conjunto puro.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-3"></div>
+</section>
+
+<!-- ===================== TEMA 4 ===================== -->
+<section class="view" data-view="tema-4" hidden>
+  <p class="eyebrow">Tema 4</p>
+  <h1>Evaluación de clasificadores</h1>
+  <p class="oneline">La <b>matriz de confusión</b> cruza clase real (filas) y predicha (columnas): VP, VN, FP, FN. De ella salen la <b>exactitud</b>, la <b>precisión</b>, la <b>sensibilidad</b> (recall) y la <b>especificidad</b>. El <b>Kappa de Cohen</b> descuenta el acuerdo por azar y la <b>curva ROC</b> muestra el compromiso entre aciertos y falsas alarmas al mover el umbral.</p>
+  <ul class="objs"><li>Matriz de confusión</li><li>Métricas</li><li>Kappa de Cohen</li><li>Curva ROC y AUC</li></ul>
+
+  <h2>Simulador: mueve el umbral de un modelo de impago</h2>
+  <figure class="diagram">
+    <label for="rcT">Umbral de decisión: se predice "impago" si la puntuación ≥ <b class="out" id="rcTV">0,50</b></label>
+    <input type="range" id="rcT" min="0" max="1" step="0.01" value="0.5" style="width:100%">
+    <label for="rcS" style="margin-top:6px">Calidad del modelo (separación entre clases) = <b class="out" id="rcSV">1,5</b></label>
+    <input type="range" id="rcS" min="0" max="3" step="0.1" value="1.5" style="width:100%">
+    <div class="grid g2" style="margin-top:8px;align-items:start">
+      <div><svg id="rcDist" viewBox="0 0 300 170" width="100%" style="display:block" role="img" aria-label="Distribución de puntuaciones"></svg><div class="table-wrap"><table id="rcCM"></table></div></div>
+      <svg id="rcRoc" viewBox="0 0 300 300" width="100%" style="display:block" role="img" aria-label="Curva ROC"></svg>
+    </div>
+    <div class="grid g3" id="rcMet" style="margin-top:8px"></div>
+    <figcaption>1.000 clientes ficticios, 20 % impagan. Bajar el umbral sube la sensibilidad (se detectan más impagos) a costa de más falsos positivos. La AUC no depende del umbral: mide la calidad global del modelo.</figcaption>
+  </figure>
+
+  <h2>Métricas</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Métrica</th><th>Fórmula</th><th>Pregunta que responde</th></tr></thead>
+    <tbody>
+      <tr><td><b>Exactitud (accuracy)</b></td><td class="mono">(VP+VN)/total</td><td>¿Qué fracción acierta? Engañosa con clases desbalanceadas</td></tr>
+      <tr><td><b>Tasa de error</b></td><td class="mono">(FP+FN)/total = 1 − exactitud</td><td>¿Qué fracción falla?</td></tr>
+      <tr><td><b>Precisión</b></td><td class="mono">VP/(VP+FP)</td><td>De lo que marco como positivo, ¿cuánto lo es?</td></tr>
+      <tr><td><b>Sensibilidad (recall, TVP)</b></td><td class="mono">VP/(VP+FN)</td><td>De los positivos reales, ¿cuántos detecto?</td></tr>
+      <tr><td><b>Especificidad (TVN)</b></td><td class="mono">VN/(VN+FP)</td><td>De los negativos reales, ¿cuántos acierto?</td></tr>
+      <tr><td><b>Kappa de Cohen</b></td><td class="mono">(pₒ − pₑ)/(1 − pₑ)</td><td>¿Cuánto acuerdo hay más allá del azar?</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4>Kappa</h4>pₒ: acuerdo observado; pₑ: acuerdo esperado por azar. Antecedente en <b>Galton (1892)</b>. Se considera algo conservador. Escala habitual: &lt;0,20 pobre · 0,21–0,40 débil · 0,41–0,60 moderado · 0,61–0,80 bueno · &gt;0,80 muy bueno.</div>
+    <div class="box"><h4>Curva ROC</h4>Eje Y: tasa de verdaderos positivos (sensibilidad); eje X: tasa de falsos positivos (1 − especificidad). La diagonal es el azar (AUC = 0,5); el modelo perfecto pega en la esquina superior izquierda (AUC = 1).</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>En detección de fraude solo el 0,1 % de las operaciones es fraude: un modelo que diga "nunca hay fraude" tiene 99,9 % de exactitud y es inútil. Por eso se miran la <b>sensibilidad</b>, la <b>precisión</b> y la <b>AUC</b>, y el umbral se fija según el <b>coste</b> de cada error (dejar pasar un fraude frente a bloquear a un buen cliente).</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Filas = clase real; columnas = predicción.</li>
+    <li>Exactitud, error, precisión, sensibilidad (recall), especificidad: saber las fórmulas.</li>
+    <li>Kappa = (pₒ − pₑ)/(1 − pₑ); corrige el azar.</li>
+    <li>ROC: TVP frente a TFP; AUC 0,5 azar, 1 perfecto.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-4"></div>
+</section>
+
+<!-- ===================== TEMA 5 ===================== -->
+<section class="view" data-view="tema-5" hidden>
+  <p class="eyebrow">Tema 5</p>
+  <h1>Reglas de clasificación</h1>
+  <p class="oneline">Un clasificador basado en reglas usa sentencias <b>SI &lt;antecedente&gt; ENTONCES &lt;consecuente&gt;</b>, fáciles de interpretar. Se evalúan con <b>soporte</b>, <b>confianza</b> y <b>cobertura</b>, y se aprenden con el <b>algoritmo de recubrimiento secuencial</b>: aprender una regla, quitar los ejemplos que cubre y repetir.</p>
+  <ul class="objs"><li>Estructura de una regla</li><li>Medidas de evaluación</li><li>Clasificación supervisada</li><li>Recubrimiento secuencial</li></ul>
+
+  <h2>Medidas</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Cobertura</h4>Fracción de ejemplos que cumplen el antecedente: <span class="mono">|A| / N</span>.</div>
+    <div class="box"><h4>Soporte</h4>Fracción que cumple antecedente y consecuente: <span class="mono">|A ∧ B| / N</span>.</div>
+    <div class="box"><h4>Confianza (precisión)</h4>Probabilidad condicional: <span class="mono">P(B | A) = |A ∧ B| / |A|</span>.</div>
+  </div>
+  <p class="prose">Las condiciones se unen con AND u OR (mejor no mezclarlas). Las reglas pueden <b>no ser mutuamente excluyentes</b> (un ejemplo cubierto por varias) ni <b>exhaustivas</b> (un ejemplo sin regla → clase por defecto). Se construyen de <b>general a específico</b> (añadiendo condiciones) o de específico a general (quitándolas). También se obtienen podando árboles de decisión.</p>
+
+  <h2>Simulador: setas comestibles o venenosas</h2>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Datos del temario (9 setas). Construye una regla eligiendo condiciones:</p>
+    <div class="table-wrap"><table id="ruData"></table></div>
+    <div id="ruCond" class="grid g3" style="margin-top:8px"></div>
+    <div id="ruMet" class="grid g3" style="margin-top:8px"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn" id="ruSeq">Recubrimiento secuencial para «venenoso»</button></div>
+    <div id="ruSeqOut" style="margin-top:8px"></div>
+    <figcaption>Filas resaltadas: cubiertas por la regla (verde si la clase coincide, rojo si no). El recubrimiento secuencial añade, en cada paso, la condición que más mejora la confianza, hasta cubrir solo setas venenosas; luego retira las cubiertas y empieza otra regla.</figcaption>
+  </figure>
+<pre class="code"><span class="c">// Recubrimiento secuencial (esquema del temario)</span>
+para cada clase y en orden de relevancia:
+  mientras queden registros de y sin cubrir:
+    r := aprender_regla(y)        <span class="c">// de general a específico</span>
+    añadir r a R
+    eliminar de T los registros cubiertos por r
+añadir la regla por defecto {} → y'</pre>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Una regla de alerta de cumplimiento: "SI importe &gt; 10.000 € Y cliente nuevo Y país de riesgo ENTONCES revisar". Con un histórico etiquetado se mide su <b>cobertura</b> (cuántas operaciones salta), su <b>confianza</b> (cuántas eran realmente sospechosas) y se decide si conviene añadir condiciones para reducir falsas alarmas.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>SI antecedente ENTONCES consecuente; AND/OR.</li>
+    <li>Soporte = P(A ∧ B); confianza = P(B | A); cobertura = P(A).</li>
+    <li>Recubrimiento secuencial: aprender regla → quitar cubiertos → repetir; regla por defecto al final.</li>
+    <li>Clasificadores: estadísticos (regresión logística, discriminante) y de IA (redes, reglas, árboles, redes bayesianas).</li>
+    <li>Curva de aprendizaje: rendimiento frente a experiencia en entrenamiento y validación.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-5"></div>
+</section>
+
+<!-- ===================== TEMA 6 ===================== -->
+<section class="view" data-view="tema-6" hidden>
+  <p class="eyebrow">Tema 6</p>
+  <h1>Redes neuronales</h1>
+  <p class="oneline">Una red neuronal artificial son <b>nodos</b> organizados en capas (entrada, ocultas, salida) unidos por <b>pesos</b>. Cada capa calcula <b>aˡ = σ(wˡ·aˡ⁻¹ + bˡ)</b>. Se entrena con <b>backpropagation</b> (Rumelhart, Hinton y Williams, 1986), que calcula ∂C/∂w para bajar el error. Las <b>redes recurrentes (RNN)</b> añaden ciclos y, con ellos, memoria para secuencias.</p>
+  <ul class="objs"><li>Conceptos básicos</li><li>Perceptrón simple</li><li>Backpropagation</li><li>Redes recurrentes</li></ul>
+
+  <h2>Conceptos básicos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Neurona artificial</h4>Recibe entradas con pesos <span class="mono">w</span>, aplica una función <span class="mono">f</span> a la suma ponderada y emite una salida. Neuronas de <b>entrada</b>, <b>intermedias</b> (procesan) y de <b>salida</b>. También llamados sistemas <b>conexionistas</b>.</div>
+    <div class="box"><h4>Perceptrón</h4>McCulloch y Pitts (1943) → <b>Rosenblatt</b>. Señales binarias, activación tipo signo; la neurona pasa a 1 si la suma ponderada supera el umbral <span class="mono">u</span>. Elementos: vectores de entrada, pesos sinápticos wᵢⱼ, regla de propagación, función de activación y función de salida.</div>
+  </div>
+
+  <h2>Simulador: entrena una red con backpropagation</h2>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div><label for="nnData">Problema</label><select id="nnData" class="btn" style="width:100%"><option value="xor">XOR (cuadrantes)</option><option value="circ">Círculo</option><option value="lin">Lineal</option></select></div>
+      <div><label for="nnH">Neuronas ocultas = <b class="out" id="nnHV">4</b></label><input type="range" id="nnH" min="1" max="8" value="4" style="width:100%"></div>
+      <div><label for="nnLr">Tasa de aprendizaje = <b class="out" id="nnLrV">0,5</b></label><input type="range" id="nnLr" min="0.05" max="2" step="0.05" value="0.5" style="width:100%"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+      <button class="btn" id="nnTrain">Entrenar 300 épocas</button>
+      <button class="btn" id="nnReset">Reiniciar pesos</button>
+    </div>
+    <div class="grid g2" style="margin-top:8px">
+      <svg id="nnSvg" viewBox="0 0 260 260" width="100%" style="display:block;max-width:320px" role="img" aria-label="Frontera de decisión"></svg>
+      <div><svg id="nnLoss" viewBox="0 0 300 160" width="100%" style="display:block" role="img" aria-label="Curva de error"></svg><p class="out" id="nnInfo"></p></div>
+    </div>
+    <figcaption>Ejes: dos indicadores técnicos normalizados; color: probabilidad de "subida" que da la red (sigmoide). Con 1 neurona oculta la red solo traza una frontera recta y no resuelve XOR; con 3 o más, sí. Hacia delante: a = σ(w·x + b). Hacia atrás: el error se propaga y cada peso se corrige con −η·∂C/∂w.</figcaption>
+  </figure>
+
+  <h2>Backpropagation</h2>
+  <p class="prose">Introducido en los años 70, se hizo famoso con el artículo de <b>Rumelhart, Hinton y Williams (1986)</b>: entrenaba redes mucho más rápido y resolvía problemas antes imposibles. El corazón es la derivada parcial <span class="mono">∂C/∂w</span> del coste respecto a cada peso y sesgo: dice cuánto cambia el error al mover cada peso. Notación: <span class="mono">wˡⱼₖ</span> es el peso de la neurona k de la capa l−1 a la neurona j de la capa l; <span class="mono">bˡⱼ</span> el sesgo y <span class="mono">aˡⱼ</span> la activación. En forma vectorial, <span class="mono">aˡ = σ(wˡaˡ⁻¹ + bˡ)</span> evita el "infierno de índices".</p>
+
+  <h2>Redes recurrentes</h2>
+  <div class="grid g2">
+    <div class="box"><h4>RNN</h4>Basadas en el trabajo de Rumelhart (1986). Sin estructura de capas fija: permiten conexiones arbitrarias e incluso <b>ciclos</b>, lo que da <b>memoria</b> temporal. Muy potentes con secuencias: texto, sonido, vídeo.</div>
+    <div class="box"><h4>Variantes</h4>Según capas ocultas y forma de retropropagar (en el tiempo). Las más usadas hoy son <b>LSTM</b> y <b>GRU</b>, que evitan que el gradiente se desvanezca en secuencias largas.</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Las redes recurrentes (LSTM) se usan para modelar series de precios, volúmenes o diferenciales de crédito, porque recuerdan el contexto reciente. Pero con datos financieros ruidosos sobreajustan con facilidad: hay que validar siempre fuera de muestra y comparar con un modelo simple.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Capas: entrada, intermedias (ocultas), salida; pesos; función de activación.</li>
+    <li>Perceptrón: McCulloch-Pitts (1943) → Rosenblatt; umbral u.</li>
+    <li>Backpropagation: Rumelhart, Hinton y Williams, 1986; ∂C/∂w; aˡ = σ(wˡaˡ⁻¹ + bˡ).</li>
+    <li>RNN: ciclos → memoria → secuencias.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-6"></div>
+</section>
+
+<!-- ===================== TEMA 7 ===================== -->
+<section class="view" data-view="tema-7" hidden>
+  <p class="eyebrow">Tema 7</p>
+  <h1>Métodos bayesianos</h1>
+  <p class="oneline">La estadística bayesiana <b>actualiza</b> las probabilidades a priori con la evidencia. El <b>teorema de Bayes</b> (publicado en 1763) da P(A|B) = P(B|A)·P(A)/P(B). <b>Naive Bayes</b> lo aplica a clasificación suponiendo que los atributos son <b>independientes</b> dada la clase; las <b>redes bayesianas</b> modelan las dependencias con un grafo.</p>
+  <ul class="objs"><li>Probabilidad condicionada</li><li>Teorema de Bayes</li><li>Naive Bayes</li><li>Redes bayesianas</li></ul>
+
+  <h2>Probabilidad condicionada: el ejemplo de la baraja</h2>
+  <p class="prose">Baraja española de 48 cartas (12 por palo); se sacan dos sin reemplazo. Requisitos previos para Bayes: probabilidad condicionada, diagrama de árbol y probabilidad total.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Dos copas</h4><span class="mono">12/48 · 11/47 = 11/188</span> ≈ 5,9 %</div>
+    <div class="box"><h4>Al menos una copa</h4><span class="mono">11/188 + 36/188 + 36/188 = 83/188</span> ≈ 44,1 %</div>
+    <div class="box"><h4>Una copa y una espada</h4><span class="mono">2 · 12/48 · 12/47 = 6/47</span> ≈ 12,8 %</div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4>Teorema de Bayes</h4><span class="mono">P(Aᵢ|B) = P(B|Aᵢ)·P(Aᵢ) / P(B)</span><br>P(Aᵢ): a priori · P(B|Aᵢ): verosimilitud · P(Aᵢ|B): a posteriori. Los Aᵢ deben ser exhaustivos y excluyentes. También llamado "teorema de las causas".</div>
+    <div class="box"><h4>Estadística bayesiana</h4>Probabilidades subjetivas que se actualizan; la evidencia se mide con el <b>factor de Bayes</b>; se acepta la hipótesis con mayor probabilidad a posteriori.</div>
+  </div>
+
+  <h2>Simulador: Naive Bayes, ¿sube o baja mañana?</h2>
+  <figure class="diagram">
+    <div class="table-wrap"><table id="nbData"></table></div>
+    <div id="nbSel" class="grid g3" style="margin-top:8px"></div>
+    <label style="display:flex;gap:6px;align-items:center;margin-top:6px"><input type="checkbox" id="nbLap" checked> Suavizado de Laplace (+1)</label>
+    <div id="nbOut" style="margin-top:8px"></div>
+    <figcaption>14 sesiones ficticias. Para un día nuevo, Naive Bayes multiplica la probabilidad a priori de cada clase por la verosimilitud de cada atributo, como si fueran independientes, y normaliza. Sin Laplace, un valor nunca visto con una clase anula toda la probabilidad.</figcaption>
+  </figure>
+
+  <h2>Redes bayesianas</h2>
+  <p class="prose">Grafo dirigido acíclico: nodos = variables, arcos = dependencias condicionales, cada nodo con su tabla de probabilidades. Relajan la independencia "ingenua". Se aplican en diagnóstico médico, detección de fraude, filtros de spam y análisis de riesgos.</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Naive Bayes es un clásico para clasificar <b>noticias</b> o tuits financieros como positivos o negativos según sus palabras, porque es rápido y funciona bien con muchos atributos. Y la lógica bayesiana es la de un analista que <b>actualiza</b> su previsión de beneficios cuando llega un dato nuevo, sin descartar lo que ya sabía.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Bayes: P(A|B) = P(B|A)P(A)/P(B); a priori, verosimilitud, a posteriori; 1763.</li>
+    <li>Requisitos: probabilidad condicionada, árbol, probabilidad total.</li>
+    <li>Naive Bayes: independencia condicional de los atributos dada la clase.</li>
+    <li>Redes bayesianas: DAG con dependencias condicionales.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-7"></div>
+</section>
+
+<!-- ===================== TEMA 8 ===================== -->
+<section class="view" data-view="tema-8" hidden>
+  <p class="eyebrow">Tema 8</p>
+  <h1>Modelos de regresión y de respuesta continua</h1>
+  <p class="oneline">La regresión relaciona variables predictoras con una respuesta. La <b>lineal simple</b> ajusta y = β₀ + β₁x por <b>mínimos cuadrados</b>; la <b>múltiple</b> usa β = (XᵀX)⁻¹XᵀY; la <b>logística</b> predice una probabilidad con la sigmoide; los <b>árboles de regresión</b> (CART, Breiman 1984) y las <b>SVM</b> amplían el repertorio. La bondad de ajuste se comprueba con <b>R²</b> y <b>ANOVA</b>.</p>
+  <ul class="objs"><li>Regresión lineal simple y múltiple</li><li>Mínimos cuadrados y ANOVA</li><li>Regresión logística</li><li>Árboles de regresión y SVM</li></ul>
+
+  <h2>Simulador: la beta de una acción</h2>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Rentabilidades mensuales ficticias del mercado (x) y de una acción (y). Haz clic en el gráfico para añadir puntos y ver cómo cambia la recta.</p>
+    <svg id="lrSvg" viewBox="0 0 600 300" width="100%" style="display:block;cursor:crosshair" role="img" aria-label="Regresión lineal"></svg>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+      <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="lrRes" checked> Ver residuos</label>
+      <button class="btn" id="lrReset">Datos originales</button>
+      <button class="btn" id="lrOut">Añadir un atípico</button>
+    </div>
+    <div class="grid g3" id="lrStats" style="margin-top:8px"></div>
+    <figcaption>β₁ (la pendiente) es la <b>beta</b> del modelo de mercado: cuánto se mueve la acción por cada 1 % del índice. Los mínimos cuadrados minimizan S(β₀, β₁) = Σ(yᵢ − β₀ − β₁xᵢ)², por eso un solo atípico puede mover mucho la recta.</figcaption>
+  </figure>
+
+  <h2>Regresión lineal múltiple</h2>
+  <p class="prose"><span class="mono">Y = β₀ + β₁X₁ + … + βₘXₘ + ε</span>, con ε ~ N(0, σ²) y errores incorrelados. En forma matricial <span class="mono">Y = Xβ + ε</span>; las ecuaciones normales <span class="mono">XᵀXβ = XᵀY</span> dan <span class="mono">β̂ = (XᵀX)⁻¹XᵀY</span>. La magnitud de cada coeficiente depende de sus unidades: para comparar la importancia se usan coeficientes <b>estandarizados</b>. Ojo con interpretar causa-efecto.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Fuente</th><th>Suma de cuadrados</th><th>g. l.</th><th>Cuadrado medio</th><th>F₀</th></tr></thead>
+    <tbody><tr><td>Regresión</td><td>SSR</td><td>k</td><td>CMR = SSR/k</td><td>CMR/CME</td></tr><tr><td>Error</td><td>SSE</td><td>n − p</td><td>CME = SSE/(n−p)</td><td></td></tr><tr><td>Total</td><td>Syy</td><td>n − 1</td><td></td><td></td></tr></tbody>
+  </table></div>
+
+  <h2>Regresión logística</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Modelo</h4>Para respuestas <b>dicotómicas</b>: <span class="mono">p = 1 / (1 + e^−(β₀+β₁x₁+…))</span>. El logit (log de la razón de probabilidades) es lineal; e^β es la <b>odds ratio</b>. Se estima por <b>máxima verosimilitud</b>. Equivale a un perceptrón de una capa con sigmoide; su derivada y' = y(1 − y) facilita backpropagation.</div>
+    <div class="box"><h4>Simulador: curva logística</h4>
+      <label for="lgB">β₁ = <b class="out" id="lgBV">1,5</b></label><input type="range" id="lgB" min="-4" max="4" step="0.1" value="1.5" style="width:100%">
+      <label for="lgA">β₀ = <b class="out" id="lgAV">−3,0</b></label><input type="range" id="lgA" min="-8" max="8" step="0.1" value="-3" style="width:100%">
+      <svg id="lgSvg" viewBox="0 0 280 140" width="100%" style="display:block;margin-top:6px" role="img" aria-label="Curva logística"></svg>
+      <p class="out" id="lgInfo"></p>
+    </div>
+  </div>
+  <p class="prose">Aplicaciones del temario: fallos de piezas (fabricación), riesgo de enfermedad (sanidad), <b>fraude y riesgo de crédito</b> (finanzas), clics en anuncios (marketing).</p>
+
+  <h2>Árboles de regresión y SVM</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Árboles de regresión</h4>Propuestos por <b>Leo Breiman (1984)</b> (CART): de regresión si la respuesta es continua, de clasificación si es cualitativa. Cada hoja Nᵢ predice un valor θᵢ; modelo explicativo y predictivo.</div>
+    <div class="box"><h4>Máquinas de vectores soporte</h4>Buscan el hiperplano de <b>máximo margen</b>; con <i>kernels</i> separan datos no lineales. La variante <b>SVR</b> hace regresión con un tubo de tolerancia ε.</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>El <b>modelo de mercado</b> (CAPM) es una regresión lineal simple: R<sub>acción</sub> = α + β·R<sub>mercado</sub> + ε. Una beta de 1,3 significa que la acción amplifica un 30 % los movimientos del índice. La regresión <b>logística</b> es el estándar del <b>scoring de crédito</b> (probabilidad de impago).</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Simple: y = β₀ + β₁x; mínimos cuadrados; ecuaciones normales.</li>
+    <li>Múltiple: β = (XᵀX)⁻¹XᵀY; bondad de ajuste con ANOVA (F) y R².</li>
+    <li>Logística: respuesta binaria, sigmoide, máxima verosimilitud, odds ratio e^β.</li>
+    <li>Árboles de regresión: Breiman 1984 (CART). SVM / SVR: margen máximo.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-8"></div>
+</section>
+
+<!-- ===================== TEMA 9 ===================== -->
+<section class="view" data-view="tema-9" hidden>
+  <p class="eyebrow">Tema 9</p>
+  <h1>Clustering</h1>
+  <p class="oneline">El <b>clustering</b> (agrupamiento) es aprendizaje <b>no supervisado</b>: agrupa elementos parecidos según una distancia. El <b>jerárquico</b> puede ser <b>aglomerativo</b> (fusiona de abajo arriba) o <b>divisivo</b>, con distintos <b>enlaces</b> (simple, completo, promedio, centroide, Ward) y se representa con un <b>dendrograma</b>. Los métodos <b>probabilistas</b> usan el algoritmo <b>EM</b>, y la calidad se mide, por ejemplo, con <b>B-Cubed</b>.</p>
+  <ul class="objs"><li>Conceptos y usos</li><li>Clustering jerárquico</li><li>Métodos probabilistas y EM</li><li>Evaluación: B-Cubed</li></ul>
+
+  <h2>Conceptos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Clasificación vs agrupamiento</h4>La clasificación (supervisada) aprende a predecir clases ya etiquetadas; el clustering (no supervisado) busca grupos naturales en datos sin etiquetar. Busca alta similitud <b>intraclúster</b> y baja <b>interclúster</b>.</div>
+    <div class="box"><h4>Usos</h4>Segmentación de clientes, agrupación de documentos, segmentación de imágenes, motores de recomendación; en biología, medicina, marketing, teoría de la señal y biometría.</div>
+  </div>
+  <p class="prose">Dos familias: <b>jerárquico</b> (los grupos se fusionan o dividen) y <b>no jerárquico</b> (se fija el número de grupos de antemano, como k-means).</p>
+
+  <h2>Simulador: clustering jerárquico de acciones</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="hcL">Método de enlace</label><select id="hcL" class="btn" style="width:100%"><option value="single">Enlace simple (distancia mínima)</option><option value="complete">Enlace completo (distancia máxima)</option><option value="average" selected>Enlace promedio</option><option value="centroid">Centroide</option><option value="ward">Ward (mínimo aumento de varianza)</option></select></div>
+      <div><label for="hcK">Número de grupos (corte del dendrograma) = <b class="out" id="hcKV">3</b></label><input type="range" id="hcK" min="1" max="8" value="3" style="width:100%"></div>
+    </div>
+    <div class="grid g2" style="margin-top:8px">
+      <svg id="hcSc" viewBox="0 0 300 260" width="100%" style="display:block" role="img" aria-label="Acciones por rentabilidad y volatilidad"></svg>
+      <svg id="hcDen" viewBox="0 0 300 260" width="100%" style="display:block" role="img" aria-label="Dendrograma"></svg>
+    </div>
+    <p class="out" id="hcInfo"></p>
+    <figcaption>12 valores ficticios descritos por rentabilidad y volatilidad (estandarizadas). Aglomerativo: cada valor empieza solo y se fusionan los dos grupos más cercanos hasta que queda uno. La línea discontinua del dendrograma es el corte que da los grupos.</figcaption>
+  </figure>
+  <div class="grid g3">
+    <div class="box"><h4>Simple</h4>Distancia mínima entre puntos de ambos grupos; produce "cadenas" y ayuda a ver atípicos.</div>
+    <div class="box"><h4>Completo</h4>Distancia máxima; grupos compactos.</div>
+    <div class="box"><h4>Promedio / centroide</h4>Media de todas las distancias / distancia entre centros.</div>
+    <div class="box"><h4>Ward</h4>Fusiona minimizando el aumento de varianza dentro de los grupos.</div>
+    <div class="box"><h4>Ventaja</h4>Admite cualquier distancia: solo necesita la matriz de distancias.</div>
+    <div class="box"><h4>Desventajas</h4>Coste computacional alto (k-means es lineal), sensible al ruido; hay que decidir dónde cortar.</div>
+  </div>
+
+  <h2>Métodos probabilistas y EM</h2>
+  <p class="prose">Suponen que los datos se generan con una distribución: discretas (Bernoulli, binomial, binomial negativa, Poisson, geométrica, hipergeométrica) o continuas (exponencial, chi-cuadrado, F de Snedecor, normal). El algoritmo <b>EM</b> estima parámetros con variables ocultas (por ejemplo, a qué grupo pertenece cada punto en una mezcla de gaussianas) repitiendo dos pasos hasta converger:</p>
+  <div class="grid g2">
+    <div class="box"><h4>Paso E (esperanza)</h4>Con la hipótesis actual h y los datos observados Z, estimar la distribución de los datos completos Y: <span class="mono">Q(h'|h) = E[ln p(Y|h') | h, Z]</span>.</div>
+    <div class="box"><h4>Paso M (maximización)</h4>Sustituir h por la hipótesis que maximiza Q: <span class="mono">h ← argmax Q(h'|h)</span>.</div>
+  </div>
+  <p class="prose">Se usa en mezclas gaussianas, modelos ocultos de Markov, visión artificial y psicometría. <b>Evaluación</b>: <b>B-Cubed</b> (Bagga y Baldwin, 1998) calcula precisión y recall para cada elemento según con quién comparte grupo en la solución y en la verdad, y luego los promedia con pesos. Los <b>métodos implícitos</b> agrupan sin modelo explícito de distribución.</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Agrupar acciones por cómo se mueven (correlaciones) en lugar de por su sector oficial ayuda a <b>diversificar</b> de verdad: dos valores de sectores distintos pueden caer en el mismo clúster si reaccionan igual a los tipos de interés. Los bancos también segmentan a sus clientes por comportamiento para ofrecer productos distintos.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Clustering = no supervisado; intraclúster alta similitud, interclúster baja.</li>
+    <li>Jerárquico: aglomerativo (abajo arriba) o divisivo; dendrograma.</li>
+    <li>Enlaces: simple (mín), completo (máx), promedio, centroide, Ward (varianza).</li>
+    <li>EM: paso E (esperanza) y paso M (maximización) hasta converger.</li>
+    <li>B-Cubed: Bagga y Baldwin (1998), precisión y recall por elemento.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-9"></div>
+</section>
+
+<!-- ===================== TEMA 10 ===================== -->
+<section class="view" data-view="tema-10" hidden>
+  <p class="eyebrow">Tema 10</p>
+  <h1>Minería de textos y procesamiento del lenguaje natural</h1>
+  <p class="oneline">La <b>minería de textos</b> convierte texto no estructurado (≈80 % de la información en internet) en datos analizables. El <b>NLP/PLN</b> es la disciplina de la IA que trata computacionalmente el lenguaje. El flujo típico: crear un <b>corpus</b>, limpiar (minúsculas, signos, <b>stopwords</b>, raíces), contar <b>frecuencias</b>, hacer <b>análisis descriptivo</b> y aplicar modelos como el <b>análisis de sentimiento</b>.</p>
+  <ul class="objs"><li>Minería de textos vs de datos</li><li>Corpus</li><li>Preprocesamiento y frecuencias</li><li>Análisis descriptivo y sentimiento</li></ul>
+
+  <h2>Conceptos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Text mining</h4>Tipo especial de minería de datos para texto: datos heterogéneos, sin estructura, de fuentes e idiomas distintos se convierten en conceptos clave identificando patrones. Combinado con data mining (estructurado) es pieza clave del <i>marketing intelligence</i>.</div>
+    <div class="box"><h4>PLN / NLP</h4>Tratamiento computacional del lenguaje humano centrado en el significado; muy ligado a la <b>lingüística computacional</b>. Es el segmento de la IA que más crece.</div>
+  </div>
+
+  <h2>Corpus</h2>
+  <p class="prose">Colección sistemática de textos reales, ordenada y clasificada, normalmente electrónica (escritos o transcripciones). En R, el paquete <b>tm</b> distingue el corpus <b>volátil</b> (en memoria, se borra al destruir el objeto) del <b>permanente</b> (guardado fuera de R, en una base de datos). Sirve para construir diccionarios, tesauros u ontologías, listas de frecuencias, traducción (corpus bilingües) y voz. Los corpus web son "oportunistas" (sin criterio de selección) pero actuales.</p>
+
+  <h2>Simulador: de titulares a datos</h2>
+  <figure class="diagram">
+    <label for="txIn">Titulares (uno por línea)</label>
+    <textarea id="txIn" rows="6" style="width:100%"></textarea>
+    <div id="txSteps" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+    <div class="grid g2" style="margin-top:8px">
+      <div><div id="txTok" class="box" style="font-size:.85rem;min-height:120px"></div></div>
+      <div><svg id="txFreq" viewBox="0 0 300 220" width="100%" style="display:block" role="img" aria-label="Frecuencia de términos"></svg></div>
+    </div>
+    <div class="table-wrap" style="margin-top:8px"><table id="txSent"></table></div>
+    <figcaption>Activa los pasos de limpieza y mira cómo cambian los términos más frecuentes. El sentimiento usa un pequeño <b>léxico</b> de palabras positivas y negativas (con negación sencilla: "no sube" puntúa negativo). Es un método de diccionario: rápido y explicable, pero no entiende ironía ni contexto.</figcaption>
+  </figure>
+
+  <h2>Análisis descriptivo y sentimiento</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Análisis descriptivo</h4>Describe la situación sin hipótesis previa: medidas de <b>frecuencia</b> (conteos, porcentajes), de <b>tendencia central</b>, de <b>dispersión</b> y de <b>posición</b>. En texto: frecuencia de términos, nubes de palabras, n-gramas, asociaciones.</div>
+    <div class="box"><h4>Análisis de sentimiento</h4>Clasifica opiniones en positivas, negativas o neutras: con <b>léxicos</b> (diccionarios de polaridad) o con <b>modelos</b> de ML (Naive Bayes, redes, transformers). Usos: reputación de marca, atención al cliente, encuestas.</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Fondos y bancos miden el <b>sentimiento</b> de noticias, informes de resultados y redes sociales para anticipar movimientos o vigilar riesgos reputacionales. Un clásico académico es el léxico financiero de Loughran y McDonald: palabras como "pasivo" o "riesgo" no son negativas en finanzas aunque lo parezcan en un léxico general.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Minería de textos = minería de datos aplicada a texto no estructurado (~80 % de la información).</li>
+    <li>PLN: IA + lingüística computacional; foco en el significado.</li>
+    <li>Corpus: colección sistemática; en R (tm) volátil o permanente.</li>
+    <li>Preprocesamiento: minúsculas, puntuación, stopwords, stemming → frecuencias.</li>
+    <li>Análisis descriptivo: frecuencia, tendencia central, dispersión, posición. Sentimiento: léxicos o modelos.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-10"></div>
+</section>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section class="view" data-view="glosario" hidden>
+  <p class="eyebrow">Consulta rápida</p>
+  <h1>Glosario</h1>
+  <p class="lead">Los términos clave del módulo 7. Escribe para filtrar.</p>
+  <label for="glossQ" style="margin-top:16px">Buscar término</label>
+  <input type="text" id="glossQ" placeholder="Por ejemplo: entropía, ROC, Ward…">
+  <div class="gloss" id="glossList"></div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  const TOPICS = [
+    {id:"tema-1", t:"KDD y conceptos de ML", d:"Etapas del descubrimiento de conocimiento, tipos de aprendizaje y sobreajuste."},
+    {id:"tema-2", t:"Exploración y preprocesamiento", d:"Tipos de datos, transformaciones, histogramas, atípicos y covarianza."},
+    {id:"tema-3", t:"Árboles de decisión", d:"Entropía, ganancia, ID3, C4.5 y poda."},
+    {id:"tema-4", t:"Evaluación de clasificadores", d:"Matriz de confusión, métricas, Kappa y curva ROC."},
+    {id:"tema-5", t:"Reglas de clasificación", d:"Soporte, confianza y recubrimiento secuencial."},
+    {id:"tema-6", t:"Redes neuronales", d:"Perceptrón, backpropagation y redes recurrentes."},
+    {id:"tema-7", t:"Métodos bayesianos", d:"Probabilidad condicionada, teorema de Bayes, Naive Bayes y redes bayesianas."},
+    {id:"tema-8", t:"Regresión", d:"Lineal simple y múltiple, logística, árboles de regresión y SVM."},
+    {id:"tema-9", t:"Clustering", d:"Jerárquico, enlaces, dendrograma, EM y B-Cubed."},
+    {id:"tema-10", t:"Minería de textos y NLP", d:"Corpus, preprocesamiento, frecuencias y sentimiento."}
+  ];  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (x,d=2) => isFinite(x) ? x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d}) : "—";
+  const parse = s => s.split(/[;\s]*,[;\s]*|\s+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(isFinite);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function gaussFrom(r){ return function(){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
+
+  // ---------- Storage ----------
+  const KEY = "ml-mineria-m7-v1";
+  let state = {studied:{}, scores:{}};
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---------- Router ----------
+  const views = document.querySelectorAll(".view");
+  const navLinks = document.querySelectorAll("#navlist a");
+  function route(){
+    let h = (location.hash || "#inicio").slice(1);
+    if (!document.querySelector('.view[data-view="'+h+'"]')) h = "inicio";
+    views.forEach(v => v.hidden = v.dataset.view !== h);
+    navLinks.forEach(a => { if (a.dataset.v === h) { a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Quiz ----------
+  const QUIZ = {
+    "tema-1":[
+      {q:"¿En qué año se introdujo el término KDD?", o:["1960","1989","2006"], a:1, e:"Para el proceso amplio de descubrir conocimiento en bases de datos."},
+      {q:"El proceso KDD es…", o:["Lineal y automático","Iterativo e interactivo","Exclusivamente estadístico"], a:1, e:"Se puede volver a etapas anteriores y requiere expertos del dominio."},
+      {q:"¿Qué etapa del KDD aplica técnicas para extraer patrones?", o:["Limpieza","Minería de datos","Representación"], a:1, e:"Es la etapa central del proceso."},
+      {q:"El aprendizaje supervisado necesita…", o:["Datos etiquetados","Una recompensa","Ningún dato"], a:0, e:"El no supervisado trabaja sin etiquetas; el refuerzo con recompensas."},
+      {q:"Un modelo que acierta en entrenamiento pero falla con datos nuevos sufre…", o:["Infraajuste","Sobreajuste","Normalización"], a:1, e:"Ha memorizado el ruido en lugar de generalizar."}
+    ],
+    "tema-2":[
+      {q:"El rating crediticio (AAA, AA, A…) es una variable…", o:["Nominal","Ordinal","Continua"], a:1, e:"Tiene categorías con orden."},
+      {q:"¿Qué gráfico se recomienda para una variable continua?", o:["Histograma","Diagrama de sectores","Tabla de contingencia"], a:0, e:"El ancho de clase se controla con binwidth."},
+      {q:"La covarianza describe…", o:["El comportamiento dentro de una variable","El comportamiento entre variables","El número de nulos"], a:1, e:"La varianza es dentro de una variable."},
+      {q:"Ante un atípico con mucha influencia en los resultados…", o:["Se elimina siempre","No se elimina sin justificación","Se duplica"], a:1, e:"Se recomienda repetir el análisis con y sin él."},
+      {q:"La transformación de datos consta de…", o:["Mapeo y generación de código","Muestreo y votación","Entrenamiento y prueba"], a:0, e:"Del origen al destino y el programa que lo hace."}
+    ],
+    "tema-3":[
+      {q:"¿Quién creó ID3 y C4.5?", o:["Leo Breiman","J. Ross Quinlan","Geoffrey Hinton"], a:1, e:"ID3 en 1983 y C4.5 en 1993."},
+      {q:"Una bolsa con 3 bolas blancas y 3 negras tiene entropía…", o:["0","0,5","1"], a:2, e:"Incertidumbre máxima con dos clases equilibradas."},
+      {q:"ID3 elige en cada nodo el atributo con mayor…", o:["Ganancia de información","Número de valores","Error"], a:0, e:"Ganancia = entropía del nodo − entropía ponderada de los hijos."},
+      {q:"¿Qué criterio usa C4.5 para no favorecer atributos con muchos valores?", o:["Razón de ganancia","Índice Kappa","Error cuadrático"], a:0, e:"Gain ratio = I(Xᵢ,C)/H(Xᵢ)."},
+      {q:"¿Cómo se llama la implementación de C4.5 en Weka?", o:["J48","See5","CART"], a:0, e:"C5.0 y See5 son sus sucesores comerciales."}
+    ],
+    "tema-4":[
+      {q:"En la matriz de confusión del temario, las filas representan…", o:["La clase real","La clase predicha","El umbral"], a:0, e:"Las columnas son las predicciones."},
+      {q:"La sensibilidad (recall) es…", o:["VP/(VP+FN)","VN/(VN+FP)","VP/(VP+FP)"], a:0, e:"VP/(VP+FP) es la precisión; VN/(VN+FP), la especificidad."},
+      {q:"¿Qué mide el Kappa de Cohen?", o:["El acuerdo más allá del azar","El área bajo la curva","El error cuadrático"], a:0, e:"κ = (pₒ − pₑ)/(1 − pₑ)."},
+      {q:"En la curva ROC, el eje X es…", o:["La tasa de falsos positivos","La precisión","La exactitud"], a:0, e:"El eje Y es la tasa de verdaderos positivos."},
+      {q:"Un AUC de 0,5 indica…", o:["Un modelo perfecto","Un modelo equivalente al azar","Un modelo sin falsos positivos"], a:1, e:"El modelo perfecto tiene AUC = 1."}
+    ],
+    "tema-5":[
+      {q:"En «SI A ENTONCES B», A es…", o:["El consecuente","El antecedente","El soporte"], a:1, e:"B es el consecuente (la clase)."},
+      {q:"La confianza de una regla A → B es…", o:["P(B | A)","P(A)","P(A ∧ B) · N"], a:0, e:"Fracción de los que cumplen A que también cumplen B."},
+      {q:"En el recubrimiento secuencial, tras aprender una regla…", o:["Se eliminan los ejemplos que cubre","Se reinicia todo","Se borra la regla"], a:0, e:"Y se repite hasta cubrir la clase."},
+      {q:"Si ninguna regla cubre un ejemplo, se aplica…", o:["La regla por defecto","Un error","La primera regla"], a:0, e:"{} → clase por defecto."},
+      {q:"Construir reglas de general a específico consiste en…", o:["Añadir condiciones","Quitar condiciones","Cambiar la clase"], a:0, e:"Se empieza con un antecedente vacío y se especializa."}
+    ],
+    "tema-6":[
+      {q:"El artículo que popularizó backpropagation (1986) es de…", o:["Rumelhart, Hinton y Williams","McCulloch y Pitts","Quinlan"], a:0, e:"Aunque el algoritmo se introdujo en los 70."},
+      {q:"El corazón de backpropagation es…", o:["La derivada ∂C/∂w","La entropía","La matriz de confusión"], a:0, e:"Cuánto cambia el coste al mover cada peso."},
+      {q:"En notación vectorial, la activación de la capa l es…", o:["aˡ = σ(wˡaˡ⁻¹ + bˡ)","aˡ = wˡ + bˡ","aˡ = σ(bˡ)"], a:0, e:"Pesos por activaciones previas más sesgo, y la función σ."},
+      {q:"¿Qué da memoria a una red recurrente?", o:["Sus ciclos","Su número de entradas","La función signo"], a:0, e:"Útiles para secuencias: texto, sonido, vídeo."},
+      {q:"En un perceptrón, la neurona pasa a 1 cuando…", o:["La suma ponderada supera el umbral u","Todas las entradas son 0","El error es máximo"], a:0, e:"Activación tipo signo/escalón."}
+    ],
+    "tema-7":[
+      {q:"En el teorema de Bayes, P(Aᵢ) es la probabilidad…", o:["A priori","A posteriori","Condicionada"], a:0, e:"P(Aᵢ|B) es la a posteriori."},
+      {q:"La probabilidad de sacar dos copas de una baraja de 48 cartas es…", o:["1/16","11/188","12/48"], a:1, e:"12/48 · 11/47."},
+      {q:"Naive Bayes supone que los atributos son…", o:["Independientes dada la clase","Todos continuos","Ordenados"], a:0, e:"De ahí lo de «ingenuo»."},
+      {q:"¿Para qué sirve el suavizado de Laplace?", o:["Evitar probabilidades cero por valores no vistos","Acelerar el cálculo","Normalizar variables"], a:0, e:"Suma 1 a cada conteo."},
+      {q:"Una red bayesiana es…", o:["Un grafo dirigido acíclico con dependencias condicionales","Un perceptrón multicapa","Un árbol de decisión"], a:0, e:"Relaja la independencia de Naive Bayes."}
+    ],
+    "tema-8":[
+      {q:"Los mínimos cuadrados minimizan…", o:["La suma de los residuos al cuadrado","El número de variables","La entropía"], a:0, e:"S(β₀, β₁) = Σ(yᵢ − β₀ − β₁xᵢ)²."},
+      {q:"En regresión múltiple, el estimador es…", o:["β = (XᵀX)⁻¹XᵀY","β = XY","β = Y/X"], a:0, e:"Sale de las ecuaciones normales XᵀXβ = XᵀY."},
+      {q:"La regresión logística se usa cuando la respuesta es…", o:["Continua","Dicotómica","Ordinal con 10 niveles"], a:1, e:"Predice la probabilidad de un resultado sí/no."},
+      {q:"¿Quién propuso los árboles de regresión/clasificación (CART) en 1984?", o:["Leo Breiman","Ross Quinlan","Thomas Bayes"], a:0, e:"De regresión si la respuesta es continua."},
+      {q:"La bondad de ajuste de una regresión múltiple se contrasta con…", o:["ANOVA (estadístico F)","Kappa","B-Cubed"], a:0, e:"Compara la varianza explicada con la residual."}
+    ],
+    "tema-9":[
+      {q:"El clustering es un método de aprendizaje…", o:["Supervisado","No supervisado","Por refuerzo"], a:1, e:"Agrupa datos sin etiquetas."},
+      {q:"El clustering aglomerativo…", o:["Parte de cada punto solo y fusiona","Parte de un único grupo y divide","Necesita etiquetas"], a:0, e:"El divisivo hace lo contrario."},
+      {q:"El enlace completo usa la distancia…", o:["Mínima","Máxima","Entre centroides"], a:1, e:"El simple usa la mínima."},
+      {q:"El método de Ward fusiona los grupos que…", o:["Menos aumentan la varianza interna","Están más lejos","Tienen más puntos"], a:0, e:"Minimiza el incremento de la suma de cuadrados."},
+      {q:"Los dos pasos del algoritmo EM son…", o:["Esperanza y maximización","Entrenamiento y medición","Enlace y medida"], a:0, e:"Se repiten hasta la convergencia."}
+    ],
+    "tema-10":[
+      {q:"¿Qué proporción de la información en internet es texto según el temario?", o:["≈20 %","≈50 %","≈80 %"], a:2, e:"De ahí el interés de la minería de textos."},
+      {q:"Un corpus es…", o:["Una colección sistemática de textos reales","Un tipo de red neuronal","Un algoritmo de clustering"], a:0, e:"Base para estudiar el uso de la lengua."},
+      {q:"En el paquete tm de R, un corpus volátil…", o:["Se guarda en una base de datos externa","Vive en memoria y se borra con el objeto","No se puede usar"], a:1, e:"El permanente se guarda fuera de R."},
+      {q:"Las stopwords son…", o:["Palabras muy frecuentes con poco significado (el, de, la)","Palabras clave del dominio","Errores ortográficos"], a:0, e:"Se eliminan para que no dominen las frecuencias."},
+      {q:"Un análisis de sentimiento por léxico…", o:["Usa un diccionario de palabras positivas y negativas","Requiere una red neuronal","Solo cuenta palabras"], a:0, e:"Rápido y explicable, pero no entiende ironía."}
+    ]
+  };
+  function renderProgress(){
+    const n = TOPICS.filter(t => state.studied[t.id]).length;
+    document.getElementById("progText").textContent = n + " de 10 temas estudiados";
+    document.getElementById("progBar").style.width = (n*10) + "%";
+    navLinks.forEach(a => a.classList.toggle("done", !!state.studied[a.dataset.v]));
+    document.getElementById("tcards").innerHTML = TOPICS.map((t,i) => {
+      const sc = state.scores[t.id];
+      const st = state.studied[t.id] ? '<span class="pill ok">Estudiado</span>' : '<span class="pill neutral">Pendiente</span>';
+      const scs = sc!=null ? ' <span class="pill neutral">Test: '+sc+'/'+QUIZ[t.id].length+'</span>' : '';
+      return '<a class="tcard" href="#'+t.id+'"><span class="n">TEMA '+(i+1)+'</span><b>'+t.t+'</b><span class="d">'+t.d+'</span><span class="st">'+st+scs+'</span></a>';
+    }).join("");
+    document.querySelectorAll(".studied button").forEach(b => {
+      const on = !!state.studied[b.dataset.t];
+      b.setAttribute("aria-pressed", on);
+      b.textContent = on ? "✓ Estudiado" : "Marcar como estudiado";
+    });
+  }
+
+  document.querySelectorAll(".quiz").forEach(box => {
+    const id = box.dataset.quiz, qs = QUIZ[id];
+    let answered = 0, right = 0;
+    box.innerHTML = '<h2>Autoevaluación</h2><p style="color:var(--muted);font-size:.9rem;margin-top:4px">' + qs.length + ' preguntas. Elige una respuesta para ver la explicación.</p>' +
+      qs.map((q,i) => '<div class="qitem"><p class="q">'+(i+1)+'. '+q.q+'</p><div class="qopts">'+q.o.map((o,j)=>'<button class="qopt" data-i="'+i+'" data-j="'+j+'">'+o+'</button>').join("")+'</div><p class="qexp" hidden></p></div>').join("") +
+      '<div class="qscore"><span class="out" data-score>0 de '+qs.length+' respondidas</span><button class="btn" data-reset>Repetir test</button></div>' +
+      '<div class="studied"><button class="btn primary" data-t="'+id+'" aria-pressed="false">Marcar como estudiado</button></div>';
+    box.addEventListener("click", ev => {
+      const b = ev.target.closest(".qopt");
+      if (b){
+        const i = +b.dataset.i, j = +b.dataset.j, q = qs[i], item = b.closest(".qitem");
+        item.querySelectorAll(".qopt").forEach((x,k) => { x.disabled = true; if (k===q.a) x.classList.add("right"); });
+        if (j !== q.a) b.classList.add("wrong"); else right++;
+        answered++;
+        const exp = item.querySelector(".qexp");
+        exp.textContent = (j===q.a ? "Correcto. " : "No es correcto. ") + q.e; exp.hidden = false;
+        box.querySelector("[data-score]").textContent = answered < qs.length ? (answered+" de "+qs.length+" respondidas · "+right+" aciertos") : ("Resultado: "+right+" de "+qs.length+" aciertos");
+        if (answered === qs.length){ state.scores[id] = right; if (right >= qs.length-1) state.studied[id] = true; save(); renderProgress(); }
+        return;
+      }
+      if (ev.target.closest("[data-reset]")){
+        answered = 0; right = 0;
+        box.querySelectorAll(".qopt").forEach(x => { x.disabled=false; x.classList.remove("right","wrong"); });
+        box.querySelectorAll(".qexp").forEach(x => x.hidden = true);
+        box.querySelector("[data-score]").textContent = "0 de "+qs.length+" respondidas";
+        return;
+      }
+      if (ev.target.closest(".studied button")){ state.studied[id] = !state.studied[id]; save(); renderProgress(); }
+    });
+  });
+
+  TOPICS.forEach((t,i) => {
+    const sec = document.querySelector('.view[data-view="'+t.id+'"]');
+    const prev = i>0 ? TOPICS[i-1] : null, next = i<TOPICS.length-1 ? TOPICS[i+1] : null;
+    const div = document.createElement("div"); div.className = "pager";
+    div.innerHTML = (prev ? '<a href="#'+prev.id+'"><small>← Tema '+i+'</small>'+prev.t+'</a>' : '<a href="#inicio"><small>←</small>Mapa del módulo</a>') +
+                    (next ? '<a class="next" href="#'+next.id+'"><small>Tema '+(i+2)+' →</small>'+next.t+'</a>' : '<a class="next" href="#glosario"><small>→</small>Glosario</a>');
+    sec.appendChild(div);
+  });
+
+  const SVGE = (tag, a, txt) => '<'+tag+' '+Object.entries(a).map(([k,v])=>k+'="'+v+'"').join(" ")+(txt!=null?'>'+txt+'</'+tag+'>':'/>');
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const $ = id => document.getElementById(id);
+  const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  const gauss = r => { let u=0; while(u===0) u=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r()); };
+  const sig = z => 1/(1+Math.exp(-z));
+  function solveLin(A,b){ const n=b.length, M=A.map((r,i)=>r.concat([b[i]]));
+    for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(M[r][c])>Math.abs(M[p][c])) p=r; [M[c],M[p]]=[M[p],M[c]]; const d=M[c][c]||1e-12;
+      for(let r=0;r<n;r++){ if(r===c) continue; const f=M[r][c]/d; for(let k=c;k<=n;k++) M[r][k]-=f*M[c][k]; } }
+    return M.map((r,i)=>r[n]/(r[i]||1e-12)); }
+
+  // ---------- T1: sobreajuste ----------
+  let ofSeed=1, ofTr=[], ofTe=[];
+  const ofF=x=>0.6*Math.sin(2.6*x)+0.25*x;
+  function ofGen(){ const r=mulberry32(ofSeed*7717); ofTr=[]; ofTe=[];
+    for(let i=0;i<14;i++){ const x=-1+2*(i+0.3*r())/13.3; ofTr.push([x,ofF(x)+0.2*gauss(r)]); }
+    for(let i=0;i<40;i++){ const x=-1+2*r(); ofTe.push([x,ofF(x)+0.2*gauss(r)]); } }
+  function ofFit(d){ const n=d+1, A=Array.from({length:n},()=>Array(n).fill(0)), b=Array(n).fill(0);
+    ofTr.forEach(([x,y])=>{ const p=[]; for(let k=0;k<n;k++) p.push(x**k); for(let i=0;i<n;i++){ b[i]+=p[i]*y; for(let j=0;j<n;j++) A[i][j]+=p[i]*p[j]; } });
+    for(let i=0;i<n;i++) A[i][i]+=1e-9; const c=solveLin(A,b); return x=>c.reduce((s,ck,k)=>s+ck*x**k,0); }
+  const rmse=(f,D)=>Math.sqrt(D.reduce((s,[x,y])=>s+(f(x)-y)**2,0)/D.length);
+  function ofRun(){ const d=+$("ofD").value; $("ofDV").textContent=d;
+    const f=ofFit(d), X=x=>20+(x+1)/2*270, Y=y=>110-y*70; let h="";
+    h+=SVGE("line",{x1:20,x2:290,y1:110,y2:110,stroke:"var(--line)"});
+    let p=""; for(let i=0;i<=200;i++){ const x=-1+2*i/200, y=Math.max(-1.55,Math.min(1.55,f(x))); p+=(p?"L":"M")+X(x).toFixed(1)+" "+Y(y).toFixed(1); }
+    let pt=""; for(let i=0;i<=100;i++){ const x=-1+2*i/100; pt+=(pt?"L":"M")+X(x).toFixed(1)+" "+Y(ofF(x)).toFixed(1); }
+    h+=SVGE("path",{d:pt,fill:"none",stroke:"var(--muted)","stroke-dasharray":"4 4"});
+    ofTe.forEach(([x,y])=>h+=SVGE("circle",{cx:X(x).toFixed(1),cy:Y(y).toFixed(1),r:3,fill:"var(--example)",opacity:.7}));
+    ofTr.forEach(([x,y])=>h+=SVGE("circle",{cx:X(x).toFixed(1),cy:Y(y).toFixed(1),r:4,fill:"var(--accent)"}));
+    h+=SVGE("path",{d:p,fill:"none",stroke:"var(--ink)","stroke-width":2.2});
+    h+=SVGE("text",{x:150,y:214,"text-anchor":"middle","font-size":10},"Modelo de grado "+d+" (gris: función real)");
+    $("ofSvg").innerHTML=h;
+    const E=[]; for(let k=1;k<=12;k++){ const g=ofFit(k); E.push([rmse(g,ofTr),rmse(g,ofTe)]); }
+    const mx=Math.min(1.2,Math.max(...E.flat())), XE=k=>35+(k-1)/11*250, YE=v=>190-Math.min(v,mx)/mx*170;
+    let e=SVGE("line",{x1:35,x2:285,y1:190,y2:190,stroke:"var(--line)"})+SVGE("line",{x1:35,x2:35,y1:20,y2:190,stroke:"var(--line)"});
+    [[0,"var(--accent)","Entrenamiento"],[1,"var(--example)","Prueba"]].forEach(([j,c,l],q)=>{ let s=""; E.forEach((v,k)=>s+=(s?"L":"M")+XE(k+1).toFixed(1)+" "+YE(v[j]).toFixed(1)); e+=SVGE("path",{d:s,fill:"none",stroke:c,"stroke-width":2.2})+SVGE("text",{x:280,y:30+q*14,"text-anchor":"end","font-size":10,style:"fill:"+c+";font-weight:600"},l); });
+    e+=SVGE("line",{x1:XE(d),x2:XE(d),y1:20,y2:190,stroke:"var(--ink)","stroke-dasharray":"3 3"})+SVGE("text",{x:160,y:212,"text-anchor":"middle","font-size":10},"Error (RMSE) según el grado");
+    $("ofErr").innerHTML=e;
+    const best=E.reduce((b,v,k)=>v[1]<E[b][1]?k:b,0)+1, [tr,te]=E[d-1];
+    $("ofInfo").innerHTML='Error de entrenamiento '+fmt(tr,3)+' · error de prueba '+fmt(te,3)+' · '+(d<best-1?'<span class="pill neutral">infraajuste</span>':d>best+2?'<span class="pill bad">sobreajuste</span>':'<span class="pill ok">buen equilibrio</span>')+' (mejor grado en prueba: '+best+')';
+  }
+  $("ofD").addEventListener("input",ofRun); $("ofNew").addEventListener("click",()=>{ ofSeed++; ofGen(); ofRun(); }); ofGen(); ofRun();
+
+  // ---------- T2: exploración ----------
+  const EX_BASE=(()=>{ const r=mulberry32(4242), a=[]; for(let i=0;i<250;i++){ const k=r()<0.06?3:1; a.push(1.1*k*gauss(r)+0.04); } return a; })();
+  const EX_OUT=[-100,45,-38];
+  const quant=(s,q)=>{ const p=(s.length-1)*q, i=Math.floor(p); return s[i]+(s[Math.min(i+1,s.length-1)]-s[i])*(p-i); };
+  function exRun(){ const bw=+$("exBin").value, mode=$("exNorm").value; $("exBinV").textContent=fmt(bw,1)+" %";
+    const raw=EX_BASE.concat($("exOut").checked?EX_OUT:[]), n=raw.length, mean=raw.reduce((a,b)=>a+b,0)/n, sd=Math.sqrt(raw.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)), mn=Math.min(...raw), mxv=Math.max(...raw);
+    const T=v=>mode==="z"?(v-mean)/sd:mode==="mm"?(v-mn)/(mxv-mn):v, unit=mode==="raw"?" %":"";
+    const nb=Math.max(1,Math.ceil((mxv-mn)/bw)), cnt=Array(nb).fill(0); raw.forEach(v=>cnt[Math.min(nb-1,Math.floor((v-mn)/bw))]++);
+    const cm=Math.max(...cnt), X=v=>40+(v-mn)/(mxv-mn||1)*540, Y=c=>170-c/cm*155; let h="";
+    cnt.forEach((c,i)=>{ if(!c) return; const x0=X(mn+i*bw), x1=X(Math.min(mxv,mn+(i+1)*bw)); h+=SVGE("rect",{x:x0.toFixed(1),y:Y(c).toFixed(1),width:Math.max(1,x1-x0-0.5).toFixed(1),height:(170-Y(c)).toFixed(1),fill:"var(--accent)"}); });
+    h+=SVGE("line",{x1:40,x2:580,y1:170,y2:170,stroke:"var(--line)"});
+    for(let k=0;k<=5;k++){ const v=mn+(mxv-mn)*k/5; h+=SVGE("text",{x:X(v).toFixed(1),y:186,"text-anchor":"middle","font-size":10},fmt(T(v),mode==="raw"?1:2)+unit); }
+    h+=SVGE("text",{x:34,y:Y(cm)+4,"text-anchor":"end","font-size":9},cm);
+    $("exHist").innerHTML=h;
+    const s=raw.slice().sort((a,b)=>a-b), q1=quant(s,.25), md=quant(s,.5), q3=quant(s,.75), iqr=q3-q1, lo=Math.max(s[0],q1-1.5*iqr), hi=Math.min(s[n-1],q3+1.5*iqr), outs=s.filter(v=>v<q1-1.5*iqr||v>q3+1.5*iqr);
+    let b=SVGE("line",{x1:X(lo),x2:X(hi),y1:30,y2:30,stroke:"var(--ink)"})+SVGE("rect",{x:X(q1),y:16,width:Math.max(1,X(q3)-X(q1)),height:28,fill:"var(--accent-soft)",stroke:"var(--accent)"})+SVGE("line",{x1:X(md),x2:X(md),y1:16,y2:44,stroke:"var(--ink)","stroke-width":2});
+    outs.forEach(v=>b+=SVGE("circle",{cx:X(v).toFixed(1),cy:30,r:3,fill:"none",stroke:"var(--bad)"}));
+    $("exBox").innerHTML=b;
+    const tv=raw.map(T), tm=tv.reduce((a,c)=>a+c,0)/n, ts=Math.sqrt(tv.reduce((a,c)=>a+(c-tm)**2,0)/(n-1)), d=mode==="raw"?2:3;
+    const box=(l,v,sub)=>'<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.15rem">'+v+'</div><small>'+sub+'</small></div>';
+    $("exStats").innerHTML=box("Media",fmt(tm,d)+unit,"sensible a atípicos")+box("Mediana",fmt(T(md),d)+unit,"robusta")+box("Desviación típica",fmt(ts,d)+unit,"dispersión")+box("Rango intercuartílico",fmt(T(q3)-T(q1),d)+unit,"Q3 − Q1")+box("Mín / máx",fmt(T(mn),d)+" / "+fmt(T(mxv),d)+unit,n+" observaciones")+box("Atípicos (regla 1,5·IQR)",outs.length,"círculos rojos en la caja");
+  }
+  ["exBin","exNorm","exOut"].forEach(id=>$(id).addEventListener("input",exRun)); $("exOut").addEventListener("change",exRun); exRun();
+
+  // ---------- T3: ID3 ----------
+  const ID_ATTR=["Historial","Ingresos","Deuda","Garantía"];
+  const ID_ROWS=[["regular","bajos","alta","sí","no"],["regular","bajos","alta","no","no"],["bueno","bajos","alta","sí","sí"],["malo","medios","alta","sí","sí"],["malo","altos","baja","sí","sí"],["malo","altos","baja","no","no"],["bueno","altos","baja","no","sí"],["regular","medios","alta","sí","no"],["regular","altos","baja","sí","sí"],["malo","medios","baja","sí","sí"],["regular","medios","baja","no","sí"],["bueno","medios","alta","no","sí"],["bueno","bajos","baja","sí","sí"],["malo","medios","alta","no","no"]];
+  const H=rows=>{ const n=rows.length; if(!n) return 0; const p=rows.filter(r=>r[4]==="sí").length/n; return [p,1-p].reduce((s,q)=>q>0?s-q*Math.log2(q):s,0); };
+  let idRoot, idLast=null;
+  function idReset(){ idRoot={rows:ID_ROWS.map((r,i)=>i),attrs:[0,1,2,3],attr:null,kids:null}; idLast=null; idDraw(); }
+  function idPending(){ const q=[idRoot]; while(q.length){ const n=q.shift(); const rs=n.rows.map(i=>ID_ROWS[i]); if(n.kids){ q.push(...Object.values(n.kids)); continue; } if(H(rs)>0&&n.attrs.length) return n; } return null; }
+  function idSplit(){ const n=idPending(); if(!n) return false; const rs=n.rows.map(i=>ID_ROWS[i]), h0=H(rs);
+    const gains=n.attrs.map(a=>{ const vals=[...new Set(rs.map(r=>r[a]))]; const e=vals.reduce((s,v)=>{ const sub=rs.filter(r=>r[a]===v); return s+sub.length/rs.length*H(sub); },0); return [a,h0-e,vals]; }).sort((x,y)=>y[1]-x[1]);
+    const [ba,,vals]=gains[0]; n.attr=ba; n.kids={}; vals.forEach(v=>{ n.kids[v]={rows:n.rows.filter(i=>ID_ROWS[i][ba]===v),attrs:n.attrs.filter(a=>a!==ba),attr:null,kids:null}; });
+    idLast={node:n,gains,h0}; return true; }
+  function idDraw(){
+    const hl=idLast?new Set(idLast.node.rows):new Set();
+    $("idData").innerHTML='<thead><tr><th>#</th>'+ID_ATTR.map(a=>'<th>'+a+'</th>').join("")+'<th>¿Concede?</th></tr></thead><tbody>'+ID_ROWS.map((r,i)=>'<tr style="'+(hl.has(i)?'background:var(--accent-soft)':'')+'"><td class="num">'+(i+1)+'</td>'+r.map((c,j)=>'<td'+(j===4?' style="font-weight:600;color:'+(c==="sí"?'var(--ok)':'var(--bad)')+'"':'')+'>'+c+'</td>').join("")+'</tr>').join("")+'</tbody>';
+    $("idGain").innerHTML=idLast?'<p class="out" style="margin:0 0 4px">Nodo con '+idLast.node.rows.length+' ejemplos (filas resaltadas), entropía '+fmt(idLast.h0,3)+'. Ganancia de cada atributo:</p><div class="table-wrap"><table><tbody>'+idLast.gains.map((g,k)=>'<tr style="'+(k===0?'font-weight:700':'')+'"><td>'+ID_ATTR[g[0]]+'</td><td class="num">'+fmt(g[1],3)+'</td><td style="width:50%"><div style="height:10px;border-radius:5px;background:'+(k===0?'var(--accent)':'var(--line)')+';width:'+(g[1]/Math.max(idLast.gains[0][1],1e-9)*100).toFixed(0)+'%"></div></td></tr>').join("")+'</tbody></table></div>':'<p class="out">Entropía inicial del conjunto (9 sí / 5 no): '+fmt(H(ID_ROWS),3)+'. Pulsa «Siguiente división».</p>';
+    const lines=[]; const rec=(n,pre,label)=>{ const rs=n.rows.map(i=>ID_ROWS[i]), s=rs.filter(r=>r[4]==="sí").length, no=rs.length-s;
+      if(n.kids){ lines.push(pre+label+"¿"+ID_ATTR[n.attr]+"?  ["+s+" sí / "+no+" no]"); Object.entries(n.kids).forEach(([v,k])=>rec(k,pre+"   ","├─ "+v+" → ")); }
+      else lines.push(pre+label+(H(rs)===0?(s?"✔ CONCEDER":"✘ DENEGAR")+"  ["+rs.length+"]":"… pendiente ["+s+" sí / "+no+" no]")); };
+    rec(idRoot,"","");
+    $("idTree").textContent=lines.join("\n");
+  }
+  $("idStep").addEventListener("click",()=>{ idSplit(); idDraw(); });
+  $("idAll").addEventListener("click",()=>{ while(idSplit()); idDraw(); });
+  $("idReset").addEventListener("click",idReset); idReset();
+
+  // ---------- T4: ROC ----------
+  const RC_Z=(()=>{ const r=mulberry32(99), a=[]; for(let i=0;i<1000;i++) a.push([gauss(r),i<200]); return a; })();
+  function rcRun(){ const t=+$("rcT").value, s=+$("rcS").value; $("rcTV").textContent=fmt(t,2); $("rcSV").textContent=fmt(s,1);
+    const D=RC_Z.map(([z,pos])=>[sig(1.4*(z+(pos?s:0)-s/2)),pos]);
+    const cmAt=th=>{ let tp=0,fp=0,tn=0,fn=0; D.forEach(([sc,pos])=>{ const pr=sc>=th; if(pos&&pr) tp++; else if(pos) fn++; else if(pr) fp++; else tn++; }); return {tp,fp,tn,fn}; };
+    const c=cmAt(t), N=1000;
+    const bins=20, hp=Array(bins).fill(0), hn=Array(bins).fill(0); D.forEach(([sc,pos])=>{ const b=Math.min(bins-1,Math.floor(sc*bins)); (pos?hp:hn)[b]++; });
+    const mx=Math.max(...hn,...hp), X=v=>20+v*270, Y=v=>140-v/mx*125; let h="";
+    [[hn,"var(--ok)"],[hp,"var(--bad)"]].forEach(([arr,col])=>{ let p="M"+X(0)+" 140"; arr.forEach((v,i)=>p+="L"+X(i/bins).toFixed(1)+" "+Y(v).toFixed(1)+"L"+X((i+1)/bins).toFixed(1)+" "+Y(v).toFixed(1)); p+="L"+X(1)+" 140Z"; h+=SVGE("path",{d:p,fill:col,opacity:.35,stroke:col}); });
+    h+=SVGE("line",{x1:X(t),x2:X(t),y1:10,y2:140,stroke:"var(--ink)","stroke-width":2,"stroke-dasharray":"4 3"})+SVGE("text",{x:20,y:158,"font-size":9,style:"fill:var(--ok)"},"■ pagan (800)")+SVGE("text",{x:110,y:158,"font-size":9,style:"fill:var(--bad)"},"■ impagan (200)")+SVGE("text",{x:290,y:158,"text-anchor":"end","font-size":9},"puntuación 0 → 1");
+    $("rcDist").innerHTML=h;
+    $("rcCM").innerHTML='<thead><tr><th>Real \\ Predicho</th><th class="num">Impago</th><th class="num">Paga</th></tr></thead><tbody><tr><td><b>Impago</b></td><td class="num" style="background:var(--ok-soft)">VP '+c.tp+'</td><td class="num" style="background:var(--bad-soft)">FN '+c.fn+'</td></tr><tr><td><b>Paga</b></td><td class="num" style="background:var(--bad-soft)">FP '+c.fp+'</td><td class="num" style="background:var(--ok-soft)">VN '+c.tn+'</td></tr></tbody>';
+    const pts=[]; for(let k=0;k<=200;k++){ const q=cmAt(1-k/200); pts.push([q.fp/800,q.tp/200]); } pts.unshift([0,0]); pts.push([1,1]);
+    let auc=0; for(let i=1;i<pts.length;i++) auc+=(pts[i][0]-pts[i-1][0])*(pts[i][1]+pts[i-1][1])/2;
+    const RX=v=>40+v*240, RY=v=>270-v*240; let r=SVGE("rect",{x:40,y:30,width:240,height:240,fill:"none",stroke:"var(--line)"})+SVGE("line",{x1:RX(0),y1:RY(0),x2:RX(1),y2:RY(1),stroke:"var(--muted)","stroke-dasharray":"4 4"});
+    let p=""; pts.forEach(([x,y])=>p+=(p?"L":"M")+RX(x).toFixed(1)+" "+RY(y).toFixed(1)); r+=SVGE("path",{d:p+"L"+RX(1)+" "+RY(0)+"Z",fill:"var(--accent-soft)",opacity:.6})+SVGE("path",{d:p,fill:"none",stroke:"var(--accent)","stroke-width":2.5});
+    r+=SVGE("circle",{cx:RX(c.fp/800).toFixed(1),cy:RY(c.tp/200).toFixed(1),r:6,fill:"var(--example)",stroke:"var(--surface)","stroke-width":2});
+    r+=SVGE("text",{x:160,y:294,"text-anchor":"middle","font-size":10},"Tasa de falsos positivos (1 − especificidad)")+SVGE("text",{x:14,y:150,"text-anchor":"middle","font-size":10,transform:"rotate(-90 14 150)"},"Sensibilidad")+SVGE("text",{x:160,y:20,"text-anchor":"middle","font-size":12,style:"fill:var(--ink);font-weight:700"},"AUC = "+fmt(auc,3));
+    $("rcRoc").innerHTML=r;
+    const acc=(c.tp+c.tn)/N, prec=c.tp/((c.tp+c.fp)||1), rec=c.tp/200, spec=c.tn/800, pe=((c.tp+c.fn)*(c.tp+c.fp)+(c.tn+c.fp)*(c.tn+c.fn))/N/N, kap=(acc-pe)/(1-pe||1);
+    const box=(l,v,sub)=>'<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.15rem">'+v+'</div><small>'+sub+'</small></div>';
+    $("rcMet").innerHTML=box("Exactitud",fmt(acc*100,1)+" %","(VP+VN)/total")+box("Precisión",fmt(prec*100,1)+" %","VP/(VP+FP)")+box("Sensibilidad",fmt(rec*100,1)+" %","VP/(VP+FN)")+box("Especificidad",fmt(spec*100,1)+" %","VN/(VN+FP)")+box("Tasa de error",fmt((1-acc)*100,1)+" %","(FP+FN)/total")+box("Kappa de Cohen",fmt(kap,3),"pₒ = "+fmt(acc,3)+" · pₑ = "+fmt(pe,3));
+  }
+  ["rcT","rcS"].forEach(id=>$(id).addEventListener("input",rcRun)); rcRun();
+
+  // ---------- T5: reglas ----------
+  const RU_A=["Forma","Superficie","Moretones","Olor","Tallo","Población","Hábitat"];
+  const RU=[["plano","escamosa","sí","anís","estrechándose","disperso","pastos","comestible"],["convexo","escamosa","sí","acre","agrandamiento","varios","pastos","venenoso"],["convexo","lisa","sí","almendra","agrandamiento","numeroso","pastos","comestible"],["convexo","escamosa","sí","almendra","estrechándose","disperso","prados","comestible"],["plano","fibrosa","sí","anís","agrandamiento","varios","bosque","comestible"],["plano","fibrosa","no","ninguno","agrandamiento","varios","urbano","comestible"],["cónico","escamosa","sí","acre","agrandamiento","disperso","urbano","venenoso"],["plano","lisa","sí","anís","agrandamiento","numeroso","prados","comestible"],["convexo","lisa","sí","acre","agrandamiento","varios","urbano","venenoso"]];
+  $("ruCond").innerHTML=RU_A.map((a,j)=>'<div><label for="ru_'+j+'">'+a+'</label><select id="ru_'+j+'" data-ru class="btn" style="width:100%"><option value="">(cualquiera)</option>'+[...new Set(RU.map(r=>r[j]))].map(v=>'<option'+(j===6&&v==="urbano"?' selected':'')+'>'+v+'</option>').join("")+'</select></div>').join("")+'<div><label for="ruC">ENTONCES clase</label><select id="ruC" data-ru class="btn" style="width:100%"><option>venenoso</option><option>comestible</option></select></div>';
+  function ruRun(){ const cond=RU_A.map((_,j)=>$("ru_"+j).value), cls=$("ruC").value, cov=RU.map(r=>cond.every((v,j)=>!v||r[j]===v));
+    $("ruData").innerHTML='<thead><tr><th>#</th>'+RU_A.map(a=>'<th>'+a+'</th>').join("")+'<th>Clase</th></tr></thead><tbody>'+RU.map((r,i)=>'<tr style="'+(cov[i]?(r[7]===cls?'background:var(--ok-soft)':'background:var(--bad-soft)'):'')+'"><td class="num">'+(i+1)+'</td>'+r.map(c=>'<td>'+c+'</td>').join("")+'</tr>').join("")+'</tbody>';
+    const nA=cov.filter(Boolean).length, nAB=RU.filter((r,i)=>cov[i]&&r[7]===cls).length, N=RU.length, ant=cond.map((v,j)=>v?RU_A[j].toLowerCase()+" = "+v:null).filter(Boolean);
+    const box=(l,v,sub)=>'<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.15rem">'+v+'</div><small>'+sub+'</small></div>';
+    $("ruMet").innerHTML='<div class="box" style="grid-column:1/-1"><b>SI</b> '+(ant.length?ant.join(" <b>Y</b> "):"(antecedente vacío)")+' <b>ENTONCES</b> clase = '+cls+'</div>'+box("Cobertura",nA+"/"+N+" = "+fmt(nA/N*100,0)+" %","cumplen el antecedente")+box("Soporte",nAB+"/"+N+" = "+fmt(nAB/N*100,0)+" %","antecedente y consecuente")+box("Confianza",nA?fmt(nAB/nA*100,0)+" %":"—","P(clase | antecedente)"); }
+  document.querySelectorAll("[data-ru]").forEach(s=>s.addEventListener("change",ruRun)); ruRun();
+  $("ruSeq").addEventListener("click",()=>{ const target="venenoso"; let T=RU.map((r,i)=>i); const rules=[]; let html="";
+    while(T.some(i=>RU[i][7]===target)&&rules.length<5){ let cond={}, cand=T.slice(), steps=[];
+      while(true){ const pos=cand.filter(i=>RU[i][7]===target).length; if(pos===cand.length) break;
+        const opts=[]; RU_A.forEach((a,j)=>{ if(cond[j]!=null) return; [...new Set(cand.map(i=>RU[i][j]))].forEach(v=>{ const c=cand.filter(i=>RU[i][j]===v), p=c.filter(i=>RU[i][7]===target).length; if(p) opts.push([j,v,p/c.length,p,c.length]); }); });
+        if(!opts.length) break; opts.sort((x,y)=>y[2]-x[2]||y[3]-x[3]); steps.push(opts.slice(0,4)); const [j,v]=opts[0]; cond[j]=v; cand=cand.filter(i=>RU[i][j]===v); }
+      const covered=cand.filter(i=>RU[i][7]===target); rules.push([cond,covered.length,cand.length]);
+      html+='<div class="box" style="margin:6px 0"><b>Regla '+rules.length+':</b> SI '+Object.entries(cond).map(([j,v])=>RU_A[j].toLowerCase()+" = "+v).join(" Y ")+' ENTONCES venenoso <span class="pill ok">cubre '+covered.length+', confianza '+fmt(covered.length/cand.length*100,0)+' %</span>'+steps.map((o,k)=>'<div style="font-size:.85rem;margin-top:4px;color:var(--muted)">Paso '+(k+1)+' · candidatas: '+o.map(([j,v,p,np,nc],q)=>(q===0?'<b style="color:var(--ink)">':'')+RU_A[j].toLowerCase()+"="+v+" ("+np+"/"+nc+")"+(q===0?'</b>':'')).join(" · ")+'</div>').join("")+'</div>';
+      T=T.filter(i=>!covered.includes(i)); }
+    html+='<div class="box"><b>Regla por defecto:</b> {} → comestible (cubre las '+T.length+' setas restantes)</div>';
+    $("ruSeqOut").innerHTML=html; });
+
+  // ---------- T6: red neuronal ----------
+  let nnSeed=1, NN=null, nnPts=[], nnLossH=[], nnEp=0;
+  function nnData(){ const r=mulberry32(321), t=$("nnData").value; nnPts=[];
+    for(let i=0;i<140;i++){ const x=2*r()-1, y=2*r()-1; const l=t==="xor"?(x*y>0?1:0):t==="circ"?(x*x+y*y<0.42?1:0):(x+0.6*y>0.1?1:0); nnPts.push([x,y,l]); } }
+  function nnInit(){ const r=mulberry32(nnSeed*131), Hn=+$("nnH").value, w=()=>(r()*2-1)*1.2;
+    NN={H:Hn,W1:Array.from({length:Hn},()=>[w(),w()]),b1:Array.from({length:Hn},w),W2:Array.from({length:Hn},w),b2:0}; nnLossH=[]; nnEp=0; }
+  function nnFwd(x,y){ const h=NN.W1.map((wv,j)=>Math.tanh(wv[0]*x+wv[1]*y+NN.b1[j])); const o=sig(h.reduce((s,v,j)=>s+v*NN.W2[j],NN.b2)); return [o,h]; }
+  function nnTrain(E){ const lr=+$("nnLr").value, r=mulberry32(nnSeed*7+nnEp);
+    for(let e=0;e<E;e++){ const idx=nnPts.map((_,i)=>i); for(let i=idx.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+      let L=0; idx.forEach(i=>{ const [x,y,t]=nnPts[i], [o,h]=nnFwd(x,y); L+=-(t*Math.log(o+1e-9)+(1-t)*Math.log(1-o+1e-9)); const d=o-t;
+        for(let j=0;j<NN.H;j++){ const dh=d*NN.W2[j]*(1-h[j]*h[j]); NN.W2[j]-=lr*d*h[j]; NN.W1[j][0]-=lr*dh*x; NN.W1[j][1]-=lr*dh*y; NN.b1[j]-=lr*dh; } NN.b2-=lr*d; });
+      nnLossH.push(L/nnPts.length); nnEp++; } }
+  function nnDraw(){ const S=v=>(v+1)/2*260; let h=""; const G=26;
+    for(let i=0;i<G;i++) for(let j=0;j<G;j++){ const x=-1+(i+0.5)*2/G, y=1-(j+0.5)*2/G, p=nnFwd(x,y)[0]; h+=SVGE("rect",{x:(i*260/G).toFixed(1),y:(j*260/G).toFixed(1),width:(260/G+0.5).toFixed(1),height:(260/G+0.5).toFixed(1),fill:p>0.5?"var(--accent)":"var(--example)",opacity:(Math.abs(p-0.5)*1.3+0.05).toFixed(2)}); }
+    nnPts.forEach(([x,y,l])=>h+=SVGE("circle",{cx:S(x).toFixed(1),cy:(260-S(y)).toFixed(1),r:3.5,fill:l?"var(--accent)":"var(--example)",stroke:"var(--surface)","stroke-width":1.2}));
+    $("nnSvg").innerHTML=h;
+    const L=nnLossH, mx=Math.max(0.75,...L), X=k=>35+k/Math.max(1,L.length-1)*255, Y=v=>140-v/mx*120;
+    let l=SVGE("line",{x1:35,x2:290,y1:140,y2:140,stroke:"var(--line)"})+SVGE("line",{x1:35,x2:35,y1:15,y2:140,stroke:"var(--line)"})+SVGE("text",{x:160,y:156,"text-anchor":"middle","font-size":10},"Épocas ("+nnEp+")")+SVGE("text",{x:30,y:Y(mx)+4,"text-anchor":"end","font-size":9},fmt(mx,2));
+    if(L.length>1){ let p=""; L.forEach((v,k)=>p+=(p?"L":"M")+X(k).toFixed(1)+" "+Y(v).toFixed(1)); l+=SVGE("path",{d:p,fill:"none",stroke:"var(--accent)","stroke-width":2}); }
+    $("nnLoss").innerHTML=l;
+    const acc=nnPts.filter(([x,y,t])=>(nnFwd(x,y)[0]>0.5?1:0)===t).length/nnPts.length;
+    $("nnInfo").innerHTML='Épocas: '+nnEp+' · error (entropía cruzada): '+(L.length?fmt(L[L.length-1],3):"—")+' · exactitud: <b>'+fmt(acc*100,1)+' %</b> · parámetros: '+(NN.H*4+1); }
+  const nnReset=()=>{ nnData(); nnInit(); nnDraw(); };
+  $("nnTrain").addEventListener("click",()=>{ nnTrain(300); nnDraw(); });
+  $("nnReset").addEventListener("click",()=>{ nnSeed++; nnReset(); });
+  $("nnData").addEventListener("change",nnReset); $("nnH").addEventListener("input",()=>{ $("nnHV").textContent=$("nnH").value; nnInit(); nnDraw(); });
+  $("nnLr").addEventListener("input",()=>{ $("nnLrV").textContent=fmt(+$("nnLr").value,2); });
+  $("nnLrV").textContent=fmt(0.5,2); nnReset();
+
+  // ---------- T7: Naive Bayes ----------
+  const NB_A=["Tendencia","Volumen","Noticias"];
+  const NB=[["alcista","alto","positivas","sube"],["alcista","normal","neutras","sube"],["alcista","alto","negativas","baja"],["lateral","normal","positivas","sube"],["lateral","alto","neutras","baja"],["lateral","normal","negativas","baja"],["bajista","alto","negativas","baja"],["bajista","normal","negativas","baja"],["bajista","alto","positivas","sube"],["alcista","normal","positivas","sube"],["lateral","alto","positivas","sube"],["bajista","normal","neutras","baja"],["alcista","alto","neutras","sube"],["bajista","alto","neutras","baja"]];
+  $("nbData").innerHTML='<thead><tr><th>#</th>'+NB_A.map(a=>'<th>'+a+'</th>').join("")+'<th>Día siguiente</th></tr></thead><tbody>'+NB.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td>'+r.map((c,j)=>'<td'+(j===3?' style="font-weight:600;color:'+(c==="sube"?'var(--ok)':'var(--bad)')+'"':'')+'>'+c+'</td>').join("")+'</tr>').join("")+'</tbody>';
+  const NB_DEF=["alcista","alto","negativas"];
+  $("nbSel").innerHTML=NB_A.map((a,j)=>'<div><label for="nb_'+j+'">'+a+' del día nuevo</label><select id="nb_'+j+'" class="btn" style="width:100%">'+[...new Set(NB.map(r=>r[j]))].map(v=>'<option'+(v===NB_DEF[j]?' selected':'')+'>'+v+'</option>').join("")+'</select></div>').join("");
+  function nbRun(){ const lap=$("nbLap").checked, x=NB_A.map((_,j)=>$("nb_"+j).value), classes=["sube","baja"];
+    const res=classes.map(c=>{ const rc=NB.filter(r=>r[3]===c), prior=rc.length/NB.length; const lik=x.map((v,j)=>{ const k=new Set(NB.map(r=>r[j])).size, n=rc.filter(r=>r[j]===v).length; return [n,rc.length,lap?(n+1)/(rc.length+k):n/rc.length,k]; }); return [c,prior,lik,lik.reduce((p,l)=>p*l[2],prior)]; });
+    const tot=res.reduce((s,r)=>s+r[3],0);
+    $("nbOut").innerHTML='<div class="table-wrap"><table><thead><tr><th>Clase</th><th class="num">P(clase)</th>'+NB_A.map((a,j)=>'<th class="num">P('+x[j]+' | clase)</th>').join("")+'<th class="num">Producto</th><th class="num">P(clase | día)</th></tr></thead><tbody>'+res.map(([c,pr,lik,prod])=>'<tr><td><b>'+c+'</b></td><td class="num">'+fmt(pr,3)+'</td>'+lik.map(([n,N,p,k])=>'<td class="num" title="'+(lap?'('+n+'+1)/('+N+'+'+k+')':n+'/'+N)+'">'+(lap?'('+n+'+1)/('+N+'+'+k+')':n+'/'+N)+' = '+fmt(p,3)+'</td>').join("")+'<td class="num">'+fmt(prod,4)+'</td><td class="num"><b>'+(tot?fmt(prod/tot*100,1)+' %':'—')+'</b></td></tr>').join("")+'</tbody></table></div>'+
+      '<p class="out">'+(tot?'Predicción: <b>'+(res[0][3]>=res[1][3]?'sube':'baja')+'</b>':'Ambas probabilidades son 0')+(res.some(r=>r[3]===0)&&!lap?' · <span class="pill bad">Probabilidad cero: un valor nunca visto con esa clase anula todo el producto. Activa Laplace.</span>':'')+'</p>'; }
+  NB_A.forEach((_,j)=>$("nb_"+j).addEventListener("change",nbRun)); $("nbLap").addEventListener("change",nbRun); nbRun();
+
+  // ---------- T8: regresión ----------
+  const LR0=(()=>{ const r=mulberry32(77), a=[]; for(let i=0;i<24;i++){ const x=0.6+4*gauss(r); a.push([x,0.3+1.3*x+2.4*gauss(r)]); } return a; })();
+  let LR=LR0.map(p=>p.slice());
+  const LX=x=>50+(x+12)/24*530, LY=y=>150-y/20*135, LXi=px=>(px-50)/530*24-12, LYi=py=>(150-py)/135*20;
+  function lrRun(){ const n=LR.length, mx=LR.reduce((s,p)=>s+p[0],0)/n, my=LR.reduce((s,p)=>s+p[1],0)/n;
+    let sxy=0,sxx=0,syy=0; LR.forEach(([x,y])=>{ sxy+=(x-mx)*(y-my); sxx+=(x-mx)**2; syy+=(y-my)**2; });
+    const b1=sxy/(sxx||1e-9), b0=my-b1*mx, sse=LR.reduce((s,[x,y])=>s+(y-b0-b1*x)**2,0), r2=1-sse/(syy||1e-9);
+    let h=SVGE("line",{x1:50,x2:580,y1:LY(0),y2:LY(0),stroke:"var(--line)"})+SVGE("line",{x1:LX(0),x2:LX(0),y1:12,y2:290,stroke:"var(--line)"});
+    [-10,-5,5,10].forEach(v=>{ h+=SVGE("text",{x:LX(v),y:LY(0)+14,"text-anchor":"middle","font-size":9},v+" %"); h+=SVGE("text",{x:LX(0)-4,y:LY(v)+3,"text-anchor":"end","font-size":9},v+" %"); });
+    h+=SVGE("text",{x:575,y:LY(0)-6,"text-anchor":"end","font-size":10},"Mercado")+SVGE("text",{x:LX(0)+6,y:22,"font-size":10},"Acción");
+    if($("lrRes").checked) LR.forEach(([x,y])=>h+=SVGE("line",{x1:LX(x).toFixed(1),x2:LX(x).toFixed(1),y1:LY(y).toFixed(1),y2:LY(b0+b1*x).toFixed(1),stroke:"var(--bad)",opacity:.6,"stroke-dasharray":"3 2"}));
+    h+=SVGE("line",{x1:LX(-12),x2:LX(12),y1:LY(b0-12*b1).toFixed(1),y2:LY(b0+12*b1).toFixed(1),stroke:"var(--accent)","stroke-width":2.5});
+    LR.forEach(([x,y],i)=>h+=SVGE("circle",{cx:LX(x).toFixed(1),cy:LY(y).toFixed(1),r:4.5,fill:i>=LR0.length?"var(--example)":"var(--ink)",opacity:.8}));
+    $("lrSvg").innerHTML=h;
+    const box=(l,v,sub)=>'<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.15rem">'+v+'</div><small>'+sub+'</small></div>';
+    $("lrStats").innerHTML=box("β₁ (beta)",fmt(b1,3),"pendiente")+box("β₀ (alfa)",fmt(b0,3)+" %","ordenada en el origen")+box("R²",fmt(r2,3),"varianza explicada")+box("Correlación r",fmt(Math.sign(b1)*Math.sqrt(Math.max(0,r2)),3),"")+box("Observaciones",n,(n-LR0.length)+" añadidas")+box("Ecuación","y = "+fmt(b0,2)+" + "+fmt(b1,2)+"·x","recta de mínimos cuadrados"); }
+  $("lrSvg").addEventListener("click",ev=>{ const sv=$("lrSvg"), pt=sv.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY; const q=pt.matrixTransform(sv.getScreenCTM().inverse()); const x=LXi(q.x), y=LYi(q.y); if(Math.abs(x)>12||Math.abs(y)>20) return; LR.push([x,y]); lrRun(); });
+  $("lrRes").addEventListener("change",lrRun); $("lrReset").addEventListener("click",()=>{ LR=LR0.map(p=>p.slice()); lrRun(); });
+  $("lrOut").addEventListener("click",()=>{ LR.push([-10,16]); lrRun(); }); lrRun();
+  function lgRun(){ const b=+$("lgB").value, a=+$("lgA").value; $("lgBV").textContent=fmt(b,1); $("lgAV").textContent=fmt(a,1);
+    const X=x=>20+(x+6)/12*250, Y=p=>120-p*105; let h=SVGE("line",{x1:20,x2:270,y1:120,y2:120,stroke:"var(--line)"})+SVGE("line",{x1:20,x2:270,y1:Y(0.5),y2:Y(0.5),stroke:"var(--line)","stroke-dasharray":"3 3"});
+    let p=""; for(let i=0;i<=120;i++){ const x=-6+i/10; p+=(p?"L":"M")+X(x).toFixed(1)+" "+Y(sig(a+b*x)).toFixed(1); } h+=SVGE("path",{d:p,fill:"none",stroke:"var(--accent)","stroke-width":2.5});
+    [-6,0,6].forEach(v=>h+=SVGE("text",{x:X(v),y:134,"text-anchor":"middle","font-size":9},v)); h+=SVGE("text",{x:16,y:Y(1)+4,"text-anchor":"end","font-size":9},"1")+SVGE("text",{x:16,y:Y(0)+4,"text-anchor":"end","font-size":9},"0");
+    $("lgSvg").innerHTML=h; $("lgInfo").innerHTML='p(x = 0) = '+fmt(sig(a),3)+' · p = 0,5 en x = '+(Math.abs(b)>1e-6?fmt(-a/b,2):"—")+' · odds ratio e^β₁ = '+fmt(Math.exp(b),2); }
+  ["lgA","lgB"].forEach(id=>$(id).addEventListener("input",lgRun)); lgRun();
+
+  // ---------- T9: clustering jerárquico ----------
+  const HC=[["Eléctrica A",6,14],["Eléctrica B",7,15],["Gasista",5.5,13],["Banco A",9,25],["Banco B",10,27],["Banco C",8.5,24],["Tecno A",15,32],["Tecno B",17,35],["Tecno C",14,30],["Farma A",7,18],["Farma B",8,19],["Minera cripto",25,70]];
+  const HCZ=(()=>{ const m=[1,2].map(k=>HC.reduce((s,r)=>s+r[k],0)/HC.length), sd=[1,2].map((k,i)=>Math.sqrt(HC.reduce((s,r)=>s+(r[k]-m[i])**2,0)/HC.length)); return HC.map(r=>[(r[1]-m[0])/sd[0],(r[2]-m[1])/sd[1]]); })();
+  const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+  function hcBuild(link){ let C=HC.map((_,i)=>({id:i,m:[i],h:0})); const merges=[]; let nid=HC.length;
+    const cen=c=>[c.m.reduce((s,i)=>s+HCZ[i][0],0)/c.m.length,c.m.reduce((s,i)=>s+HCZ[i][1],0)/c.m.length];
+    const D=(a,b)=>{ if(link==="centroid") return dist(cen(a),cen(b)); if(link==="ward"){ const na=a.m.length, nb=b.m.length; return Math.sqrt(2*na*nb/(na+nb))*dist(cen(a),cen(b)); }
+      const ds=[]; a.m.forEach(i=>b.m.forEach(j=>ds.push(dist(HCZ[i],HCZ[j])))); return link==="single"?Math.min(...ds):link==="complete"?Math.max(...ds):ds.reduce((s,v)=>s+v,0)/ds.length; };
+    while(C.length>1){ let best=[0,1,Infinity]; for(let i=0;i<C.length;i++) for(let j=i+1;j<C.length;j++){ const d=D(C[i],C[j]); if(d<best[2]) best=[i,j,d]; }
+      const [i,j,d]=best, nc={id:nid++,m:C[i].m.concat(C[j].m),h:d,l:C[i],r:C[j]}; merges.push(nc); C=C.filter((_,k)=>k!==i&&k!==j).concat([nc]); }
+    return merges; }
+  const HCOL=["var(--p1)","var(--example)","var(--p3)","var(--accent)","var(--p4)","var(--bad)","var(--p5)","var(--ok)","var(--muted)","var(--ink)","var(--p2)","var(--p1)"];
+  function hcRun(){ const link=$("hcL").value, k=+$("hcK").value; $("hcKV").textContent=k;
+    const M=hcBuild(link), N=HC.length, root=M[M.length-1];
+    const groups=[]; (function cut(n){ if(n.m.length===1||M.indexOf(n)<N-k){ groups.push(n.m); return; } cut(n.l); cut(n.r); })(root);
+    const lab=Array(N); groups.forEach((g,c)=>g.forEach(i=>lab[i]=c));
+    const SX=v=>30+(v+1.6)/4.8*255, SY=v=>230-(v+1.4)/4.4*215;
+    let s=SVGE("text",{x:160,y:254,"text-anchor":"middle","font-size":10},"Rentabilidad (z) →")+SVGE("text",{x:12,y:120,"text-anchor":"middle","font-size":10,transform:"rotate(-90 12 120)"},"Volatilidad (z) →");
+    HCZ.forEach(([x,y],i)=>{ s+=SVGE("circle",{cx:SX(x).toFixed(1),cy:SY(y).toFixed(1),r:6,fill:HCOL[lab[i]%HCOL.length]})+SVGE("text",{x:(SX(x)+8).toFixed(1),y:(SY(y)+3).toFixed(1),"font-size":8.5},esc(HC[i][0])); });
+    $("hcSc").innerHTML=s;
+    const order=[]; (function walk(n){ if(n.m.length===1&&!n.l){ order.push(n.m[0]); return; } walk(n.l); walk(n.r); })(root);
+    const hmax=Math.max(...M.map(m=>m.h)), DX=i=>20+order.indexOf(i)*(270/(N-1)), DY=v=>200-v/hmax*185;
+    const pos=new Map(); HC.forEach((_,i)=>pos.set(i,[DX(i),200]));
+    let d=""; M.forEach(m=>{ const a=m.l.m.length===1&&!m.l.l?pos.get(m.l.m[0]):pos.get("c"+m.l.id), b=m.r.m.length===1&&!m.r.l?pos.get(m.r.m[0]):pos.get("c"+m.r.id), y=DY(m.h);
+      d+=SVGE("path",{d:"M"+a[0].toFixed(1)+" "+a[1].toFixed(1)+"V"+y.toFixed(1)+"H"+b[0].toFixed(1)+"V"+b[1].toFixed(1),fill:"none",stroke:"var(--ink)","stroke-width":1.4}); pos.set("c"+m.id,[(a[0]+b[0])/2,y]); });
+    if(k>1&&k<=N){ const hc=(M[N-k-1].h+M[N-k].h)/2; d+=SVGE("line",{x1:10,x2:295,y1:DY(hc).toFixed(1),y2:DY(hc).toFixed(1),stroke:"var(--bad)","stroke-dasharray":"5 4","stroke-width":1.5}); }
+    order.forEach(i=>d+=SVGE("text",{x:DX(i).toFixed(1),y:206,"font-size":8,"text-anchor":"end",transform:"rotate(-60 "+DX(i).toFixed(1)+" 206)",style:"fill:"+HCOL[lab[i]%HCOL.length]+";font-weight:600"},esc(HC[i][0])));
+    $("hcDen").innerHTML=d;
+    $("hcInfo").innerHTML=groups.map((g,c)=>'<span class="pill neutral" style="margin:2px;border-left:4px solid '+HCOL[c%HCOL.length]+'">'+g.map(i=>HC[i][0]).join(", ")+'</span>').join(" "); }
+  ["hcL","hcK"].forEach(id=>$(id).addEventListener("input",hcRun)); $("hcL").addEventListener("change",hcRun); hcRun();
+
+  // ---------- T10: texto ----------
+  $("txIn").value="El Ibex 35 sube con fuerza impulsado por la banca\nTelefónica cae tras presentar resultados peores de lo esperado\nIberdrola mejora sus beneficios y eleva el dividendo\nLa inflación no baja y los bonos caen\nEl BCE mantiene los tipos de interés sin cambios\nLas bolsas europeas suben por segunda sesión consecutiva";
+  const TX_STEPS=[["low","Minúsculas"],["punct","Quitar signos y números"],["stop","Quitar stopwords"],["stem","Raíces (stemming)"]];
+  const TX_ON={low:true,punct:true,stop:true,stem:false};
+  const STOP=new Set("el la los las un una unos unas de del al a y o u e en con por para sin sus su se lo le les que tras es son fue ha han muy mas más como pero sobre entre ya no".split(" "));
+  const POS=new Set("sube suben subir subida mejora mejoran eleva elevan impulsado impulsa fuerza record gana ganan ganancias beneficio beneficios alza alzas recupera recuperan avanza avanzan".split(" "));
+  const NEG=new Set("cae caen caida baja bajan bajada peores peor perdidas pierde pierden recorte recortes desploma desplome crisis riesgo inflacion hunde hunden".split(" "));
+  const stem=w=>{ for(const s of ["aciones","acion","mente","ando","iendo","aron","ieron","ados","idas","ido","ada","as","os","es","an","en","a","o","e","s"]) if(w.endsWith(s)&&w.length-s.length>=3) return w.slice(0,-s.length); return w; };
+  TX_STEPS.forEach(([k,l])=>{ const b=document.createElement("button"); b.className="btn"; b.textContent=l; b.setAttribute("aria-pressed",TX_ON[k]?"true":"false"); b.addEventListener("click",()=>{ TX_ON[k]=!TX_ON[k]; b.setAttribute("aria-pressed",TX_ON[k]?"true":"false"); txRun(); }); $("txSteps").appendChild(b); });
+  function txTokens(line){ let t=line; if(TX_ON.low) t=t.toLowerCase(); if(TX_ON.punct) t=t.replace(/[0-9.,;:!?¡¿"'()«»%€$-]/g," ");
+    let w=t.split(/\s+/).filter(Boolean); if(TX_ON.stop) w=w.filter(x=>!STOP.has(norm(x))); if(TX_ON.stem) w=w.map(x=>stem(norm(x))); return w; }
+  function txRun(){ const lines=$("txIn").value.split("\n").map(s=>s.trim()).filter(Boolean).slice(0,20);
+    const toks=lines.map(txTokens), freq={}; toks.flat().forEach(w=>freq[w]=(freq[w]||0)+1);
+    $("txTok").innerHTML='<b>Tokens tras la limpieza</b> ('+toks.flat().length+' en total, '+Object.keys(freq).length+' distintos)'+toks.map(t=>'<div style="margin-top:4px">'+t.map(w=>'<span class="pill neutral" style="margin:1px">'+esc(w)+'</span>').join("")+'</div>').join("");
+    const top=Object.entries(freq).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,10), mx=top.length?top[0][1]:1;
+    let h=SVGE("text",{x:150,y:14,"text-anchor":"middle","font-size":11,style:"fill:var(--ink);font-weight:700"},"10 términos más frecuentes");
+    top.forEach(([w,c],i)=>{ const y=26+i*19; h+=SVGE("text",{x:96,y:y+12,"text-anchor":"end","font-size":10},esc(w.length>14?w.slice(0,13)+"…":w))+SVGE("rect",{x:100,y,width:(c/mx*170).toFixed(1),height:14,rx:3,fill:"var(--accent)"})+SVGE("text",{x:(104+c/mx*170).toFixed(1),y:y+11,"font-size":10},c); });
+    $("txFreq").innerHTML=h;
+    $("txSent").innerHTML='<thead><tr><th>Titular</th><th>Palabras con polaridad</th><th class="num">Puntuación</th><th>Sentimiento</th></tr></thead><tbody>'+lines.map(l=>{ const w=norm(l).replace(/[^a-zñ ]/g," ").split(/\s+/).filter(Boolean); let sc=0; const hits=[];
+      w.forEach((x,i)=>{ let v=POS.has(x)?1:NEG.has(x)?-1:0; if(!v) return; const neg=i>0&&w[i-1]==="no"; if(neg) v=-v; sc+=v; hits.push((neg?"no ":"")+x+(v>0?" (+1)":" (−1)")); });
+      return '<tr><td>'+esc(l)+'</td><td><small>'+(hits.join(", ")||"—")+'</small></td><td class="num">'+(sc>0?"+":"")+sc+'</td><td>'+(sc>0?'<span class="pill ok">positivo</span>':sc<0?'<span class="pill bad">negativo</span>':'<span class="pill neutral">neutro</span>')+'</td></tr>'; }).join("")+'</tbody>'; }
+  $("txIn").addEventListener("input",txRun); txRun();
+  // ---------- Glosario ----------
+  const GL = [
+    ["KDD","Descubrimiento de conocimiento en bases de datos: patrones válidos, novedosos, útiles y comprensibles (término de 1989).",1],
+    ["Minería de datos","Etapa del KDD que aplica técnicas para extraer patrones.",1],
+    ["Aprendizaje supervisado","Aprende de datos etiquetados: clasificación y regresión.",1],
+    ["Aprendizaje no supervisado","Descubre estructura en datos sin etiquetas: agrupamiento, asociación.",1],
+    ["Sobreajuste","El modelo memoriza el ruido del entrenamiento y generaliza mal.",1],
+    ["Variable ordinal","Categórica con orden (rating, nivel de riesgo).",2],
+    ["Variable continua","Puede tomar infinitos valores entre dos cualesquiera.",2],
+    ["Histograma","Gráfico de frecuencias por intervalos para variables continuas; binwidth = ancho de clase.",2],
+    ["Atípico","Observación que no encaja con el patrón; no se elimina sin justificación.",2],
+    ["Estandarización","Restar la media y dividir por la desviación (z-score).",2],
+    ["Covarianza","Tendencia de dos variables a variar conjuntamente.",2],
+    ["Entropía","Incertidumbre de un conjunto: −Σ p·log₂ p.",3],
+    ["Ganancia de información","Reducción de entropía al dividir por un atributo.",3],
+    ["ID3","Árbol de decisión de Quinlan (1983) basado en la ganancia de información.",3],
+    ["C4.5","Sucesor de ID3 (1993): razón de ganancia, continuos, perdidos, poda. J48 en Weka.",3],
+    ["Poda","Simplificar el árbol (antes o después de crecer) para evitar sobreajuste.",3],
+    ["Matriz de confusión","Tabla de clase real frente a predicha: VP, VN, FP, FN.",4],
+    ["Precisión","VP/(VP+FP): de lo predicho positivo, cuánto lo es.",4],
+    ["Sensibilidad (recall)","VP/(VP+FN): positivos reales detectados.",4],
+    ["Especificidad","VN/(VN+FP): negativos reales acertados.",4],
+    ["Kappa de Cohen","Acuerdo corregido por azar: (pₒ − pₑ)/(1 − pₑ).",4],
+    ["Curva ROC","Sensibilidad frente a tasa de falsos positivos al variar el umbral; AUC = área bajo ella.",4],
+    ["Antecedente / consecuente","Parte SI / parte ENTONCES de una regla.",5],
+    ["Confianza","P(consecuente | antecedente).",5],
+    ["Soporte","Fracción de ejemplos que cumplen antecedente y consecuente.",5],
+    ["Recubrimiento secuencial","Aprender una regla, quitar lo que cubre y repetir.",5],
+    ["Perceptrón","Neurona con umbral; Rosenblatt, a partir de McCulloch y Pitts (1943).",6],
+    ["Backpropagation","Retropropagación del error mediante ∂C/∂w (Rumelhart, Hinton y Williams, 1986).",6],
+    ["Red recurrente (RNN)","Red con ciclos que tiene memoria; para secuencias.",6],
+    ["Teorema de Bayes","P(A|B) = P(B|A)P(A)/P(B).",7],
+    ["Probabilidad a priori / a posteriori","Antes / después de observar la evidencia.",7],
+    ["Naive Bayes","Clasificador bayesiano que supone atributos independientes dada la clase.",7],
+    ["Suavizado de Laplace","Sumar 1 a los conteos para evitar probabilidades cero.",7],
+    ["Red bayesiana","Grafo dirigido acíclico con dependencias condicionales.",7],
+    ["Mínimos cuadrados","Estimación que minimiza la suma de residuos al cuadrado.",8],
+    ["R²","Proporción de varianza explicada por la regresión.",8],
+    ["Regresión logística","Modelo para respuesta binaria con la función sigmoide.",8],
+    ["Odds ratio","e^β: cuánto multiplica las odds un aumento unitario del predictor.",8],
+    ["CART","Árboles de clasificación y regresión de Breiman (1984).",8],
+    ["SVM","Máquina de vectores soporte: hiperplano de margen máximo.",8],
+    ["Clustering","Agrupar elementos similares sin etiquetas.",9],
+    ["Dendrograma","Árbol que muestra las fusiones del clustering jerárquico.",9],
+    ["Método de Ward","Enlace que minimiza el aumento de varianza dentro de los grupos.",9],
+    ["Algoritmo EM","Esperanza-maximización: estima parámetros con variables ocultas.",9],
+    ["B-Cubed","Métrica de evaluación de clustering (Bagga y Baldwin, 1998).",9],
+    ["Corpus","Colección sistemática de textos reales.",10],
+    ["Stopwords","Palabras vacías muy frecuentes que se eliminan.",10],
+    ["Stemming","Reducir palabras a su raíz.",10],
+    ["Análisis de sentimiento","Clasificar la polaridad de un texto: positivo, negativo o neutro.",10]
+  ];
+  function gloss(){
+    const q = document.getElementById("glossQ").value.trim().toLowerCase();
+    const items = GL.filter(g => !q || (g[0]+" "+g[1]).toLowerCase().includes(q));
+    document.getElementById("glossList").innerHTML = items.length ? items.map(g => '<div class="gi"><dl style="margin:0"><dt>'+g[0]+'</dt><dd>'+g[1]+'</dd></dl><small><a href="#tema-'+g[2]+'">Tema '+g[2]+'</a></small></div>').join("") : '<p style="color:var(--muted)">No hay términos que coincidan. Prueba con otra palabra.</p>';
+  }
+  document.getElementById("glossQ").addEventListener("input", gloss); gloss();
+
+  renderProgress();
+  route();
+})();
+</script>
+
+</body>
+</html>

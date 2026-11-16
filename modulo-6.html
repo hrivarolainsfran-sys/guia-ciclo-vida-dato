@@ -1,0 +1,1488 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistemas inteligentes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: guía de estudio con índice lateral fijo (10 temas + glosario) y una vista por tema; en móvil el índice pasa a barra superior deslizable. */
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EEF1F6; --ink:#141C29; --muted:#566275; --line:#D9DFE8;
+  --accent:#2448C4; --accent-ink:#FFFFFF; --accent-soft:#E5EBFB;
+  --example:#A4510B; --example-soft:#FCF0E1;
+  --ok:#157A3A; --ok-soft:#E3F4E8; --bad:#B42323; --bad-soft:#FBE7E7;
+  --p1:#0E8A88; --p2:#2448C4; --p3:#7A3FC2; --p4:#B9650E; --p5:#2E8A3A;
+  --s1:#3C6FE0; --s2:#D9822B; --s3:#2E9C6E;
+  --font-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --font-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+    --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+    --example:#F1AC62; --example-soft:#33261A;
+    --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+    --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+    --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --surface-2:#1B2431; --ink:#E5EAF2; --muted:#98A4B7; --line:#2A3444;
+  --accent:#86A2FF; --accent-ink:#0E131A; --accent-soft:#1C2849;
+  --example:#F1AC62; --example-soft:#33261A;
+  --ok:#5AD785; --ok-soft:#173022; --bad:#FF8A8A; --bad-soft:#3A1C1F;
+  --p1:#3CC7C4; --p2:#86A2FF; --p3:#B88BF5; --p4:#F1AC62; --p5:#6FD47D;
+  --s1:#7EA2FF; --s2:#F2A65A; --s3:#5BD3A0;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.2;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:600;margin-top:2.2rem}
+h3{font-size:1.1rem;font-weight:600;margin-top:1.4rem}
+p{margin:.6rem 0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--font-mono);font-size:.88em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+.app{display:grid;grid-template-columns:272px minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 14px 24px max(14px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.brand{padding:0 8px}
+.brand small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.brand strong{font-family:var(--font-display);font-size:1.15rem;line-height:1.25;display:block;margin-top:2px}
+.progress{padding:0 8px}
+.progress .bar{height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin-top:6px}
+.progress .bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress span{font-size:.8rem;color:var(--muted)}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.navlist a{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.92rem;line-height:1.3}
+.navlist a:hover{background:var(--surface-2)}
+.navlist a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.navlist .num{flex:none;width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem;background:var(--surface-2);color:var(--muted)}
+.navlist a[aria-current="page"] .num{background:var(--accent);color:var(--accent-ink)}
+.navlist a.done .num{background:var(--ok-soft);color:var(--ok)}
+.navsep{height:1px;background:var(--line);margin:6px 8px}
+
+main{min-width:0;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.view{max-width:860px;margin:0 auto}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;font-weight:600;color:var(--accent)}
+.lead{font-size:1.12rem;color:var(--muted);max-width:65ch}
+.prose{max-width:68ch}
+.oneline{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 var(--radius) var(--radius) 0;font-weight:500}
+.objs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.objs li{font-size:.85rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);background:var(--surface)}
+
+/* Callouts */
+.callout{margin:1.2rem 0;padding:14px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.callout>.tag{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+.callout p:first-of-type{margin-top:0}
+.callout p:last-child{margin-bottom:0}
+.ex{background:var(--example-soft);border-color:transparent}
+.ex>.tag{color:var(--example)}
+.exam{background:var(--surface);border:1px solid var(--accent)}
+.exam>.tag{color:var(--accent)}
+.exam ul{margin:.3rem 0 0;padding-left:1.2rem}
+.warn{background:var(--bad-soft);border-color:transparent}
+.warn>.tag{color:var(--bad)}
+
+/* Diagrams */
+.diagram{margin:1.2rem 0;padding:18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow-x:auto}
+.diagram figcaption{font-size:.8rem;color:var(--muted);margin-top:10px}
+.flow{display:flex;align-items:stretch;gap:8px;flex-wrap:nowrap}
+.flow .node{flex:1 1 0;min-width:110px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.86rem;line-height:1.35}
+.flow .node b{display:block;font-family:var(--font-display);font-size:.95rem;margin-bottom:2px}
+.flow .arrow{flex:none;align-self:center;color:var(--muted);font-size:1.2rem}
+.flow .node.hl{background:var(--accent-soft);border-color:var(--accent)}
+@media (max-width:640px){
+  .flow.stack{flex-direction:column}
+  .flow.stack .arrow{transform:rotate(90deg)}
+  .flow.stack .node{min-width:0}
+}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}}
+.box{padding:12px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);font-size:.9rem;line-height:1.45;min-width:0}
+.box h4{font-size:.98rem;margin-bottom:4px}
+.box .k{font-family:var(--font-display);font-weight:700;font-size:1.6rem;line-height:1;color:var(--accent)}
+.box.accent{background:var(--accent-soft);border-color:var(--accent)}
+.box small{color:var(--muted)}
+
+/* Tree */
+.tree{display:flex;flex-direction:column;align-items:center;gap:0;min-width:560px}
+.tree .lvl{display:flex;gap:16px;justify-content:center;width:100%}
+.tree .tnode{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:.85rem;text-align:center;line-height:1.3}
+.tree .tnode.root{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tree .tnode.mid{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.tree .branch{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:14px;border-top:2px solid var(--line);position:relative}
+.tree .stem{width:2px;height:14px;background:var(--line)}
+.tree .leaves{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tree .leaf{font-size:.8rem;padding:6px 9px;border-radius:6px;background:var(--surface);border:1px dashed var(--line);text-align:center;line-height:1.3}
+.tree .leaf em{display:block;font-style:normal;color:var(--muted);font-size:.74rem}
+
+/* Lifecycle */
+.cycle{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-width:640px;counter-reset:ph}
+.phase{position:relative;padding:12px;border-radius:10px;background:var(--surface-2);border-top:4px solid var(--c);font-size:.85rem;line-height:1.4}
+.phase .pn{font-family:var(--font-mono);font-size:.72rem;color:var(--c);font-weight:600}
+.phase b{display:block;font-family:var(--font-display);font-size:.95rem;margin:2px 0 6px}
+.phase .topics{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.phase .topics a{font-size:.72rem;padding:2px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.phase:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:1rem}
+.loopback{margin-top:10px;font-size:.8rem;color:var(--muted);text-align:center;min-width:640px}
+
+/* Tables */
+.table-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--surface-2);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+pre.code{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.55;margin:1rem 0}
+pre.code .c{color:var(--muted)}
+pre.code .o{color:var(--ok)}
+
+/* Data matrix (dato/obs/variable) */
+.matrix td,.matrix th{text-align:center;font-family:var(--font-mono);font-size:.82rem;transition:background .15s}
+.matrix.show-var td:nth-child(3),.matrix.show-var th:nth-child(3){background:var(--accent-soft);color:var(--accent)}
+.matrix.show-obs tbody tr:nth-child(2) td{background:var(--example-soft);color:var(--example)}
+.matrix.show-dat tbody tr:nth-child(3) td:nth-child(4){background:var(--ok-soft);color:var(--ok);font-weight:600}
+
+/* Buttons & inputs */
+.btn{font:inherit;font-size:.88rem;font-weight:500;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+input[type=text],input[type=number]{font:inherit;font-size:.92rem;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.out{font-family:var(--font-mono);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.neutral{background:var(--surface-2);color:var(--muted)}
+
+/* Interactive SVG */
+svg text{fill:var(--muted);font-family:var(--font-body)}
+.dot{transition:r .2s,opacity .2s}
+.dot.st1{fill:var(--s1)}.dot.st2{fill:var(--s2)}.dot.st3{fill:var(--s3)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Gantt */
+.gantt{display:grid;grid-template-columns:200px repeat(8,minmax(44px,1fr));min-width:620px;font-size:.8rem}
+.gantt>div{padding:6px 6px;border-bottom:1px solid var(--line);min-height:32px;display:flex;align-items:center}
+.gantt .gh{font-weight:600;color:var(--muted);font-size:.72rem;justify-content:center}
+.gantt .bar{background:var(--surface-2);border-radius:5px;margin:4px 0;padding:0 6px;font-size:.72rem;color:var(--muted)}
+.gantt .bar.crit{background:var(--accent);color:var(--accent-ink)}
+.gantt .bar.mile{background:transparent;justify-content:center;color:var(--example);font-size:1rem}
+
+/* Quiz */
+.quiz{margin-top:2.4rem;padding:20px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.quiz h2{margin-top:0}
+.qitem{padding:14px 0;border-top:1px solid var(--line)}
+.qitem:first-of-type{border-top:0}
+.qitem p.q{font-weight:600;margin:0 0 8px}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{text-align:left;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;line-height:1.4}
+.qopt:hover:not(:disabled){border-color:var(--accent)}
+.qopt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ink)}
+.qopt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--ink)}
+.qopt:disabled{cursor:default}
+.qexp{font-size:.86rem;color:var(--muted);margin-top:8px}
+.qscore{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;padding-top:14px;border-top:1px solid var(--line)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.pager a{flex:1 1 220px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);text-decoration:none;color:var(--ink);background:var(--surface)}
+.pager a:hover{border-color:var(--accent)}
+.pager small{display:block;color:var(--muted);font-size:.75rem}
+.pager a.next{text-align:right}
+.studied{display:flex;align-items:center;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+/* Home cards */
+.tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:14px}
+.tcard{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.tcard:hover{border-color:var(--accent)}
+.tcard .n{font-family:var(--font-mono);font-size:.75rem;color:var(--muted)}
+.tcard b{font-family:var(--font-display);font-size:1rem;line-height:1.3}
+.tcard span.d{font-size:.84rem;color:var(--muted);line-height:1.4}
+.tcard .st{margin-top:auto;padding-top:6px}
+
+/* Glossary */
+.gloss{display:grid;gap:8px;margin-top:14px}
+.gloss dt{font-weight:600;font-family:var(--font-display)}
+.gloss dd{margin:0 0 6px;color:var(--muted);font-size:.92rem}
+.gloss .gi{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.gloss .gi small{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+
+/* Mobile nav */
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:sticky;top:env(safe-area-inset-top,0px);height:auto;z-index:5;flex-direction:row;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .brand,.progress{display:none}
+  .navlist{flex-direction:row;overflow-x:auto;gap:4px;scrollbar-width:none;min-width:0}
+  .navlist::-webkit-scrollbar{display:none}
+  .navlist a{white-space:nowrap;padding:6px 8px}
+  .navlist a .lbl{display:none}
+  .navlist a[aria-current="page"] .lbl{display:inline}
+  .navsep{width:1px;height:20px;margin:auto 2px}
+  main{padding-block:24px 64px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Módulo 3: componentes extra */
+.pyramid{display:flex;flex-direction:column;align-items:center;gap:6px}
+.pyramid>div{padding:12px 16px;border-radius:8px;text-align:center;font-size:.88rem;line-height:1.4;max-width:100%}
+.pyramid b{display:block;font-family:var(--font-display);font-size:1rem}
+.pyramid span{color:var(--muted)}
+.pyramid .lvl3{width:55%;background:var(--accent);color:var(--accent-ink)}
+.pyramid .lvl3 span{color:var(--accent-ink);opacity:.85}
+.pyramid .lvl2{width:75%;background:var(--accent-soft);border:1px solid var(--accent)}
+.pyramid .lvl1{width:95%;background:var(--surface-2);border:1px solid var(--line)}
+@media (max-width:560px){.pyramid>div{width:100%!important}}
+.balbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.balbar .maj{background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:600;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden}
+.balbar .min{background:var(--example);min-width:3px}
+.cm{display:grid;grid-template-columns:120px 1fr 1fr;gap:8px;max-width:520px}
+.cm .cmh{font-size:.78rem;font-weight:600;color:var(--muted);display:flex;align-items:flex-end;justify-content:center;text-align:center}
+.cm .cmh.side{justify-content:flex-start;align-items:center;text-align:left}
+.cm .cell{padding:10px;border-radius:8px;border:1px solid var(--line)}
+.cm .cell.good{background:var(--ok-soft)}
+.cm .cell.badc{background:var(--bad-soft)}
+.cm .cell label{margin-bottom:4px}
+@media (max-width:480px){.cm{grid-template-columns:80px 1fr 1fr}}
+.mini{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--example)}
+.kfold{display:flex;flex-direction:column;gap:6px;min-width:480px}
+.kfrow{display:grid;grid-template-columns:100px repeat(5,1fr);gap:4px;align-items:center}
+.kfrow span{font-size:.75rem;text-align:center;padding:6px 0;border-radius:5px}
+.kfrow .kt{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.kfrow .ktr{background:var(--accent-soft);color:var(--accent)}
+.kfrow .out{text-align:left;color:var(--muted)}
+select.btn{padding-right:8px}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="nav" aria-label="Temas">
+    <div class="brand"><small>Módulo 6 · Guía de estudio</small><strong>Sistemas inteligentes</strong></div>
+    <div class="progress"><span id="progText">0 de 10 temas estudiados</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="navlist" id="navlist">
+      <li><a href="./" data-v="__home"><span class="num">⌂</span><span class="lbl">Todos los módulos</span></a></li>
+      <li><a href="#inicio" data-v="inicio"><span class="num">◎</span><span class="lbl">Mapa del módulo</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#tema-1" data-v="tema-1"><span class="num">1</span><span class="lbl">Teoría de agentes</span></a></li>
+      <li><a href="#tema-2" data-v="tema-2"><span class="num">2</span><span class="lbl">Arquitecturas de agentes</span></a></li>
+      <li><a href="#tema-3" data-v="tema-3"><span class="num">3</span><span class="lbl">Información y conocimiento</span></a></li>
+      <li><a href="#tema-4" data-v="tema-4"><span class="num">4</span><span class="lbl">Representación del conocimiento</span></a></li>
+      <li><a href="#tema-5" data-v="tema-5"><span class="num">5</span><span class="lbl">Ontologías</span></a></li>
+      <li><a href="#tema-6" data-v="tema-6"><span class="num">6</span><span class="lbl">Lenguajes y Protégé</span></a></li>
+      <li><a href="#tema-7" data-v="tema-7"><span class="num">7</span><span class="lbl">La web semántica</span></a></li>
+      <li><a href="#tema-8" data-v="tema-8"><span class="num">8</span><span class="lbl">Otros modelos (SOC)</span></a></li>
+      <li><a href="#tema-9" data-v="tema-9"><span class="num">9</span><span class="lbl">Lógica y Prolog</span></a></li>
+      <li><a href="#tema-10" data-v="tema-10"><span class="num">10</span><span class="lbl">Razonadores y SE</span></a></li>
+      <li class="navsep" aria-hidden="true"></li>
+      <li><a href="#glosario" data-v="glosario"><span class="num">Aa</span><span class="lbl">Glosario</span></a></li>
+    </ul>
+  </nav>
+
+  <main>
+<!-- ===================== INICIO ===================== -->
+<section class="view" data-view="inicio">
+  <p class="eyebrow">Módulo 6 · 10 temas</p>
+  <h1>Sistemas inteligentes</h1>
+  <p class="lead">Qué es un agente inteligente y cómo se organiza por dentro, cómo se pasa de datos a conocimiento, cómo se representa ese conocimiento (ontologías, RDF, OWL, tesauros, lógica) y cómo razonan sobre él los razonadores semánticos y los sistemas expertos.</p>
+
+  <h2>El mapa del módulo</h2>
+  <figure class="diagram">
+    <div class="cycle">
+      <div class="phase" style="--c:var(--p1)"><span class="pn">AGENTES</span><b>Quién actúa</b>Tipos de agentes y arquitecturas reactivas, deliberativas e híbridas.<div class="topics"><a href="#tema-1">T1</a><a href="#tema-2">T2</a></div></div>
+      <div class="phase" style="--c:var(--p2)"><span class="pn">CONOCIMIENTO</span><b>Con qué actúa</b>Datos → información → conocimiento; roles de la representación.<div class="topics"><a href="#tema-3">T3</a><a href="#tema-4">T4</a></div></div>
+      <div class="phase" style="--c:var(--p3)"><span class="pn">ONTOLOGÍAS</span><b>Cómo se modela</b>Metadatos, ontologías, RDF, RDFS, OWL, SPARQL, Protégé.<div class="topics"><a href="#tema-5">T5</a><a href="#tema-6">T6</a><a href="#tema-7">T7</a></div></div>
+      <div class="phase" style="--c:var(--p4)"><span class="pn">OTROS MODELOS</span><b>Alternativas</b>Taxonomías, tesauros, folksonomías, mapas mentales.<div class="topics"><a href="#tema-8">T8</a></div></div>
+      <div class="phase" style="--c:var(--p5)"><span class="pn">RAZONAR</span><b>Cómo se deduce</b>Lógica, Prolog, razonadores y sistemas expertos.<div class="topics"><a href="#tema-9">T9</a><a href="#tema-10">T10</a></div></div>
+    </div>
+    <p class="loopback">Idea transversal: un agente solo es tan inteligente como el <b>conocimiento</b> que maneja y la <b>capacidad de razonar</b> sobre él.</p>
+    <figcaption>Cómo se conectan los 10 temas.</figcaption>
+  </figure>
+
+  <h2>Temas</h2>
+  <div class="tcards" id="tcards"></div>
+
+  <div class="callout exam">
+    <span class="tag">Cómo usar esta guía</span>
+    <ul>
+      <li>Cada tema empieza con una frase resumen y acaba con un test de 5 preguntas.</li>
+      <li>Los recuadros naranjas son <b>ejemplos en mercados</b>; los azules, lo que más se pregunta en el <b>examen</b>.</li>
+      <li>Simuladores: cuatro agentes operando, arquitectura de subsunción, calidad de datos, formas de representar, validador de ontología, mini-SPARQL, búsqueda semántica, folksonomía, tablas de verdad y Prolog, y red bayesiana.</li>
+      <li>Tu progreso se guarda en este navegador.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== TEMA 1 ===================== -->
+<section class="view" data-view="tema-1" hidden>
+  <p class="eyebrow">Tema 1</p>
+  <h1>Teoría de agentes</h1>
+  <p class="oneline">Un <b>agente</b> es una entidad que percibe su entorno con <b>sensores</b> y actúa sobre él con <b>actuadores</b> para lograr objetivos con cierta <b>autonomía</b>. Los agentes inteligentes se clasifican en <b>reactivos simples</b>, <b>basados en modelos</b>, <b>basados en metas</b>, <b>basados en utilidad</b> y <b>que aprenden</b>.</p>
+  <ul class="objs"><li>Origen del concepto</li><li>Tipos de agentes</li><li>Programas de agente</li><li>Agentes de software</li></ul>
+
+  <h2>Origen y tipos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Modelo de Hewitt (1977)</h4>Un agente es un objeto <b>independiente, interactivo y ejecutable</b> con estado interno y capacidad de comunicarse. A diferencia de los objetos (métodos y atributos), los agentes se definen por su <b>comportamiento</b>. La teoría se desarrolla en los 90; Deep Blue (1997) la populariza.</div>
+    <div class="box"><h4>Categorías</h4>Agentes <b>humanos</b>, <b>hardware</b> y <b>software</b>. Los de software se dividen en agentes de <b>información</b>, <b>cooperativos</b> y de <b>transacción</b>. Áreas de origen: interfaces hombre-máquina, IA y programación orientada a objetos/concurrente.</div>
+  </div>
+  <div class="grid g3" style="margin-top:12px">
+    <div class="box"><h4>Independientes</h4>Pueden cambiar la forma de lograr un objetivo.</div>
+    <div class="box"><h4>Distribuidos y multiagente</h4>En distintos ordenadores; los multiagente deben comunicarse para lograr sus objetivos.</div>
+    <div class="box"><h4>Móviles</h4>Se trasladan por la red, suspenden y reanudan su ejecución y filtran la información antes de enviarla (heredan la idea de RPC, 1976).</div>
+  </div>
+
+  <h2>Programas de agente inteligente</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>Decide según…</th><th>Limitación</th></tr></thead>
+    <tbody>
+      <tr><td><b>Reactivo simple</b></td><td>Solo la percepción actual, con reglas condición–acción</td><td>Inteligencia muy limitada; bucles infinitos (la aleatoriedad ayuda a salir)</td></tr>
+      <tr><td><b>Basado en modelos</b></td><td>Un <b>estado interno</b> construido con la historia: cómo evoluciona el mundo y cómo le afectan sus acciones</td><td>Necesita un buen modelo del mundo</td></tr>
+      <tr><td><b>Basado en metas</b></td><td>Un objetivo; planifica secuencias de acciones</td><td>La meta es binaria: cumplida o no</td></tr>
+      <tr><td><b>Basado en utilidad</b></td><td>Una función que asigna a cada estado un número real ("felicidad"); elige la acción de <b>mayor utilidad esperada</b></td><td>Hay que definir bien la utilidad; resuelve metas contradictorias</td></tr>
+      <tr><td><b>Que aprende</b></td><td>Mejora con sus propias acciones; tiene un elemento que mide su éxito</td><td>Complejo de diseñar</td></tr>
+      <tr><td><b>De consulta (asesor)</b></td><td>Responde preguntas dividiéndolas en tareas y creando subagentes</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Simulador: cuatro agentes ante el mismo mercado</h2>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label for="agLam">Aversión al riesgo del agente de utilidad λ = <b class="out" id="agLamV">4</b></label><input type="range" id="agLam" min="0" max="20" step="1" value="4" style="width:100%"></div>
+      <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap"><button class="btn" id="agNew">Otro escenario de precios</button></div>
+    </div>
+    <svg id="agSvg" viewBox="0 0 600 230" width="100%" style="display:block;margin-top:10px" role="img" aria-label="Valor de la cartera de cada agente"></svg>
+    <div class="table-wrap"><table id="agTable"></table></div>
+    <figcaption>Precios simulados (no reales). <b>Reactivo simple</b>: compra si hoy bajó y vende si subió (solo mira hoy). <b>Basado en modelos</b>: estado interno = media de 10 días; está invertido si el precio supera la media. <b>Basado en metas</b>: compra y vende al lograr +8 % (o −5 % de stop). <b>Basado en utilidad</b>: elige exposición 0, 50 % o 100 % maximizando U = w·μ − λ·w²·σ².</figcaption>
+  </figure>
+
+  <h2>Agentes en ingeniería del software</h2>
+  <p class="prose">"Un programa que actúa para un usuario u otro programa". Evolucionan de la IA distribuida. El vídeo <i>Knowledge Navigator</i> (John Sculley, Apple, 1987) imaginó el asistente personal. Ojo: asistentes como el clip de Office imitan a un agente pero solo cumplen, como mucho, la <b>sociabilidad</b>.</p>
+  <div class="grid g3">
+    <div class="box"><h4>De compra</h4>Buscan productos y proveedores según los requisitos del cliente (robots comerciales).</div>
+    <div class="box"><h4>De usuario</h4>Cliente de un protocolo de red: navegadores, rastreadores; se identifican con la cabecera HTTP <span class="mono">User-agent</span>.</div>
+    <div class="box"><h4>De monitorización y vigilancia</h4>Supervisan sistemas, inventario o precios de la competencia.</div>
+    <div class="box"><h4>De minería de datos</h4>Detectan patrones y tendencias en almacenes de datos y alertan de cambios.</div>
+    <div class="box"><h4>De red y comunicación</h4>Intermediarios entre cliente y servidor o entre pares.</div>
+  </div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un <b>algoritmo de ejecución</b> que trocea una orden grande es un agente basado en metas (completar la orden) y en utilidad (minimizar impacto y coste). Un <b>agente de monitorización</b> vigila precios de la competencia o noticias, y un <b>agente de minería</b> busca patrones de abuso de mercado en los registros de operaciones.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Hewitt 1977: objeto independiente, interactivo y ejecutable con estado interno y comunicación.</li>
+    <li>Agentes humanos, hardware y software (información, cooperativos, transacción).</li>
+    <li>Reactivo simple → solo percepción actual. Basado en modelos → estado interno. Metas → planificar. Utilidad → número real, máxima utilidad esperada.</li>
+    <li>Agentes de software: compra, usuario (User-agent), monitorización, minería de datos, red.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-1"></div>
+</section>
+
+<!-- ===================== TEMA 2 ===================== -->
+<section class="view" data-view="tema-2" hidden>
+  <p class="eyebrow">Tema 2</p>
+  <h1>Arquitecturas de agentes</h1>
+  <p class="oneline">La arquitectura define cómo se descompone un agente en módulos. Los <b>reactivos</b> responden a estímulos con reglas sin modelo simbólico del mundo; los <b>deliberativos</b> razonan con lógica sobre una base de conocimiento (modelo <b>BDI</b>); los <b>híbridos</b> combinan ambos en capas <b>horizontales</b> o <b>verticales</b>.</p>
+  <ul class="objs"><li>Razonamiento práctico y BDI</li><li>Reactivos y subsunción</li><li>Deliberativos</li><li>Híbridos</li></ul>
+
+  <h2>El proceso de razonamiento: BDI</h2>
+  <p class="prose">Entradas del agente: conocimiento previo del mundo, experiencia pasada, valores y metas, y observaciones. Salida: <b>acciones</b>. Un sistema de expresión y razonamiento tiene <b>sintaxis</b>, <b>semántica</b> y <b>cálculo</b>.</p>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>Revisión de creencias</b>Percepción + creencias → nuevas creencias</div><div class="arrow">→</div>
+      <div class="node"><b>Generar opciones</b>Creencias + intenciones → deseos</div><div class="arrow">→</div>
+      <div class="node"><b>Filtro (deliberar)</b>Elige a qué comprometerse</div><div class="arrow">→</div>
+      <div class="node"><b>Intenciones</b>Lo que el agente se compromete a lograr</div><div class="arrow">→</div>
+      <div class="node hl"><b>Selección de acción</b>Acción según la intención actual</div>
+    </div>
+    <figcaption>Belief – Desire – Intention: creencias, deseos e intenciones.</figcaption>
+  </figure>
+<pre class="code"><span class="c">// Intérprete BDI</span>
+Inicializar_estado()
+Repetir
+  opciones := generador_opciones(cola_eventos)
+  seleccionadas := decidir(opciones)
+  actualizar_intenciones(seleccionadas)
+  ejecutar()
+  leer_nuevos_eventos_externos()
+  eliminar_intenciones_alcanzadas()
+  eliminar_intenciones_imposibles()
+Fin repetir</pre>
+
+  <h2>Agentes reactivos</h2>
+  <p class="prose">También llamados <b>estímulo–respuesta</b>: sin modelo simbólico del mundo ni razonamiento complejo, procesamiento <b>de abajo arriba</b>. Se basan en <b>sistemas de producción</b> <span class="mono">c₁ → a₁, c₂ → a₂, …</span>. Para resolver conflictos cuando varias condiciones coinciden, la <b>arquitectura de subsunción</b> ordena los comportamientos: uno de mayor prioridad <b>inhibe</b> a los inferiores. Su gran aplicación: controladores de robots. Su punto débil: el comportamiento proactivo.</p>
+<pre class="code">while (true) {
+  estado = interpretar_entrada(percepcion);
+  regla  = correspondencia(estado, Reglas);
+  ejecutar(regla, accion);
+}</pre>
+  <h3>Simulador: los robots recolectores (subsunción)</h3>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Ejemplo del temario: robots que recogen minerales agrupados y los llevan a la nave nodriza, comunicándose solo a través del entorno (gradiente de señal y "migas" radiactivas). Marca lo que percibe el robot:</p>
+    <div id="subSens" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+    <div class="table-wrap" style="margin-top:8px"><table id="subTable"></table></div>
+    <p class="out" id="subOut"></p>
+    <figcaption>Las reglas están ordenadas por prioridad: se ejecuta la primera que se cumple y las de abajo quedan <b>inhibidas</b>. "Si cierto → moverse al azar" siempre se cumple: es el comportamiento por defecto.</figcaption>
+  </figure>
+
+  <h2>Agentes deliberativos</h2>
+  <p class="prose">Proactivos, basados en la <b>planificación clásica</b> y en la hipótesis del <b>sistema de símbolos físicos</b> de <b>Newell y Simon</b>. El estado interno es una base de conocimiento en lógica de predicados: si L son las sentencias de primer orden, B = ℘(L) son las bases posibles.</p>
+  <div class="grid g3">
+    <div class="box"><h4>Percepción</h4><span class="mono">E → P</span></div>
+    <div class="box"><h4>Siguiente</h4><span class="mono">B × P → B</span> (actualiza la base)</div>
+    <div class="box"><h4>Acción</h4><span class="mono">B → A</span>: si de la base se deriva <span class="mono">ejecutar(a)</span>, a es la mejor acción</div>
+  </div>
+  <p class="prose">Problema: deciden suponiendo que el mundo no cambia mientras piensan. El modelo <b>BDI</b> añade el razonamiento práctico. Se dividen en arquitecturas <b>intencionales</b> (BDI) y <b>sociales</b> (modelan a otros agentes).</p>
+
+  <h2>Agentes híbridos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Capas horizontales</h4>Todas las capas conectadas a la entrada y la salida: <b>reactiva</b> (responde ya), <b>planificadora</b> (proactiva) y <b>modeladora</b> (predice y genera nuevos objetivos). Un subsistema de control basado en reglas decide qué capa manda.</div>
+    <div class="box"><h4>Capas verticales</h4>La entrada y la salida pasan por un único nivel: <b>comportamiento</b> (reactividad), <b>planificación</b> (proactividad) y <b>cooperación</b> (interacción social), con una base de conocimiento por nivel.</div>
+  </div>
+  <div class="table-wrap" style="margin-top:12px"><table>
+    <thead><tr><th></th><th>Humano</th><th>Ordenador</th></tr></thead>
+    <tbody><tr><td><b>Sensores</b></td><td>Ojos, oído, piel, lengua</td><td>Teclado, ratón</td></tr><tr><td><b>Actuadores</b></td><td>Piernas, brazos, boca, dedos</td><td>Mensajes, email, archivos</td></tr></tbody>
+  </table></div>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un sistema de trading suele ser <b>híbrido</b>: una capa reactiva corta posiciones si salta un límite de riesgo (milisegundos, sin deliberar), una capa planificadora reparte la orden a lo largo del día y una capa modeladora revisa las previsiones y fija los objetivos del día siguiente. La capa de riesgo <b>inhibe</b> a las demás, como en la subsunción.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>BDI: creencias, deseos, intenciones; funciones de revisión, generación de opciones, filtro y selección de acción.</li>
+    <li>Reactivos: sistemas de producción c → a; subsunción = prioridades con inhibición; aplicación: robótica.</li>
+    <li>Deliberativos: Newell y Simon (símbolos físicos); percepción E→P, siguiente B×P→B, acción B→A.</li>
+    <li>Híbridos: horizontales (reactiva, planificadora, modeladora) y verticales (comportamiento, planificación, cooperación).</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-2"></div>
+</section>
+
+<!-- ===================== TEMA 3 ===================== -->
+<section class="view" data-view="tema-3" hidden>
+  <p class="eyebrow">Tema 3</p>
+  <h1>Información y conocimiento</h1>
+  <p class="oneline">Según <b>Davenport y Prusak (1999)</b>: los <b>datos</b> son valores sin significado; la <b>información</b> son datos procesados con significado, propósito y contexto; el <b>conocimiento</b> mezcla experiencia, valores, información y saber hacer, y sirve para actuar. La calidad de los datos se evalúa (DQA) y se capturan con métodos como encuestas, entrevistas u observación.</p>
+  <ul class="objs"><li>Datos, información, conocimiento</li><li>Calidad de datos</li><li>Captura de datos y DAQ</li><li>Adquisición de conocimiento</li></ul>
+
+  <h2>De dato a conocimiento</h2>
+  <figure class="diagram">
+    <div class="pyramid">
+      <div class="lvl3" style="width:45%"><b>Conocimiento</b><span>"Cuando el BCE sube tipos, los bancos suben": regla útil para actuar</span></div>
+      <div class="lvl2" style="width:70%"><b>Información</b><span>"SAN ha subido un 2,1 % hoy tras la decisión del BCE": responde qué, quién, cuándo</span></div>
+      <div class="lvl1" style="width:95%"><b>Datos</b><span>4,85 · 4,95 · 10:31 · SAN: valores sueltos sin significado</span></div>
+    </div>
+    <figcaption>El conocimiento se deriva de la información igual que la información de los datos.</figcaption>
+  </figure>
+  <div class="grid g3">
+    <div class="box"><h4>Datos</h4>Unidad semántica más pequeña; no dicen el porqué. Tipos: objetivos, subjetivos, cualitativos, cuantitativos. Muchos datos no siempre es bueno.</div>
+    <div class="box"><h4>Información</h4>Puede usarla mucha gente a la vez sin destruirse; a veces caduca pronto.</div>
+    <div class="box"><h4>Conocimiento</h4>Intangible, se enriquece al compartirse, vive en personas y rutinas. Clases: terminológico, de rutina, de clasificación y heurístico.</div>
+  </div>
+
+  <h2>Evaluación de la calidad de los datos (DQA)</h2>
+  <p class="prose">Serie de evaluaciones científicas y estadísticas que comprueban si los datos cumplen los estándares de la empresa: precisión, integridad, actualización, consistencia, relevancia, accesibilidad y fiabilidad. Busca las causas de problemas, no solo los campos vacíos.</p>
+  <h3>Simulador: audita un fichero de operaciones</h3>
+  <figure class="diagram">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn" id="dqFix">Aplicar limpieza</button>
+      <button class="btn" id="dqReset">Datos originales</button>
+    </div>
+    <div class="table-wrap" style="margin-top:8px"><table id="dqTable"></table></div>
+    <div class="grid g3" id="dqScore" style="margin-top:8px"></div>
+    <figcaption>Celdas en rojo: problemas detectados. Completitud (sin vacíos), validez (precio &gt; 0 y cantidad entera), consistencia (misma divisa y formato de fecha), unicidad (sin duplicados) y actualidad (como mucho 2 días de antigüedad respecto al 14/11/2026).</figcaption>
+  </figure>
+
+  <h2>Captura de datos y adquisición de información</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Métodos de captura</h4>Estudio de casos, datos de uso, listas de verificación, observación, entrevista, grupo de enfoque y encuestas. También audiovisual, análisis en tiempo real y datos anónimos.</div>
+    <div class="box"><h4>Adquisición (DAQ)</h4>Tomar señales físicas, convertirlas en tensión y digitalizarlas con una tarjeta <b>DAQ</b>. El tiempo de conversión va del inicio (SOC) a la salida válida.</div>
+    <div class="box"><h4>Tipos de DAQ</h4>Ambiental (satélite), audio y vibraciones, control de movimiento (láser) y con visión artificial (robots).</div>
+  </div>
+  <p class="prose"><b>Adquisición de conocimiento</b>: según <b>Piaget</b>, por <b>asimilación</b> (integrar lo nuevo en los esquemas que ya existen) y <b>acomodación/adaptación</b> (modificar esos esquemas).</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un proveedor de datos de mercado entrega millones de <b>datos</b> (ticks). El terminal los convierte en <b>información</b> (velas, variaciones, volumen). El gestor, con su experiencia, extrae <b>conocimiento</b> ("en jornadas de vencimiento el volumen se dispara al cierre"). Un precio erróneo (un 0 o un desplazamiento de coma) que no pase la DQA puede disparar órdenes automáticas equivocadas.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Davenport y Prusak (1999): datos → información (qué, quién, cómo, cuándo, dónde) → conocimiento (para actuar).</li>
+    <li>Conocimiento: terminológico, de rutina, de clasificación, heurístico.</li>
+    <li>DQA: evaluaciones científicas y estadísticas frente a los estándares de la empresa.</li>
+    <li>Captura: casos, datos de uso, checklist, observación, entrevista, grupo de enfoque, encuestas. DAQ digitaliza señales.</li>
+    <li>Piaget: asimilación y adaptación.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-3"></div>
+</section>
+
+<!-- ===================== TEMA 4 ===================== -->
+<section class="view" data-view="tema-4" hidden>
+  <p class="eyebrow">Tema 4</p>
+  <h1>Representación del conocimiento</h1>
+  <p class="oneline">Representar el conocimiento es expresarlo de forma <b>explícita</b> para que una máquina pueda hacer inferencias. Según sus <b>cinco roles</b>, una representación es un <b>sustituto</b>, un conjunto de <b>compromisos ontológicos</b>, una <b>teoría parcial del razonamiento</b>, un medio de <b>computación eficiente</b> y un medio de <b>expresión humana</b>.</p>
+  <ul class="objs"><li>Historia y lenguajes</li><li>Técnicas</li><li>Los cinco roles</li><li>Características</li></ul>
+
+  <h2>Historia</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Época</th><th>Hito</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1970–80</td><td>Heurísticas, redes neuronales, demostración de teoremas, sistemas expertos (MYCIN)</td></tr>
+      <tr><td class="num">1972–73</td><td><b>Prolog</b>: proposiciones y lógica para sacar conclusiones</td></tr>
+      <tr><td class="num">Años 80</td><td><b>KL-ONE</b> (énfasis en la representación misma); proyecto <b>Cyc</b> de sentido común (física elemental, tiempo, causalidad, motivos, objetos)</td></tr>
+      <tr><td class="num">1995</td><td><b>Dublin Core</b>, estándar de metadatos</td></tr>
+      <tr><td class="num">Después</td><td>SGML → HTML → XML; estándares de la web semántica (RDF, OWL)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Simulador: un mismo conocimiento, cinco técnicas</h2>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Conocimiento: <i>"Un bono con rating inferior a BBB− es de alto rendimiento (especulativo); el bono X de Telefónica tiene rating BB+."</i></p>
+    <div id="krTabs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div id="krOut" style="margin-top:10px"></div>
+    <figcaption>Cada técnica hace fácil ver unas cosas y difícil otras: eso es el <b>compromiso ontológico</b>.</figcaption>
+  </figure>
+
+  <h2>Los cinco roles</h2>
+  <div class="grid g2">
+    <div class="box"><h4>1 · Sustituto</h4>Ocupa el lugar de la cosa real para <b>pensar en vez de actuar</b>. La única representación exacta de un objeto es el objeto mismo: todo sustituto es incompleto y, por tanto, <b>alguna conclusión será errónea</b>.</div>
+    <div class="box"><h4>2 · Compromisos ontológicos</h4>Elegir representación es decidir qué mirar y qué ignorar. El compromiso empieza con la primera elección (lógica, reglas, marcos) y <b>se acumula en niveles</b>. No es una estructura de datos.</div>
+    <div class="box"><h4>3 · Teoría parcial del razonamiento</h4>Dice qué <b>se puede</b> inferir (razonamiento sancionado) y qué <b>se debe</b> inferir (recomendado).</div>
+    <div class="box"><h4>4 · Computación eficiente</h4>Organiza la información para que las conclusiones recomendadas se obtengan rápido (adecuación heurística).</div>
+    <div class="box"><h4>5 · Expresión humana</h4>Lenguaje para contar el mundo a la máquina y a otras personas: importa lo <b>fácil</b> que es, no solo si es posible.</div>
+  </div>
+
+  <h2>Características de una buena representación</h2>
+  <div class="grid g3">
+    <div class="box"><b>Cobertura</b> amplia y profunda</div>
+    <div class="box"><b>Comprensible</b> por humanos, modular y con jerarquía de clases</div>
+    <div class="box"><b>Consistencia</b>: sin redundancias ni contradicciones</div>
+    <div class="box"><b>Eficiencia</b></div>
+    <div class="box"><b>Fácil de modificar</b> y actualizar</div>
+    <div class="box"><b>Soporte</b> a la actividad inteligente que la usa</div>
+  </div>
+  <p class="prose">Ejemplo del temario: Wikipedia tiene cobertura (millones de artículos), es comprensible (categorías), consistente (redirecciones al mismo artículo), eficiente y fácil de actualizar.</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un modelo de riesgo de crédito es un <b>sustituto</b> de la realidad: si representa a las empresas solo por su rating, ignora su liquidez. Ese compromiso ontológico explica por qué algunos bonos con buen rating impagaron en 2008: lo que se dejó fuera de la representación se volvió relevante.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Técnicas: marcos, reglas, etiquetas, redes semánticas (y lógica).</li>
+    <li>5 roles: sustituto, compromisos ontológicos, teoría parcial del razonamiento, computación eficiente, expresión humana.</li>
+    <li>Todo sustituto es imperfecto → conclusiones erróneas inevitables.</li>
+    <li>Prolog (1973), KL-ONE (80s), Cyc, Dublin Core (1995).</li>
+    <li>Características: cobertura, comprensión, consistencia, eficiencia, modificación, soporte.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-4"></div>
+</section>
+
+<!-- ===================== TEMA 5 ===================== -->
+<section class="view" data-view="tema-5" hidden>
+  <p class="eyebrow">Tema 5</p>
+  <h1>Ontologías</h1>
+  <p class="oneline">Los <b>metadatos</b> son datos sobre datos (quién, qué, cuándo, dónde, por qué). Una <b>ontología</b> informática es una definición <b>formal</b> de los tipos, propiedades y relaciones de un dominio. Se construye con metodologías como <b>Ontology Development 101</b>: alcance, reutilizar, términos, clases, slots, facets e instancias.</p>
+  <ul class="objs"><li>Metadatos</li><li>Ontología filosófica e informática</li><li>Dominio vs nivel superior</li><li>Cómo construir una ontología</li></ul>
+
+  <h2>Metadatos</h2>
+  <p class="prose">"Datos sobre datos": recogen las propiedades esenciales de un recurso y responden <b>¿quién? ¿qué? ¿cuándo? ¿dónde? ¿por qué?</b>. No son nuevos: la leyenda de un mapa impreso ya es un metadato. Sirven para buscar y añadir valor; se producen para colecciones, catálogos y datos de uso (museos, bibliotecas virtuales, archivos digitales).</p>
+
+  <h2>De la filosofía a la informática</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Filosófica</h4>Del griego <i>ontos</i> (ser) y <i>logos</i> (estudio): rama de la metafísica que estudia qué existe y sus categorías (sustancias, propiedades, relaciones, eventos). Platón y Aristóteles. Teorías monocategoría o multicategoría, jerárquicas o planas.</div>
+    <div class="box"><h4>Informática</h4>Desde los años 80 la IA usa "ontología" para la teoría del mundo modelado. Definición formal de tipos, propiedades y relaciones de un dominio, con una taxonomía. Ejemplos grandes: <b>WordNet</b> y <b>Cyc</b>. Estructura básica: <b>sujeto – predicado – objeto</b>. Se visualiza como grafos o árboles (VOWL para OWL).</div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4>Ontología de dominio</h4>Conceptos de una parte concreta del mundo (finanzas, medicina). Fusionar ontologías de dominio que no comparten una ontología superior es manual, caro y lento.</div>
+    <div class="box"><h4>Ontología de nivel superior</h4>Términos muy generales comunes a todos los dominios (objeto, propiedad, relación). Sus clases son superclases de las de dominio y permiten la <b>interoperabilidad</b>. Ninguna es estándar aceptado.</div>
+  </div>
+  <p class="prose">Otros tipos: de aplicación, generales, de tareas, terminológicas, de información y de modelado del conocimiento.</p>
+
+  <h2>Metodologías</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Metodología</th><th>Rasgo</th></tr></thead>
+    <tbody>
+      <tr><td><b>Cyc</b></td><td>Lenat y Guha, 1990: pasos generales</td></tr>
+      <tr><td><b>Uschold y King</b></td><td>1995, a partir de la Enterprise Ontology</td></tr>
+      <tr><td><b>Grüninger y Fox</b></td><td><b>Preguntas de competencia</b> en lenguaje natural para fijar el alcance</td></tr>
+      <tr><td><b>METHONTOLOGY</b></td><td>La más completa: trata la ontología como un proyecto software</td></tr>
+      <tr><td><b>On-To-Knowledge</b></td><td>Gestión del conocimiento en grandes organizaciones</td></tr>
+      <tr><td><b>TERMINAE</b></td><td>2002, construye ontologías a partir de texto con PLN</td></tr>
+      <tr><td><b>Ontology Development 101</b></td><td>Universidad de Stanford</td></tr>
+    </tbody>
+  </table></div>
+  <figure class="diagram">
+    <div class="flow">
+      <div class="node"><b>1 · Dominio y alcance</b>Preguntas de competencia</div><div class="arrow">→</div>
+      <div class="node"><b>2 · Reutilizar</b>Ontologías existentes (Cyc, UNSPSC, RosettaNet, DMOZ)</div><div class="arrow">→</div>
+      <div class="node"><b>3 · Términos</b>Lista de términos importantes</div><div class="arrow">→</div>
+      <div class="node"><b>4 · Clases y jerarquía</b>Top-down, bottom-up o híbrido</div><div class="arrow">→</div>
+      <div class="node"><b>5 · Slots</b>Propiedades; las subclases las heredan</div><div class="arrow">→</div>
+      <div class="node"><b>6 · Facets</b>Tipo, cardinalidad, dominio y rango</div><div class="arrow">→</div>
+      <div class="node hl"><b>7 · Instancias</b>Elegir clase, crear y rellenar slots</div>
+    </div>
+    <figcaption>Si A es superclase de B, toda instancia de B es instancia de A (B "es un tipo de" A). Los slots se definen en la clase más general posible.</figcaption>
+  </figure>
+
+  <h3>Simulador: crea una instancia y valida sus facets</h3>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div>
+        <label for="onClass">Clase</label>
+        <select id="onClass" class="btn" style="width:100%"></select>
+        <div id="onTree" class="box" style="margin-top:8px;font-size:.88rem"></div>
+      </div>
+      <div><div id="onForm"></div><button class="btn" id="onCreate" style="margin-top:8px">Crear instancia</button></div>
+    </div>
+    <div id="onOut" style="margin-top:8px"></div>
+    <figcaption>Los slots heredados aparecen marcados. Cada facet comprueba el tipo de valor (string, número, enumerado, instancia de otra clase), la cardinalidad (obligatorio o no) y el rango.</figcaption>
+  </figure>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p><b>FIBO</b> (Financial Industry Business Ontology) es una ontología de dominio financiero. Una pregunta de competencia sería: "¿qué bonos emitidos por filiales de un grupo vencen antes de 2030?". Si la ontología no la puede responder (porque no modela la relación filial–matriz), hay que ampliar su alcance.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Metadatos = datos sobre datos; quién, qué, cuándo, dónde, por qué.</li>
+    <li>Ontología: ontos + logos; informática = definición formal de tipos, propiedades y relaciones (WordNet, Cyc).</li>
+    <li>Dominio vs nivel superior (términos generales, interoperabilidad).</li>
+    <li>Metodologías: Cyc, Uschold y King, Grüninger y Fox (preguntas de competencia), METHONTOLOGY, On-To-Knowledge, TERMINAE, Ontology Development 101 (Stanford).</li>
+    <li>Pasos: alcance, reutilizar, términos, clases, slots, facets, instancias.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-5"></div>
+</section>
+
+<!-- ===================== TEMA 6 ===================== -->
+<section class="view" data-view="tema-6" hidden>
+  <p class="eyebrow">Tema 6</p>
+  <h1>Lenguajes para ontologías y Protégé</h1>
+  <p class="oneline"><b>RDF</b> describe recursos con tripletas y se escribe en RDF/XML, N-Triples, <b>Turtle</b>, <b>N3</b>, RDFa o JSON-LD. <b>RDFS</b> añade clases y jerarquías, <b>OWL</b> añade expresividad lógica (Lite, DL, Full) y <b>SPARQL</b> consulta los grafos. <b>Protégé</b> (Stanford) es el editor de ontologías más usado.</p>
+  <ul class="objs"><li>RDF, Turtle y N3</li><li>RDF Schema</li><li>OWL y SPARQL</li><li>Protégé, Ontolingua, Chimaera</li></ul>
+
+  <h2>RDF y sus formatos</h2>
+  <p class="prose">Especificación del W3C, pensada al principio para metadatos. Nodos (recursos y literales) y aristas (propiedades). La propiedad más importante es <span class="mono">rdf:type</span>. <b>RDF no es XML</b>: RDF/XML es solo una de sus serializaciones.</p>
+  <div class="grid g2">
+<pre class="code" style="margin:0"><span class="c">&lt;!-- RDF/XML --&gt;</span>
+&lt;rdf:Description rdf:about="http://en.wikipedia.org/wiki/Tony_Benn"&gt;
+  &lt;dc:title&gt;Tony Benn&lt;/dc:title&gt;
+  &lt;dc:publisher&gt;Wikipedia&lt;/dc:publisher&gt;
+&lt;/rdf:Description&gt;</pre>
+<pre class="code" style="margin:0"><span class="c"># Turtle / N3 (lo mismo)</span>
+@prefix dc: &lt;http://purl.org/dc/elements/1.1/&gt; .
+&lt;http://en.wikipedia.org/wiki/Tony_Benn&gt;
+    dc:title "Tony Benn" ;
+    dc:publisher "Wikipedia" .</pre>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="box"><h4>Turtle</h4>Definido por <b>Dave Beckett</b> como subconjunto de N3 y superconjunto de N-Triples. Solo serializa grafos RDF válidos; más legible que RDF/XML. Prefijos, <span class="mono">;</span> para repetir sujeto, <span class="mono">,</span> para repetir sujeto y predicado, <span class="mono">[ ]</span> para nodos en blanco.</div>
+    <div class="box"><h4>N3 (Notation3)</h4>De <b>Tim Berners-Lee</b> (y Dan Connolly). Más expresivo que RDF: permite citar grafos con <span class="mono">{ }</span>, variables, cuantificación y <b>reglas</b>.</div>
+  </div>
+
+  <h2>RDF Schema</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Básicos</h4><span class="mono">rdfs:Class, rdfs:Resource, rdfs:Literal, rdfs:Datatype, rdf:Property</span></div>
+    <div class="box"><h4>Relaciones</h4><span class="mono">rdfs:subClassOf</span> (jerarquía de clases), <span class="mono">rdfs:subPropertyOf</span></div>
+    <div class="box"><h4>Restricciones</h4><span class="mono">rdfs:domain</span> (clase del sujeto), <span class="mono">rdfs:range</span> (clase del objeto)</div>
+  </div>
+  <p class="prose">Otras: <span class="mono">seeAlso, isDefinedBy, label, comment, ConstraintResource, ConstraintProperty</span>. Analogía del temario: cada tabla es una <b>clase</b>, cada fila una <b>instancia</b> y cada columna un <b>atributo</b>.</p>
+
+  <h2>OWL</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Variante</th><th>Base lógica</th><th>Características</th></tr></thead>
+    <tbody>
+      <tr><td><b>OWL Lite</b></td><td>SHIF(D)</td><td>Simplificada; sus restricciones llevaron a abandonarla poco a poco</td></tr>
+      <tr><td><b>OWL DL</b></td><td><b>SHOIN</b></td><td>Todos los constructores con restricciones; inferencia decidible</td></tr>
+      <tr><td><b>OWL Full</b></td><td>—</td><td>Compatible con RDFS; una clase puede ser a la vez individuo; la inferencia puede <b>no terminar</b></td></tr>
+    </tbody>
+  </table></div>
+  <p class="prose">Web Ontology Language; predecesor: <b>DAML+OIL</b>. Extiende RDF con un lenguaje más expresivo para que las máquinas procesen el significado.</p>
+
+  <h2>Simulador: mini-SPARQL</h2>
+  <figure class="diagram">
+    <p class="prose" style="margin-top:0">Grafo de ejemplo (fíjate en las tripletas) y una consulta con patrones de tripletas. Las variables empiezan por <span class="mono">?</span>; los patrones se unen por las variables comunes.</p>
+    <div class="grid g2">
+      <div><label>Datos (Turtle simplificado)</label><pre class="code" id="spData" style="margin:0;max-height:260px;overflow:auto"></pre></div>
+      <div>
+        <label for="spQ">Consulta</label>
+        <textarea id="spQ" rows="6" style="width:100%;font-family:var(--font-mono,monospace)"></textarea>
+        <div id="spEx" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="table-wrap" style="margin-top:8px"><table id="spRes"></table></div>
+    <p class="out" id="spInfo"></p>
+    <figcaption>Admite <span class="mono">SELECT ?a ?b WHERE { s p o . s p o . }</span> con prefijos ya declarados. SELECT elige las variables; WHERE da el patrón de grafo.</figcaption>
+  </figure>
+
+  <h2>Herramientas</h2>
+  <div class="grid g3">
+    <div class="box"><h4>Protégé</h4>Stanford (Centro de Investigación Biomédica, con Manchester), Java, código abierto (BSD). Versión 5.5.0 (2019). Guarda en OWL, BD relacional, XML o archivos planos; interfaz gráfica; versión web colaborativa. Plugins: OWL, Jambalaya, Prompt, PromptViz, Algernon…</div>
+    <div class="box"><h4>Ontolingua</h4>Knowledge Systems Lab de Stanford: creación colaborativa en red; más de 150 usuarios activos; reutilización de librerías.</div>
+    <div class="box"><h4>Chimaera</h4>Sobre Ontolingua: <b>fusionar</b> ontologías y <b>diagnosticarlas</b>; carga 15 formatos (KIF, OKBC, Protégé…).</div>
+  </div>
+  <p class="prose">Ejemplo clásico en Protégé: la ontología <b>Pizza</b> (clases Pizza, PizzaBase, PizzaTopping; propiedad <span class="mono">TieneIngredientes</span> con subpropiedades <span class="mono">TieneBase</span> y <span class="mono">TieneTopping</span>; formato recomendado RDF/XML).</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Los reguladores europeos publican datos de entidades e instrumentos (LEI, ISIN) que se pueden cargar como RDF y consultar con SPARQL: "dame todos los bonos cuyo emisor tenga como matriz a X". Con SQL habría que conocer de antemano el esquema de cada tabla; con RDF basta con seguir las propiedades.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Tripleta: sujeto, propiedad (predicado), objeto. rdf:type. RDF ≠ XML.</li>
+    <li>Turtle (Beckett) ⊂ N3 (Berners-Lee); N3 admite reglas.</li>
+    <li>RDFS: Class, Resource, Literal, Datatype, Property, subClassOf, subPropertyOf, domain, range.</li>
+    <li>OWL (de DAML+OIL): Lite (SHIF), DL (SHOIN), Full (puede no terminar).</li>
+    <li>SPARQL: SELECT + WHERE; recomendación W3C del 15/01/2008. Protégé, Ontolingua, Chimaera.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-6"></div>
+</section>
+
+<!-- ===================== TEMA 7 ===================== -->
+<section class="view" data-view="tema-7" hidden>
+  <p class="eyebrow">Tema 7</p>
+  <h1>La web semántica</h1>
+  <p class="oneline">Ya en la propuesta original de la Web (<b>Berners-Lee, 1989</b>) estaba la idea de que las máquinas entendieran el contenido. La web semántica añade metadatos y ontologías para que un agente encuentre "yegua" cuando buscas "caballo" o "paz" cuando preguntas cómo evitar la guerra.</p>
+  <ul class="objs"><li>Estado actual y futuro</li><li>Dos visiones</li><li>Web 3.0 y tendencias</li><li>Aplicaciones</li></ul>
+
+  <h2>El problema</h2>
+  <div class="grid g2">
+    <div class="box"><h4>HTML</h4><span class="mono">&lt;b&gt;&lt;i&gt;Superar la brecha digital&lt;/i&gt;&lt;/b&gt;</span>: la máquina solo sabe que va en negrita y cursiva. Los buscadores comparan <b>palabras</b>, no significados.</div>
+    <div class="box"><h4>Web semántica</h4>Capas de Berners-Lee: RDF (afirmaciones sobre recursos), relaciones entre categorías (RDFS/ontologías), <b>lógica</b> para consultar e inferir y <b>confianza</b> (firma digital).</div>
+  </div>
+
+  <h2>Simulador: búsqueda por palabras frente a búsqueda semántica</h2>
+  <figure class="diagram">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="ssQ" value="renta variable" style="flex:1;min-width:180px">
+      <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="ssSem" checked> Expandir con la ontología</label>
+    </div>
+    <div id="ssSugg" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+    <p class="out" id="ssExp"></p>
+    <div id="ssRes"></div>
+    <figcaption>La búsqueda semántica amplía la consulta con sinónimos (equivalencia) y con los conceptos más específicos de la jerarquía, igual que el ejemplo "caballo → yegua" del temario.</figcaption>
+  </figure>
+
+  <h2>Dos visiones y la Web 3.0</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Visión de la IA</h4>Páginas organizadas y codificadas para que un ordenador pueda hacer inferencias sobre su contenido.</div>
+    <div class="box"><h4>Visión de procesamiento robusto</h4>Convertir la WWW en una gran base de datos con procesamiento sistemático y consistente.</div>
+  </div>
+  <p class="prose">El término <b>Web 3.0</b> aparece en un artículo de 2006 crítico con la Web 2.0. Tendencias: web como base de datos distribuida, tecnologías semánticas (XML, RDF, microformatos), acceso desde múltiples dispositivos, IA (agentes, PLN, minería de datos), <b>web geoespacial</b> y <b>3D</b>. Obliga a redefinir el SEO y el SEM.</p>
+
+  <h2>Dónde ya se usa</h2>
+  <div class="grid g3">
+    <div class="box">Datos abiertos de gobiernos en RDF</div>
+    <div class="box"><span class="mono">datos.bne.es</span> (Biblioteca Nacional de España) y <span class="mono">data.bnf.fr</span></div>
+    <div class="box">Biblioteca Virtual Miguel de Cervantes</div>
+    <div class="box">Intranets de conocimiento de multinacionales</div>
+    <div class="box">Metadatos en comercio electrónico y resultados semánticos de Google</div>
+    <div class="box">Swoogle (Universidad de Maryland): buscador semántico</div>
+  </div>
+  <p class="prose">Campos de aplicación: <b>comercio electrónico</b> (agentes que buscan el producto que mejor encaja con el usuario), <b>administración electrónica</b>, <b>medicina</b> y <b>aprendizaje electrónico</b> (aprendizaje adaptativo), además de apoyo a la decisión e intermediación. El temario advierte que, en buena medida, sigue siendo una <b>utopía</b> en construcción.</p>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Un analista busca "exposición a renta variable europea". Un buscador por palabras no devuelve el informe que dice "acciones del Euro Stoxx 50". Uno semántico sabe que <i>acción</i> es un tipo de <i>renta variable</i> y que el Euro Stoxx 50 es un índice europeo, y lo encuentra.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Propuesta de la WWW: Berners-Lee, 1989; la semántica ya estaba ahí.</li>
+    <li>Ejemplos: caballo/yegua, guerra/paz.</li>
+    <li>Dos visiones: IA y procesamiento robusto.</li>
+    <li>Web 3.0: término de 2006. Tendencias: BD distribuida, semántica, multidispositivo, IA, geoespacial, 3D.</li>
+    <li>Pilotos: datos.bne.es, data.bnf.fr, Cervantes, Swoogle. Aplicaciones: comercio, administración, medicina, e-learning.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-7"></div>
+</section>
+
+<!-- ===================== TEMA 8 ===================== -->
+<section class="view" data-view="tema-8" hidden>
+  <p class="eyebrow">Tema 8</p>
+  <h1>Otros modelos de representación del conocimiento</h1>
+  <p class="oneline">Los <b>sistemas de organización del conocimiento (SOC/KOS)</b> van de los <b>vocabularios</b> a las <b>taxonomías</b> (categorías), los <b>tesauros</b> (relaciones jerárquicas, asociativas y de equivalencia) y las ontologías. Junto a ellos, las <b>folksonomías</b> (etiquetado social), las <b>estructuras de comparación</b> y los <b>mapas mentales</b>.</p>
+  <ul class="objs"><li>Vocabularios y SOC</li><li>Taxonomías y tesauros</li><li>Folksonomías</li><li>Comparación y mapas mentales</li></ul>
+
+  <h2>Vocabularios y SOC</h2>
+  <p class="prose">Un <b>vocabulario</b> es el conjunto de palabras de una lengua o de un campo (sinónimo de léxico). Los SOC incluyen índices, clasificaciones, nomenclátores, encabezamientos de materia, glosarios, taxonomías, tesauros, redes semánticas y ontologías. Un sistema basado en conocimiento necesita <b>calidad en la base</b>, <b>adquisición</b> (expertos y fuentes digitales) y <b>modelado</b>. Razonamientos: deductivo, inductivo y abductivo.</p>
+
+  <h2>Taxonomías y tesauros</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Taxonomía</h4>Categorías y subcategorías que agrupan cosas con una característica común (Linneo). Función principal: la <b>predicción</b>, saber dónde buscar sin recorrer todo. Términos <b>preferentes</b> (navegación) y <b>no preferentes</b> (redirección). Niveles no fijos. Ejemplo: IA → ML (análisis predictivo, deep learning), PLN, sistemas expertos.</div>
+    <div class="box"><h4>Tesauro</h4>Relaciones <b>jerárquicas, asociativas y de equivalencia</b> entre descriptores y no descriptores. Reduce la <b>polisemia</b>. No es un diccionario (diccionario onomasiológico). Formato de intercambio: <b>SKOS</b>. Funciones: normalización, inducción y representación. Primer uso: <b>Helen Brownson</b>, Dorking, 14/05/1957.</div>
+  </div>
+  <p class="prose">Construir un tesauro en 4 pasos: fijar tema principal, subtemas y marginales; elegir palabras clave y descriptores; contrastarlos con diccionarios, expertos y usuarios; y definir el contexto de cada término (fuente, origen, ortografía, frecuencia de uso).</p>
+
+  <h2>Folksonomías</h2>
+  <p class="prose">Clasificación hecha por los usuarios al <b>etiquetar</b> contenidos (etiquetado social o colaborativo). Término de <b>Thomas Vander Wal</b>: <i>folk</i> (pueblo) + taxonomía = "clasificación gestionada por el pueblo". Dos tipos: <b>amplia</b> (muchos usuarios etiquetan el mismo contenido) y <b>estrecha</b> (etiqueta sobre todo su autor). Ventajas: rápida, de abajo arriba, se adapta al lenguaje real del usuario y recoge ideas minoritarias.</p>
+  <h3>Simulador: nube de etiquetas de un foro de inversión</h3>
+  <figure class="diagram">
+    <div id="fkPosts" class="grid g2"></div>
+    <div id="fkCloud" class="box" style="margin-top:10px;text-align:center;line-height:2"></div>
+    <p class="out" id="fkInfo"></p>
+    <figcaption>Añade etiquetas a cada publicación (como haría cualquier usuario). La nube crece con la frecuencia de uso. Observa los sinónimos que una taxonomía unificaría (bolsa / renta variable, cripto / bitcoin).</figcaption>
+  </figure>
+
+  <h2>Estructura de comparación y mapas mentales</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Estructura de comparación</h4>Tabla de doble entrada: elementos a comparar en el eje horizontal (rectángulo continuo), <b>criterios</b> en el vertical (elipse) y características en las intersecciones (rectángulo punteado). Organiza, sintetiza y facilita la memoria.</div>
+    <div class="box"><h4>Mapa mental</h4><b>Tony Buzan</b> (desde los 70; libro en 1996): "pensamiento radiante". Idea central en el medio, ramas en el sentido de las agujas del reloj, palabras clave, colores e imágenes.</div>
+  </div>
+  <figure class="diagram">
+    <svg id="mmapSvg" viewBox="0 0 600 260" width="100%" style="display:block" role="img" aria-label="Mapa mental de los SOC"></svg>
+    <figcaption>Mapa mental de este tema.</figcaption>
+  </figure>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Las plataformas sociales de inversión (como los foros de brókers) usan <b>folksonomías</b>: los <i>cashtags</i> ($SAN, $BTC) son etiquetas creadas por los usuarios. Los proveedores de datos profesionales usan en cambio <b>taxonomías</b> cerradas (sectores GICS) y <b>tesauros</b> para que "Banco Santander", "SAN" y "BSCH" remitan al mismo emisor.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>SOC = KOS: vocabularios, taxonomías, tesauros, ontologías (de menor a mayor complejidad).</li>
+    <li>Taxonomía: categorías; función de predicción; términos preferentes y no preferentes.</li>
+    <li>Tesauro: jerárquica, asociativa, equivalencia; SKOS; Brownson 1957; normalización, inducción, representación.</li>
+    <li>Folksonomía: Vander Wal; amplia y estrecha; etiquetado social.</li>
+    <li>Mapas mentales: Tony Buzan, pensamiento radiante.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-8"></div>
+</section>
+
+<!-- ===================== TEMA 9 ===================== -->
+<section class="view" data-view="tema-9" hidden>
+  <p class="eyebrow">Tema 9</p>
+  <h1>Lógica y Prolog</h1>
+  <p class="oneline">La lógica es un lenguaje de representación sin ambigüedades. La <b>lógica de orden cero</b> (proposicional) combina proposiciones con conectivas; la <b>de primer orden</b> añade predicados, constantes, funciones y cuantificadores <b>∀</b> y <b>∃</b>; la <b>lógica descriptiva</b> es la base de OWL; y <b>Prolog</b> programa con hechos y reglas de primer orden.</p>
+  <ul class="objs"><li>Lógica proposicional</li><li>Primer orden y cuantificadores</li><li>Lógica descriptiva</li><li>Tipos de lógica y Prolog</li></ul>
+
+  <h2>Lógica de orden cero (proposicional)</h2>
+  <p class="prose">Desarrollada por el estoico <b>Crisipo</b> (s. III a. C.) y reinventada por <b>Pedro Abelardo</b> (s. XII). Elementos: <b>proposiciones</b> (letras minúsculas, verdaderas o falsas) y <b>operadores</b>: ∧ (y), ∨ (o), → (implica), ↔ (si y solo si), ¬ (no). Las conectivas son <b>funciones de verdad</b>. Es demasiado simple para la IA: las expresiones crecen mucho.</p>
+  <h3>Simulador: tabla de verdad</h3>
+  <figure class="diagram">
+    <label for="ttQ">Expresión con p, q, r y los operadores ¬ ∧ ∨ → ↔ (también ! &amp; | -&gt; &lt;-&gt;)</label>
+    <input type="text" id="ttQ" value="(p → q) ∧ ¬q → ¬p">
+    <div id="ttEx" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+    <div class="table-wrap" style="margin-top:8px"><table id="ttTable"></table></div>
+    <p class="out" id="ttInfo"></p>
+    <figcaption>Si la columna final es siempre V, la expresión es una <b>tautología</b> (el ejemplo es el <i>modus tollens</i>); si siempre es F, una contradicción.</figcaption>
+  </figure>
+
+  <h2>Lógica de primer orden</h2>
+  <p class="prose">También lógica de predicados o cálculo de predicados. Distingue sujetos y predicados; entidades: <b>predicados</b>, <b>constantes</b> y <b>funciones</b>. Cuantificadores:</p>
+  <div class="grid g2">
+    <div class="box"><h4>Universal ∀x P(x)</h4>"Para todo x se cumple P". <span class="mono">∀x (Accion(x) → RentaVariable(x))</span></div>
+    <div class="box"><h4>Existencial ∃x P(x)</h4>"Existe al menos un x que cumple P". <span class="mono">∃x (Banco(x) ∧ Cotiza(x, IBEX35))</span></div>
+  </div>
+
+  <h2>Lógica descriptiva (DL)</h2>
+  <p class="prose">Familia de lenguajes para el conocimiento terminológico con semántica formal; antes llamados sistemas terminológicos y lenguajes conceptuales. Evoluciona de las <b>redes semánticas</b> y los <b>marcos</b>. Bloques: <b>conceptos</b> (clases), <b>roles</b> (propiedades) e <b>individuos</b> (instancias), unidos por axiomas. Es la base de OWL. Primer sistema: <b>KL-ONE</b> (Brachman y Schmolze, 1985); después LOOM, BACK, KRIS, CLASSIC, FaCT, RACER, CEL, KAON2, JCEL.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Lógica descriptiva</th><th>OWL</th><th>Primer orden</th></tr></thead>
+    <tbody><tr><td>Concepto</td><td>Clase</td><td>Predicado unario</td></tr><tr><td>Rol</td><td>Propiedad</td><td>Predicado binario</td></tr><tr><td>Individuo</td><td>Instancia</td><td>Constante</td></tr></tbody>
+  </table></div>
+
+  <h2>Tipos de lógica</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Formal (clásica, aristotélica)</h4>Se fija en la corrección de la forma del razonamiento: deductiva e inductiva.</div>
+    <div class="box"><h4>Informal</h4>Valida argumentos del lenguaje cotidiano: debates, prensa, falacias.</div>
+    <div class="box"><h4>Simbólica</h4>Convierte el pensamiento en estructuras formales con símbolos.</div>
+    <div class="box"><h4>Matemática</h4>Sistemas formales (proposicional, primer orden, modal); estudia conjuntos, números, demostraciones y algoritmos.</div>
+  </div>
+
+  <h2>Prolog</h2>
+  <p class="prose">Creado en <b>Marsella en 1972</b> por <b>Alain Colmerauer y Philippe Roussel</b>, a partir de la interpretación procedimental de las <b>cláusulas de Horn</b> de <b>Robert Kowalski</b>. Es <b>declarativo</b>: dices <i>qué</i> resolver y el intérprete busca el <i>cómo</i>. Constantes en minúscula, variables en mayúscula, cada hecho acaba en punto. Tres tipos de sentencias: hechos, reglas y consultas.</p>
+  <h3>Simulador: consultas a una base de hechos</h3>
+  <figure class="diagram">
+    <div class="grid g2">
+      <div><label>Base de conocimiento</label><pre class="code" id="plKB" style="margin:0;max-height:280px;overflow:auto"></pre></div>
+      <div>
+        <label for="plQ">?-</label>
+        <input type="text" id="plQ" value="cotiza(X, ibex35), sector(X, banca).">
+        <div id="plEx" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
+        <div id="plOut" class="box" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <figcaption>Admite conjunciones de objetivos separados por comas y la regla <span class="mono">mismo_sector(X,Y)</span>. Las respuestas salen por unificación, como en Prolog.</figcaption>
+  </figure>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Las normas de cumplimiento normativo se escriben bien en lógica: "∀ cliente (minorista(cliente) ∧ producto_complejo(p) → requiere_test_idoneidad(cliente, p))" es la regla MiFID. Un motor lógico puede comprobarla en cada orden y explicar por qué la bloquea.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Orden cero = proposicional: Crisipo (s. III a. C.), Abelardo (s. XII); ∧ ∨ → ↔ ¬; tablas de verdad.</li>
+    <li>Primer orden: predicados, constantes, funciones; ∀ universal, ∃ existencial.</li>
+    <li>DL: conceptos, roles, individuos; KL-ONE (1985); base de OWL.</li>
+    <li>Lógica formal, informal, simbólica y matemática.</li>
+    <li>Prolog: Colmerauer y Roussel, Marsella 1972; cláusulas de Horn (Kowalski); declarativo.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-9"></div>
+</section>
+
+<!-- ===================== TEMA 10 ===================== -->
+<section class="view" data-view="tema-10" hidden>
+  <p class="eyebrow">Tema 10</p>
+  <h1>Razonadores semánticos, sistemas basados en conocimiento y sistemas expertos</h1>
+  <p class="oneline">Un <b>razonador semántico</b> es software que deduce las consecuencias lógicas de un conjunto de hechos o axiomas (con reglas en OWL, RDFS…). Un <b>sistema basado en conocimiento</b> o <b>sistema experto</b> transfiere el conocimiento humano a una máquina: base de conocimiento + motor de inferencia, con reglas, casos o redes bayesianas.</p>
+  <ul class="objs"><li>Razonadores y herramientas</li><li>Sistemas basados en conocimiento</li><li>Tipos de sistemas expertos</li><li>MYCIN y arquitectura</li></ul>
+
+  <h2>Razonadores</h2>
+  <p class="prose">También motor de razonamiento, motor de reglas o simplemente razonador. Analiza la base de conocimiento y la memoria de trabajo para obtener inferencias, encadenando <b>hacia delante</b> y <b>hacia atrás</b>. El éxito depende de definir bien las reglas.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Herramienta</th><th>Qué es</th></tr></thead>
+    <tbody>
+      <tr><td><b>Cyc</b></td><td>Motor de inferencia con lógica de orden superior; base de conocimiento de sentido común</td></tr>
+      <tr><td><b>KAON2</b></td><td>Gestión de ontologías OWL-DL, SWRL y F-Logic</td></tr>
+      <tr><td><b>CWM</b></td><td>Procesador RDF (RDF/XML o N3) "como sed o awk" para la web semántica</td></tr>
+      <tr><td><b>Drools</b></td><td>Sistema de gestión de reglas de negocio (BRMS) con el algoritmo <b>Rete</b></td></tr>
+      <tr><td><b>Evrete</b></td><td>Motor Java con Rete, compatible con JSR 94</td></tr>
+      <tr><td><b>Flora-2</b></td><td>Representación orientada a objetos basada en reglas (F-logic, HiLog)</td></tr>
+      <tr><td><b>Jena</b></td><td>Marco Java de web semántica; API RDF y consultas SPARQL 1.1</td></tr>
+      <tr><td><b>Prova</b></td><td>Reglas con sintaxis Prolog + Java; deriva de Mandarax</td></tr>
+      <tr><td><b>Apache Marmotta</b></td><td>Plataforma Linked Data con razonador en su triple store KiWi</td></tr>
+      <tr><td><b>S-LOR</b></td><td>Razonador para el internet de las cosas (sensores), GPLv3</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Sistemas expertos</h2>
+  <div class="grid g2">
+    <div class="box"><h4>Historia</h4>Turing ya hablaba de ellos en 1950; aparecen en los 70 gracias a la teoría del procesamiento de la información de <b>Newell y Simon</b> (su <b>GPS</b> fue precursor). <b>Feigenbaum</b>: <b>DENDRAL</b> (estructuras químicas). Luego <b>MYCIN</b> (infecciones de la sangre). Éxito comercial en los 80.</div>
+    <div class="box"><h4>MYCIN</h4>Acierto de ~<b>65 %</b>, mejor que la mayoría de no especialistas; los especialistas llegaban al <b>80 %</b>. Cayó en desuso por errores, problemas <b>éticos y legales</b> (¿quién responde?) y lo difícil de <b>mantener</b> el conocimiento.</div>
+  </div>
+  <div class="grid g3" style="margin-top:12px">
+    <div class="box"><h4>Basados en reglas</h4>IF condición THEN acción; aplican reglas y derivan hechos nuevos. A menudo con <b>lógica difusa</b>.</div>
+    <div class="box"><h4>Basados en casos</h4>Adaptan la solución de un problema parecido ya resuelto (razonamiento por analogía).</div>
+    <div class="box"><h4>Redes bayesianas</h4>Grafo dirigido acíclico (DAG) de variables y dependencias condicionales; teorema de Bayes.</div>
+  </div>
+  <p class="prose">Dos subsistemas: <b>base de conocimiento</b> (hechos y reglas) y <b>motor de inferencia</b> (aplica reglas a hechos para inferir hechos nuevos, con explicación y depuración). Otra división: sistemas basados en <b>árboles</b> (ramas IF hasta un resultado) y basados en <b>reglas</b>. No son creativos: no salen de los conceptos que se les dieron.</p>
+
+  <h2>Simulador: red bayesiana de detección de fraude</h2>
+  <figure class="diagram">
+    <div class="grid g3">
+      <div><label for="byP">P(fraude) = <b class="out" id="byPV">1 %</b></label><input type="range" id="byP" min="0.1" max="20" step="0.1" value="1" style="width:100%"></div>
+      <div><label for="byS">P(alerta | fraude) = <b class="out" id="bySV">95 %</b></label><input type="range" id="byS" min="50" max="100" step="1" value="95" style="width:100%"></div>
+      <div><label for="byF">P(alerta | no fraude) = <b class="out" id="byFV">5 %</b></label><input type="range" id="byF" min="0" max="30" step="0.5" value="5" style="width:100%"></div>
+    </div>
+    <label style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="byZ"> Además, la operación se hace desde un país inusual (P = 60 % si fraude, 3 % si no)</label>
+    <svg id="bySvg" viewBox="0 0 600 170" width="100%" style="display:block;margin-top:8px" role="img" aria-label="Red bayesiana"></svg>
+    <div class="grid g3" id="byOut"></div>
+    <figcaption>Teorema de Bayes: P(fraude | evidencia) = P(evidencia | fraude) · P(fraude) / P(evidencia). Con fraudes raros, la mayoría de las alertas son falsas: la probabilidad a priori importa.</figcaption>
+  </figure>
+
+  <div class="callout ex"><span class="tag">Ejemplo en mercados</span><p>Bancos y aseguradoras usan motores de reglas como <b>Drools</b> para scoring, límites de riesgo y antifraude, porque las reglas se pueden auditar. Las <b>redes bayesianas</b> estiman la probabilidad de impago o de fraude combinando señales; el <b>razonamiento basado en casos</b> compara una operación sospechosa con expedientes anteriores.</p></div>
+
+  <div class="callout exam"><span class="tag">Para el examen</span><ul>
+    <li>Razonador semántico: deduce consecuencias lógicas de hechos/axiomas.</li>
+    <li>Herramientas: Cyc, KAON2, CWM, Drools (Rete), Evrete, Flora-2, Jena, Prova, Marmotta, S-LOR.</li>
+    <li>Historia: Newell y Simon (GPS), Feigenbaum (DENDRAL), MYCIN (65 % frente a 80 % de especialistas).</li>
+    <li>Tipos: reglas, casos, redes bayesianas (DAG). Árboles vs reglas.</li>
+    <li>Subsistemas: base de conocimiento + motor de inferencia.</li>
+  </ul></div>
+  <div class="quiz" data-quiz="tema-10"></div>
+</section>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section class="view" data-view="glosario" hidden>
+  <p class="eyebrow">Consulta rápida</p>
+  <h1>Glosario</h1>
+  <p class="lead">Los términos clave del módulo 6. Escribe para filtrar.</p>
+  <label for="glossQ" style="margin-top:16px">Buscar término</label>
+  <input type="text" id="glossQ" placeholder="Por ejemplo: BDI, OWL, folksonomía…">
+  <div class="gloss" id="glossList"></div>
+</section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  const TOPICS = [
+    {id:"tema-1", t:"Teoría de agentes", d:"Qué es un agente, tipos de agentes inteligentes y agentes de software."},
+    {id:"tema-2", t:"Arquitecturas de agentes", d:"BDI, reactivos y subsunción, deliberativos e híbridos."},
+    {id:"tema-3", t:"Información y conocimiento", d:"Datos, información y conocimiento; calidad y captura de datos."},
+    {id:"tema-4", t:"Representación del conocimiento", d:"Técnicas, los cinco roles y características de una buena representación."},
+    {id:"tema-5", t:"Ontologías", d:"Metadatos, ontología de dominio y superior, metodologías y construcción."},
+    {id:"tema-6", t:"Lenguajes y Protégé", d:"RDF, Turtle, N3, RDFS, OWL, SPARQL y editores de ontologías."},
+    {id:"tema-7", t:"La web semántica", d:"Estado, visiones, Web 3.0 y aplicaciones."},
+    {id:"tema-8", t:"Otros modelos (SOC)", d:"Vocabularios, taxonomías, tesauros, folksonomías y mapas mentales."},
+    {id:"tema-9", t:"Lógica y Prolog", d:"Lógica proposicional, de primer orden, descriptiva y Prolog."},
+    {id:"tema-10", t:"Razonadores y SE", d:"Razonadores semánticos, sistemas basados en conocimiento y expertos."}
+  ];  const NS = "http://www.w3.org/2000/svg";
+  const fmt = (x,d=2) => isFinite(x) ? x.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d}) : "—";
+  const parse = s => s.split(/[;\s]*,[;\s]*|\s+/).map(x=>x.trim()).filter(Boolean).map(Number).filter(isFinite);
+  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+  function gaussFrom(r){ return function(){ let u=0,v=0; while(!u)u=r(); while(!v)v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }; }
+
+  // ---------- Storage ----------
+  const KEY = "sistemas-int-m6-v1";
+  let state = {studied:{}, scores:{}};
+  try { const raw = localStorage.getItem(KEY); if (raw) state = Object.assign(state, JSON.parse(raw)); } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  // ---------- Router ----------
+  const views = document.querySelectorAll(".view");
+  const navLinks = document.querySelectorAll("#navlist a");
+  function route(){
+    let h = (location.hash || "#inicio").slice(1);
+    if (!document.querySelector('.view[data-view="'+h+'"]')) h = "inicio";
+    views.forEach(v => v.hidden = v.dataset.view !== h);
+    navLinks.forEach(a => { if (a.dataset.v === h) { a.setAttribute("aria-current","page"); a.scrollIntoView({block:"nearest",inline:"nearest"}); } else a.removeAttribute("aria-current"); });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Quiz ----------
+  const QUIZ = {
+    "tema-1":[
+      {q:"¿De qué modelo deriva el concepto de agente (1977)?", o:["Del modelo de Hewitt","Del test de Turing","Del modelo BDI"], a:0, e:"Objeto independiente, interactivo y ejecutable con estado interno y capacidad de comunicarse."},
+      {q:"Un agente reactivo simple decide según…", o:["Toda su historia de percepciones","Solo la percepción actual","Una función de utilidad"], a:1, e:"Sigue reglas condición–acción e ignora la historia."},
+      {q:"¿Qué agente mantiene un estado interno basado en la historia percibida?", o:["Reactivo simple","Basado en modelos","De usuario"], a:1, e:"Necesita saber cómo evoluciona el mundo y cómo le afectan sus acciones."},
+      {q:"Un agente basado en utilidad elige la acción que…", o:["Cumple la meta","Maximiza la utilidad esperada","Se ejecutó la última vez"], a:1, e:"La utilidad asigna a cada estado un número real; resuelve metas contradictorias."},
+      {q:"La cabecera HTTP «User-agent» identifica a un agente…", o:["De compra","De usuario","De minería de datos"], a:1, e:"Navegadores, rastreadores, lectores de pantalla…"}
+    ],
+    "tema-2":[
+      {q:"¿Qué significan las siglas BDI?", o:["Base, Datos, Inferencia","Creencias, Deseos, Intenciones","Búsqueda, Decisión, Inferencia"], a:1, e:"Belief, Desire, Intention."},
+      {q:"Los agentes reactivos se basan en…", o:["Sistemas de producción c → a","Lógica de primer orden","Planificación clásica"], a:0, e:"Sin modelo simbólico del mundo."},
+      {q:"En la arquitectura de subsunción, un comportamiento de mayor prioridad…", o:["Inhibe a los inferiores","Se ejecuta al final","Se ignora"], a:0, e:"Así se resuelven los conflictos entre reglas."},
+      {q:"Los agentes deliberativos se apoyan en la hipótesis del sistema de símbolos físicos de…", o:["Newell y Simon","Hewitt","Berners-Lee"], a:0, e:"Razonan con lógica sobre una base de conocimiento."},
+      {q:"En un híbrido con capas horizontales, la capa que predice y genera nuevos objetivos es la…", o:["Reactiva","Planificadora","Modeladora"], a:2, e:"La reactiva responde ya; la planificadora es proactiva."}
+    ],
+    "tema-3":[
+      {q:"Según Davenport y Prusak, la información son…", o:["Valores sueltos sin significado","Datos procesados con significado, propósito y contexto","Experiencia y saber hacer"], a:1, e:"El conocimiento es la mezcla de experiencia, valores, información y saber hacer."},
+      {q:"¿Qué es una DQA?", o:["Un tipo de base de datos","Una evaluación de la calidad de los datos","Una tarjeta de adquisición"], a:1, e:"Evaluaciones científicas y estadísticas frente a los estándares de la empresa."},
+      {q:"La tarjeta que digitaliza señales físicas se llama…", o:["DAQ","DQA","OLAP"], a:0, e:"Convierte señales en tensión y luego en digital."},
+      {q:"¿Cuál NO es un método de captura de datos del temario?", o:["Grupo de enfoque","Lista de verificación","Retropropagación"], a:2, e:"La retropropagación es un algoritmo de entrenamiento de redes."},
+      {q:"Según Piaget, el conocimiento se adquiere por…", o:["Asimilación y adaptación","Memorización","Deducción pura"], a:0, e:"Se integra en esquemas previos que luego se modifican."}
+    ],
+    "tema-4":[
+      {q:"¿Cuál es el primer rol de una representación del conocimiento?", o:["Sustituto de la cosa real","Estructura de datos","Base de datos"], a:0, e:"Permite pensar en lugar de actuar."},
+      {q:"Elegir una representación implica aceptar…", o:["Un compromiso ontológico","Un lenguaje de programación","Un servidor"], a:0, e:"Decide qué se ve del mundo y qué se ignora."},
+      {q:"¿Por qué son inevitables algunas conclusiones erróneas?", o:["Porque todo sustituto es incompleto","Por errores del hardware","Porque la lógica falla"], a:0, e:"La única representación exacta de un objeto es el objeto mismo."},
+      {q:"¿En qué año aparece el estándar de metadatos Dublin Core?", o:["1973","1985","1995"], a:2, e:"Prolog es de 1972–73 y KL-ONE de los 80."},
+      {q:"Eliminar conocimiento redundante o contradictorio es la característica de…", o:["Cobertura","Consistencia","Eficiencia"], a:1, e:"Wikipedia lo logra con redirecciones al mismo artículo."}
+    ],
+    "tema-5":[
+      {q:"Los metadatos son…", o:["Datos sobre datos","Datos borrados","Datos cifrados"], a:0, e:"Responden quién, qué, cuándo, dónde y por qué."},
+      {q:"Una ontología de nivel superior…", o:["Describe un dominio concreto","Contiene términos generales comunes a todos los dominios","Es un tipo de base de datos"], a:1, e:"Permite la interoperabilidad entre ontologías de dominio."},
+      {q:"¿Qué metodología usa «preguntas de competencia» para fijar el alcance?", o:["Grüninger y Fox","TERMINAE","Cyc"], a:0, e:"Preguntas en lenguaje natural que la ontología debe poder responder."},
+      {q:"¿Qué metodología trata la ontología como un proyecto software y es la más completa?", o:["METHONTOLOGY","On-To-Knowledge","Uschold y King"], a:0, e:"Ontology Development 101 es de Stanford."},
+      {q:"En una ontología, los facets de un slot describen…", o:["El tipo de valor, la cardinalidad, el dominio y el rango","El color de la clase","El autor"], a:0, e:"Se definen después de los slots y antes de crear instancias."}
+    ],
+    "tema-6":[
+      {q:"¿Quién definió Turtle como subconjunto de N3?", o:["Dave Beckett","Tim Berners-Lee","Alain Colmerauer"], a:0, e:"N3 es de Berners-Lee y Connolly."},
+      {q:"¿Qué formato admite reglas y citar grafos con { }?", o:["N-Triples","Turtle","N3"], a:2, e:"Es más expresivo que RDF."},
+      {q:"rdfs:domain indica…", o:["La clase del objeto","La clase del sujeto de la propiedad","El nombre legible"], a:1, e:"rdfs:range es la clase del objeto."},
+      {q:"OWL DL se basa en la lógica descriptiva…", o:["SHOIN","SHIF","SQL"], a:0, e:"OWL Lite en SHIF(D)."},
+      {q:"¿Qué herramienta de Stanford es la más usada para editar ontologías OWL?", o:["Protégé","Chimaera","Jena"], a:0, e:"Chimaera fusiona y diagnostica ontologías sobre Ontolingua."}
+    ],
+    "tema-7":[
+      {q:"¿Cuándo redactó Berners-Lee la primera propuesta de la WWW?", o:["1989","1999","2006"], a:0, e:"Ya hablaba de que las máquinas entendieran el contenido."},
+      {q:"El ejemplo «caballo / yegua» ilustra…", o:["La búsqueda por palabras que no encuentra conceptos relacionados","Un error de traducción","La compresión de datos"], a:0, e:"La web semántica quiere resolverlo."},
+      {q:"¿Cuáles son las dos visiones de la web semántica?", o:["IA y procesamiento robusto","Web 1.0 y 2.0","Cliente y servidor"], a:0, e:"Inferencias sobre el contenido / la web como gran base de datos."},
+      {q:"El término Web 3.0 aparece en un artículo de…", o:["1989","2006","2016"], a:1, e:"Crítico con la Web 2.0."},
+      {q:"¿Qué buscador semántico desarrolló la Universidad de Maryland?", o:["Swoogle","Google","Jena"], a:0, e:"Un intento de buscador para la web semántica."}
+    ],
+    "tema-8":[
+      {q:"¿Qué SOC usa relaciones jerárquicas, asociativas y de equivalencia?", o:["Taxonomía","Tesauro","Folksonomía"], a:1, e:"La taxonomía solo usa categorías jerárquicas."},
+      {q:"La función principal de una taxonomía es…", o:["La predicción: saber dónde buscar","Etiquetar socialmente","Definir palabras"], a:0, e:"Evita recorrer todo secuencialmente."},
+      {q:"¿Quién acuñó el término folksonomía?", o:["Thomas Vander Wal","Tony Buzan","Helen Brownson"], a:0, e:"Folk (pueblo) + taxonomía."},
+      {q:"Los mapas mentales se asocian a…", o:["Tony Buzan y el pensamiento radiante","Linneo","Kowalski"], a:0, e:"Idea central en el medio y ramas alrededor."},
+      {q:"En una estructura de comparación, los criterios van en…", o:["El eje vertical (elipses)","El eje horizontal","Las intersecciones"], a:0, e:"Los elementos a comparar van en el eje horizontal."}
+    ],
+    "tema-9":[
+      {q:"La lógica proposicional fue desarrollada como sistema formal por…", o:["Crisipo","Aristóteles","Frege"], a:0, e:"Estoico del siglo III a. C.; la reinventó Pedro Abelardo en el XII."},
+      {q:"∃x P(x) significa…", o:["P se cumple para todo x","P se cumple al menos para un x","P no se cumple nunca"], a:1, e:"∀ es el cuantificador universal."},
+      {q:"En lógica descriptiva, un «rol» equivale en OWL a…", o:["Una clase","Una propiedad","Una instancia"], a:1, e:"Concepto = clase; individuo = instancia."},
+      {q:"¿Quién creó Prolog en Marsella en 1972?", o:["Colmerauer y Roussel","McCarthy y Minsky","Newell y Simon"], a:0, e:"Basado en las cláusulas de Horn de Kowalski."},
+      {q:"En Prolog, las variables se escriben…", o:["En minúscula","Con mayúscula inicial","Entre comillas"], a:1, e:"Las constantes van en minúscula."}
+    ],
+    "tema-10":[
+      {q:"Un razonador semántico es…", o:["Software que deduce consecuencias lógicas de hechos o axiomas","Una base de datos SQL","Un navegador web"], a:0, e:"También llamado motor de razonamiento o de reglas."},
+      {q:"¿Qué algoritmo usa Drools?", o:["Rete","Dijkstra","Backpropagation"], a:0, e:"Drools es un sistema de gestión de reglas de negocio."},
+      {q:"¿Qué marco Java permite consultar RDF con SPARQL 1.1?", o:["Jena","Flora-2","S-LOR"], a:0, e:"S-LOR es para internet de las cosas."},
+      {q:"MYCIN acertaba alrededor del…", o:["35 %","65 %","99 %"], a:1, e:"Los especialistas llegaban al 80 %."},
+      {q:"Una red bayesiana es…", o:["Un grafo dirigido acíclico de variables y dependencias condicionales","Una red neuronal de una capa","Una lista de reglas IF-THEN"], a:0, e:"Se basa en el teorema de Bayes."}
+    ]
+  };
+  function renderProgress(){
+    const n = TOPICS.filter(t => state.studied[t.id]).length;
+    document.getElementById("progText").textContent = n + " de 10 temas estudiados";
+    document.getElementById("progBar").style.width = (n*10) + "%";
+    navLinks.forEach(a => a.classList.toggle("done", !!state.studied[a.dataset.v]));
+    document.getElementById("tcards").innerHTML = TOPICS.map((t,i) => {
+      const sc = state.scores[t.id];
+      const st = state.studied[t.id] ? '<span class="pill ok">Estudiado</span>' : '<span class="pill neutral">Pendiente</span>';
+      const scs = sc!=null ? ' <span class="pill neutral">Test: '+sc+'/'+QUIZ[t.id].length+'</span>' : '';
+      return '<a class="tcard" href="#'+t.id+'"><span class="n">TEMA '+(i+1)+'</span><b>'+t.t+'</b><span class="d">'+t.d+'</span><span class="st">'+st+scs+'</span></a>';
+    }).join("");
+    document.querySelectorAll(".studied button").forEach(b => {
+      const on = !!state.studied[b.dataset.t];
+      b.setAttribute("aria-pressed", on);
+      b.textContent = on ? "✓ Estudiado" : "Marcar como estudiado";
+    });
+  }
+
+  document.querySelectorAll(".quiz").forEach(box => {
+    const id = box.dataset.quiz, qs = QUIZ[id];
+    let answered = 0, right = 0;
+    box.innerHTML = '<h2>Autoevaluación</h2><p style="color:var(--muted);font-size:.9rem;margin-top:4px">' + qs.length + ' preguntas. Elige una respuesta para ver la explicación.</p>' +
+      qs.map((q,i) => '<div class="qitem"><p class="q">'+(i+1)+'. '+q.q+'</p><div class="qopts">'+q.o.map((o,j)=>'<button class="qopt" data-i="'+i+'" data-j="'+j+'">'+o+'</button>').join("")+'</div><p class="qexp" hidden></p></div>').join("") +
+      '<div class="qscore"><span class="out" data-score>0 de '+qs.length+' respondidas</span><button class="btn" data-reset>Repetir test</button></div>' +
+      '<div class="studied"><button class="btn primary" data-t="'+id+'" aria-pressed="false">Marcar como estudiado</button></div>';
+    box.addEventListener("click", ev => {
+      const b = ev.target.closest(".qopt");
+      if (b){
+        const i = +b.dataset.i, j = +b.dataset.j, q = qs[i], item = b.closest(".qitem");
+        item.querySelectorAll(".qopt").forEach((x,k) => { x.disabled = true; if (k===q.a) x.classList.add("right"); });
+        if (j !== q.a) b.classList.add("wrong"); else right++;
+        answered++;
+        const exp = item.querySelector(".qexp");
+        exp.textContent = (j===q.a ? "Correcto. " : "No es correcto. ") + q.e; exp.hidden = false;
+        box.querySelector("[data-score]").textContent = answered < qs.length ? (answered+" de "+qs.length+" respondidas · "+right+" aciertos") : ("Resultado: "+right+" de "+qs.length+" aciertos");
+        if (answered === qs.length){ state.scores[id] = right; if (right >= qs.length-1) state.studied[id] = true; save(); renderProgress(); }
+        return;
+      }
+      if (ev.target.closest("[data-reset]")){
+        answered = 0; right = 0;
+        box.querySelectorAll(".qopt").forEach(x => { x.disabled=false; x.classList.remove("right","wrong"); });
+        box.querySelectorAll(".qexp").forEach(x => x.hidden = true);
+        box.querySelector("[data-score]").textContent = "0 de "+qs.length+" respondidas";
+        return;
+      }
+      if (ev.target.closest(".studied button")){ state.studied[id] = !state.studied[id]; save(); renderProgress(); }
+    });
+  });
+
+  TOPICS.forEach((t,i) => {
+    const sec = document.querySelector('.view[data-view="'+t.id+'"]');
+    const prev = i>0 ? TOPICS[i-1] : null, next = i<TOPICS.length-1 ? TOPICS[i+1] : null;
+    const div = document.createElement("div"); div.className = "pager";
+    div.innerHTML = (prev ? '<a href="#'+prev.id+'"><small>← Tema '+i+'</small>'+prev.t+'</a>' : '<a href="#inicio"><small>←</small>Mapa del módulo</a>') +
+                    (next ? '<a class="next" href="#'+next.id+'"><small>Tema '+(i+2)+' →</small>'+next.t+'</a>' : '<a class="next" href="#glosario"><small>→</small>Glosario</a>');
+    sec.appendChild(div);
+  });
+
+  const SVGE = (tag, a, txt) => '<'+tag+' '+Object.entries(a).map(([k,v])=>k+'="'+v+'"').join(" ")+(txt!=null?'>'+txt+'</'+tag+'>':'/>');
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  const $ = id => document.getElementById(id);
+  const norm = s => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  function pressGroup(sel, btn){ document.querySelectorAll(sel).forEach(b=>b.setAttribute("aria-pressed", b===btn?"true":"false")); }
+  function exButtons(id, list, fn){ $(id).innerHTML=""; list.forEach(([l,v])=>{ const b=document.createElement("button"); b.className="btn"; b.textContent=l; b.addEventListener("click",()=>fn(v)); $(id).appendChild(b); }); }
+
+  // ---------- T1: cuatro agentes ----------
+  let agSeed=3;
+  function agRun(){
+    const lam=+$("agLam").value; $("agLamV").textContent=lam;
+    const r=mulberry32(agSeed*977), N=120, P=[100], R=[0];
+    const g=()=>{ let u=0,v=0; while(u===0) u=r(); v=r(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+    let drift=0.0006; for(let t=1;t<N;t++){ if(t%40===0) drift=(r()-0.45)*0.004; const ret=drift+0.014*g(); R.push(ret); P.push(P[t-1]*(1+ret)); }
+    const agents=[
+      ["Reactivo simple","var(--p1)",(t,s)=> t>0&&P[t]<P[t-1]?1:0],
+      ["Basado en modelos","var(--p3)",(t,s)=>{ if(t<10) return 0; let m=0; for(let k=t-9;k<=t;k++) m+=P[k]; return P[t]>m/10?1:0; }],
+      ["Basado en metas","var(--p4)",(t,s)=>{ if(!s.pos){ s.entry=P[t]; return 1; } const g=P[t]/s.entry-1; if(g>=0.08||g<=-0.05) return 0; return 1; }],
+      ["Basado en utilidad","var(--accent)",(t,s)=>{ if(t<20) return 0; let m=0,v=0; for(let k=t-19;k<=t;k++) m+=R[k]; m/=20; for(let k=t-19;k<=t;k++) v+=(R[k]-m)**2; v/=19; let best=0,bu=-Infinity; [0,0.5,1].forEach(w=>{ const u=w*m-lam*w*w*v; if(u>bu+1e-12){bu=u;best=w;} }); return best; }]
+    ];
+    const res=agents.map(([n,c,f])=>{ const s={pos:0,entry:0}; const V=[100]; let trades=0;
+      for(let t=0;t<N-1;t++){ const p=f(t,s); if(p!==s.pos) trades++; s.pos=p; V.push(V[t]*(1+p*R[t+1])); }
+      return {n,c,V,trades}; });
+    const bh={n:"Comprar y mantener",c:"var(--muted)",V:P.map(p=>p),trades:1};
+    const all=res.concat([bh]), vals=all.flatMap(a=>a.V), lo=Math.min(...vals)*0.98, hi=Math.max(...vals)*1.02;
+    const X=t=>50+t/(N-1)*530, Y=v=>200-(v-lo)/(hi-lo)*185;
+    let h=SVGE("line",{x1:50,y1:200,x2:580,y2:200,stroke:"var(--line)"})+SVGE("line",{x1:50,y1:10,x2:50,y2:200,stroke:"var(--line)"});
+    [lo,100,hi].forEach(v=>{ h+=SVGE("text",{x:44,y:Y(v)+4,"text-anchor":"end","font-size":9},fmt(v,0)); });
+    h+=SVGE("line",{x1:50,x2:580,y1:Y(100),y2:Y(100),stroke:"var(--line)","stroke-dasharray":"3 3"});
+    all.forEach(a=>{ let p=""; a.V.forEach((v,t)=>p+=(p?"L":"M")+X(t).toFixed(1)+" "+Y(v).toFixed(1)); h+=SVGE("path",{d:p,fill:"none",stroke:a.c,"stroke-width":a===bh?1.5:2.2,"stroke-dasharray":a===bh?"5 4":"none"}); });
+    h+=SVGE("text",{x:315,y:222,"text-anchor":"middle","font-size":10},"Días de mercado (valor de una cartera que empieza en 100)");
+    $("agSvg").innerHTML=h;
+    $("agTable").innerHTML='<thead><tr><th>Agente</th><th class="num">Valor final</th><th class="num">Rentabilidad</th><th class="num">Cambios de posición</th></tr></thead><tbody>'+all.map(a=>{ const f=a.V[a.V.length-1]; return '<tr><td><span style="display:inline-block;width:12px;height:3px;background:'+a.c+';vertical-align:middle;margin-right:6px"></span>'+a.n+'</td><td class="num">'+fmt(f,1)+'</td><td class="num" style="color:'+(f>=100?'var(--ok)':'var(--bad)')+'">'+(f>=100?'+':'')+fmt(f-100,1)+' %</td><td class="num">'+a.trades+'</td></tr>'; }).join("")+'</tbody>';
+  }
+  $("agLam").addEventListener("input",agRun);
+  $("agNew").addEventListener("click",()=>{ agSeed++; agRun(); });
+  agRun();
+
+  // ---------- T2: subsunción ----------
+  const SUB_S=[["obst","Detecta obstáculo"],["lleva","Lleva muestras"],["base","Está en la base"],["muestra","Detecta una muestra"],["migas","Detecta migas"]];
+  const SUB_R=[["Si obstáculo","Cambiar de dirección",s=>s.obst],["Si lleva muestras y está en la base","Descargar las muestras",s=>s.lleva&&s.base],["Si lleva muestras y no está en la base","Dejar dos migas y moverse hacia mayor gradiente",s=>s.lleva&&!s.base],["Si detecta una muestra","Recogerla",s=>s.muestra],["Si detecta migas","Recoger una y moverse hacia menor gradiente",s=>s.migas],["Si cierto","Moverse de forma aleatoria",s=>true]];
+  $("subSens").innerHTML=SUB_S.map(([k,l])=>'<label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" data-sub="'+k+'"'+(k==="muestra"||k==="migas"?' checked':'')+'> '+l+'</label>').join("");
+  function subRun(){ const s={}; document.querySelectorAll("[data-sub]").forEach(c=>s[c.dataset.sub]=c.checked);
+    let fired=-1; SUB_R.forEach((r,i)=>{ if(fired<0&&r[2](s)) fired=i; });
+    $("subTable").innerHTML='<thead><tr><th>Prioridad</th><th>Condición</th><th>Acción</th><th>Estado</th></tr></thead><tbody>'+SUB_R.map((r,i)=>{ const ok=r[2](s); const st=i===fired?'<span class="pill ok">se ejecuta</span>':ok?'<span class="pill bad">inhibida</span>':'<span class="pill neutral">no se cumple</span>'; return '<tr style="'+(i===fired?'font-weight:600':'')+'"><td class="num">'+(i+1)+'</td><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+st+'</td></tr>'; }).join("")+'</tbody>';
+    const inh=SUB_R.filter((r,i)=>i>fired&&r[2](s)).length;
+    $("subOut").innerHTML='Acción del robot: <b>'+SUB_R[fired][1]+'</b>'+(inh?' · '+inh+' comportamiento'+(inh>1?'s':'')+' inhibido'+(inh>1?'s':''):'');
+  }
+  document.querySelectorAll("[data-sub]").forEach(c=>c.addEventListener("change",subRun)); subRun();
+
+  // ---------- T3: calidad de datos ----------
+  const DQ0=[["14/11/2026","SAN","4.85","1000","EUR"],["14/11/2026","BBVA","9.62","500","EUR"],["2026-11-13","ITX","47.10","200","EUR"],["13/11/2026","IBE","","300","EUR"],["14/11/2026","TEF","-3.98","1000","EUR"],["14/11/2026","SAN","4.85","1000","EUR"],["05/11/2026","REP","13.20","150","EUR"],["14/11/2026","AENA","172.40","20.5","USD"],["14/11/2026","","25.30","100","EUR"],["13/11/2026","FER","38.70","80","EUR"]];
+  let DQ=DQ0.map(r=>r.slice()), dqCleaned=false;
+  const dqDate=s=>{ const m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s); return m?new Date(+m[3],+m[2]-1,+m[1]):null; };
+  function dqEval(){
+    const ref=new Date(2026,10,14), issues=DQ.map(()=>[[],[],[],[],[]]);
+    let filled=0,cells=0,valid=0,cons=0,curr=0; const seen=new Set(); let uniq=0;
+    DQ.forEach((r,i)=>{ r.forEach((c,j)=>{ cells++; if(c==="") issues[i][j].push("vacío"); else filled++; });
+      const p=parseFloat(r[2]), q=r[3]; const v=r[2]!==""&&p>0&&/^\d+$/.test(q); if(v) valid++; else { if(r[2]!==""&&!(p>0)) issues[i][2].push("precio no válido"); if(!/^\d+$/.test(q)) issues[i][3].push("cantidad no entera"); }
+      const c=!!dqDate(r[0])&&r[4]==="EUR"; if(c) cons++; else { if(!dqDate(r[0])) issues[i][0].push("formato distinto"); if(r[4]!=="EUR") issues[i][4].push("divisa distinta"); }
+      const key=r.join("|"); if(seen.has(key)) issues[i].forEach(x=>x.push("duplicado")); else { seen.add(key); uniq++; }
+      const d=dqDate(r[0])||(/^\d{4}-\d{2}-\d{2}$/.test(r[0])?new Date(r[0]):null); if(d&&(ref-d)/864e5<=2) curr++; else issues[i][0].push("desactualizado"); });
+    const n=DQ.length;
+    $("dqTable").innerHTML='<thead><tr><th>#</th><th>Fecha</th><th>Ticker</th><th class="num">Precio</th><th class="num">Cantidad</th><th>Divisa</th></tr></thead><tbody>'+DQ.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td>'+r.map((c,j)=>{ const is=issues[i][j]; return '<td class="'+(j===2||j===3?'num':'')+'" title="'+esc(is.join(", "))+'" style="'+(is.length?'background:var(--bad-soft);color:var(--bad)':'')+'">'+(c===""?'<i>vacío</i>':esc(c))+(is.length?' <small>('+[...new Set(is)].join(", ")+')</small>':'')+'</td>'; }).join("")+'</tr>').join("")+'</tbody>';
+    const box=(l,v,s)=>'<div class="box"><small>'+l+'</small><div class="k" style="font-size:1.25rem;color:'+(v>=0.999?'var(--ok)':v>=0.8?'var(--ink)':'var(--bad)')+'">'+fmt(v*100,0)+' %</div><small>'+s+'</small></div>';
+    $("dqScore").innerHTML=box("Completitud",filled/cells,"celdas con valor")+box("Validez",valid/n,"precio > 0 y cantidad entera")+box("Consistencia",cons/n,"dd/mm/aaaa y EUR")+box("Unicidad",uniq/n,"filas no repetidas")+box("Actualidad",curr/n,"≤ 2 días de antigüedad")+'<div class="box"><small>Registros</small><div class="k" style="font-size:1.25rem">'+n+'</div><small>'+(dqCleaned?'tras la limpieza':'originales')+'</small></div>';
+  }
+  $("dqFix").addEventListener("click",()=>{ const out=[], seen=new Set();
+    DQ.forEach(r=>{ r=r.slice(); const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(r[0]); if(m) r[0]=m[3]+"/"+m[2]+"/"+m[1]; if(r[1]==="AENA") r[4]="EUR";
+      const k=r.join("|"); if(seen.has(k)) return; seen.add(k); if(r[1]===""||r[2]===""||!(parseFloat(r[2])>0)||!/^\d+$/.test(r[3])) return; out.push(r); });
+    DQ=out; dqCleaned=true; dqEval(); });
+  $("dqReset").addEventListener("click",()=>{ DQ=DQ0.map(r=>r.slice()); dqCleaned=false; dqEval(); });
+  dqEval();
+
+  // ---------- T4: técnicas de representación ----------
+  const KR=[
+    ["Reglas",'<pre class="code" style="margin:0">SI   bono(B) Y rating(B, R) Y R &lt; BBB−\nENTONCES alto_rendimiento(B)\n\nHecho: bono(bono_tef_x)\nHecho: rating(bono_tef_x, BB+)\n→ alto_rendimiento(bono_tef_x)</pre><p class="prose">Fácil de ver: <b>conclusiones plausibles</b> y el porqué de una decisión. Difícil: jerarquías y prototipos.</p>'],
+    ["Marco (frame)",'<pre class="code" style="margin:0">MARCO Bono\n  es_un:    ActivoRentaFija\n  emisor:   [instancia de Emisor]\n  rating:   [AAA … D]\n  categoría: si rating &lt; BBB− → "alto rendimiento"\n             (valor por defecto: "grado de inversión")\n\nMARCO bono_tef_x\n  es_un:  Bono\n  emisor: Telefónica\n  rating: BB+</pre><p class="prose">Fácil de ver: <b>prototipos</b>, valores por defecto y herencia. Difícil: reglas encadenadas.</p>'],
+    ["Red semántica",'<svg viewBox="0 0 560 170" width="100%" style="display:block"><defs><marker id="krA" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>'
+      +[["bono_tef_x",80,85],["Bono",260,30],["Telefónica",260,140],["BB+",440,85],["Alto rendimiento",440,30]].map(([l,x,y])=>'<rect x="'+(x-62)+'" y="'+(y-14)+'" width="124" height="28" rx="14" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="11" style="fill:var(--ink);font-weight:600">'+l+'</text>').join("")
+      +[[142,80,198,38,"es_un"],[142,92,198,134,"emisor"],[322,30,378,30,"subclase_de?"],[142,85,378,85,"rating"]].map(([a,b,c,d,l])=>'<line x1="'+a+'" y1="'+b+'" x2="'+c+'" y2="'+d+'" stroke="var(--muted)" marker-end="url(#krA)"/><text x="'+((a+c)/2)+'" y="'+((b+d)/2-4)+'" text-anchor="middle" font-size="10" style="fill:var(--muted)">'+l+'</text>').join("")+'</svg><p class="prose">Fácil de ver: <b>relaciones</b> entre objetos. Difícil: el significado formal de cada arco (por eso la lógica descriptiva lo formaliza).</p>'],
+    ["Lógica",'<pre class="code" style="margin:0">∀b ( Bono(b) ∧ rating(b) &lt; BBB− → AltoRendimiento(b) )\nBono(bono_tef_x)\nrating(bono_tef_x) = BB+\n⊢ AltoRendimiento(bono_tef_x)</pre><p class="prose">Fácil de ver: <b>individuos y relaciones</b> con semántica precisa y demostraciones. Difícil: lo incierto o por defecto.</p>'],
+    ["Etiquetas (metadatos)",'<pre class="code" style="margin:0">&lt;instrumento id="bono_tef_x"&gt;\n  &lt;tipo&gt;bono&lt;/tipo&gt;\n  &lt;emisor&gt;Telefónica&lt;/emisor&gt;\n  &lt;rating agencia="S&amp;P"&gt;BB+&lt;/rating&gt;\n  &lt;etiqueta&gt;high-yield&lt;/etiqueta&gt;\n&lt;/instrumento&gt;</pre><p class="prose">Fácil de ver: <b>descripción y búsqueda</b>. Difícil: inferir; la regla queda implícita en quien puso la etiqueta.</p>']
+  ];
+  KR.forEach(([l],i)=>{ const b=document.createElement("button"); b.className="btn"; b.dataset.kr=i; b.textContent=l; b.setAttribute("aria-pressed",i?"false":"true"); b.addEventListener("click",()=>{ pressGroup("[data-kr]",b); $("krOut").innerHTML=KR[i][1]; }); $("krTabs").appendChild(b); });
+  $("krOut").innerHTML=KR[0][1];
+
+  // ---------- T5: ontología ----------
+  const ON_CL={
+    "ActivoFinanciero":{p:null,slots:[["nombre","string",true],["isin","isin",true],["emisor","inst:Emisor",true]]},
+    "RentaVariable":{p:"ActivoFinanciero",slots:[["mercado","enum:BME|Euronext|NYSE",true]]},
+    "Accion":{p:"RentaVariable",slots:[["dividendo","num:0:100",false]]},
+    "RentaFija":{p:"ActivoFinanciero",slots:[["cupon","num:0:20",true],["vencimiento","num:2026:2100",true]]},
+    "Bono":{p:"RentaFija",slots:[["rating","enum:AAA|AA|A|BBB|BB|B|CCC|D",true]]},
+    "Emisor":{p:null,slots:[["nombre","string",true],["pais","enum:ES|FR|DE|US",true]]}
+  };
+  let ON_INST=[["telefonica","Emisor"],["santander","Emisor"],["iberdrola","Emisor"],["bono_tef_2030","Bono"]];
+  const onChain=c=>{ const a=[]; while(c){ a.unshift(c); c=ON_CL[c].p; } return a; };
+  const onIsA=(c,sup)=>onChain(c).includes(sup);
+  function onTree(sel){ const kids=p=>Object.keys(ON_CL).filter(c=>ON_CL[c].p===p);
+    const rec=(c,d)=>'<div style="margin-left:'+(d*16)+'px;'+(c===sel?'font-weight:700;color:var(--accent)':'')+'">'+(d?'└ ':'')+c+' <small class="mono" style="color:var(--muted)">['+ON_CL[c].slots.map(s=>s[0]).join(", ")+']</small></div>'+kids(c).map(k=>rec(k,d+1)).join("");
+    $("onTree").innerHTML='<b>Jerarquía de clases</b>'+kids(null).map(c=>rec(c,0)).join("")+'<div style="margin-top:6px"><b>Instancias</b>: <span class="mono">'+ON_INST.map(i=>i[0]+":"+i[1]).join(", ")+'</span></div>'; }
+  function onForm(){ const c=$("onClass").value, ch=onChain(c); let h='<label for="onId">Identificador de la instancia</label><input type="text" id="onId" value="'+(c==="Emisor"?"bbva":c==="Bono"?"bono_san_2029":"accion_san")+'">';
+    ch.forEach(k=>ON_CL[k].slots.forEach(([n,t,req])=>{ const inh=k!==c?' <small style="color:var(--muted)">(heredado de '+k+')</small>':'';
+      const lab='<label for="onS_'+n+'" style="margin-top:6px">'+n+(req?' *':'')+inh+' <small class="mono" style="color:var(--muted)">'+t.replace(/^num:(\d+):(\d+)/,"número $1–$2").replace(/^inst:/,"instancia de ").replace(/^enum:/,"uno de ").replace("isin","string de 12 caracteres")+'</small></label>';
+      if(t.startsWith("enum:")) h+=lab+'<select id="onS_'+n+'" class="btn" style="width:100%"><option value="">(vacío)</option>'+t.slice(5).split("|").map(o=>'<option>'+o+'</option>').join("")+'</select>';
+      else if(t.startsWith("inst:")) h+=lab+'<select id="onS_'+n+'" class="btn" style="width:100%"><option value="">(vacío)</option>'+ON_INST.map(i=>'<option value="'+i[0]+'">'+i[0]+' ('+i[1]+')</option>').join("")+'</select>';
+      else h+=lab+'<input type="text" id="onS_'+n+'" value="'+(n==="nombre"?(c==="Emisor"?"BBVA":"Ejemplo"):"")+'">'; }));
+    $("onForm").innerHTML=h; onTree(c); }
+  $("onClass").innerHTML=Object.keys(ON_CL).map(c=>'<option'+(c==="Bono"?' selected':'')+'>'+c+'</option>').join("");
+  $("onClass").addEventListener("change",()=>{ $("onOut").innerHTML=""; onForm(); });
+  $("onCreate").addEventListener("click",()=>{ const c=$("onClass").value, id=$("onId").value.trim().toLowerCase().replace(/\s+/g,"_"), errs=[], trip=[];
+    if(!/^[a-z][a-z0-9_]*$/.test(id)) errs.push("El identificador debe empezar por letra y usar solo letras, números y _.");
+    if(ON_INST.some(i=>i[0]===id)) errs.push("Ya existe una instancia «"+id+"».");
+    onChain(c).forEach(k=>ON_CL[k].slots.forEach(([n,t,req])=>{ const v=$("onS_"+n).value.trim();
+      if(v===""){ if(req) errs.push("<b>"+n+"</b>: cardinalidad mínima 1 (obligatorio)."); return; }
+      if(t.startsWith("num:")){ const [,a,b]=t.split(":"), x=parseFloat(v.replace(",",".")); if(!isFinite(x)) errs.push("<b>"+n+"</b>: el tipo de valor debe ser un número."); else if(x<+a||x>+b) errs.push("<b>"+n+"</b>: fuera del rango "+a+"–"+b+"."); else trip.push(["ex:"+n,String(x)]); }
+      else if(t==="isin"){ if(!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(v.toUpperCase())) errs.push("<b>isin</b>: debe tener 12 caracteres (2 letras de país + 9 alfanuméricos + 1 dígito), p. ej. ES0178430E18."); else trip.push(["ex:isin",'"'+v.toUpperCase()+'"']); }
+      else if(t.startsWith("inst:")){ const sup=t.slice(5), it=ON_INST.find(i=>i[0]===v); if(!onIsA(it[1],sup)) errs.push("<b>"+n+"</b>: el rango del slot es la clase "+sup+", y «"+v+"» es un "+it[1]+"."); else trip.push(["ex:"+n,"ex:"+v]); }
+      else trip.push(["ex:"+n,'"'+v+'"']); }));
+    if(errs.length){ $("onOut").innerHTML='<div class="callout warn" style="margin:0"><span class="tag">Instancia no válida</span><ul>'+errs.map(e=>'<li>'+e+'</li>').join("")+'</ul></div>'; return; }
+    ON_INST.push([id,c]); onForm();
+    $("onOut").innerHTML='<p class="out"><span class="pill ok">Instancia creada</span> También es instancia de: '+onChain(c).slice(0,-1).join(", ")+'</p><pre class="code" style="margin:0">ex:'+esc(id)+' rdf:type ex:'+c+' ;\n'+trip.map(t=>'    '+t[0]+' '+esc(t[1])).join(' ;\n')+' .</pre>'; });
+  onForm();
+
+  // ---------- T6: mini-SPARQL ----------
+  const SP_T=[["ex:SAN","a","ex:Accion"],["ex:SAN","ex:sector","ex:Banca"],["ex:SAN","ex:cotizaEn","ex:IBEX35"],["ex:SAN","ex:precio","4.85"],
+    ["ex:BBVA","a","ex:Accion"],["ex:BBVA","ex:sector","ex:Banca"],["ex:BBVA","ex:cotizaEn","ex:IBEX35"],["ex:BBVA","ex:precio","9.62"],
+    ["ex:TEF","a","ex:Accion"],["ex:TEF","ex:sector","ex:Telecom"],["ex:TEF","ex:cotizaEn","ex:IBEX35"],["ex:TEF","ex:precio","3.98"],
+    ["ex:IBE","a","ex:Accion"],["ex:IBE","ex:sector","ex:Energia"],["ex:IBE","ex:cotizaEn","ex:IBEX35"],["ex:IBE","ex:precio","13.40"],
+    ["ex:BNP","a","ex:Accion"],["ex:BNP","ex:sector","ex:Banca"],["ex:BNP","ex:cotizaEn","ex:CAC40"],["ex:BNP","ex:precio","64.10"],
+    ["ex:BonoTEF2030","a","ex:Bono"],["ex:BonoTEF2030","ex:emisor","ex:TEF"],["ex:BonoTEF2030","ex:cupon","3.5"],
+    ["ex:BonoSAN2028","a","ex:Bono"],["ex:BonoSAN2028","ex:emisor","ex:SAN"],["ex:BonoSAN2028","ex:cupon","2.75"]];
+  (function(){ const subj=[]; SP_T.forEach(t=>{ if(!subj.includes(t[0])) subj.push(t[0]); });
+    $("spData").innerHTML='<span class="c">@prefix ex: &lt;http://ejemplo.org/&gt; .</span>\n'+subj.map(s=>s+' '+SP_T.filter(t=>t[0]===s).map((t,i)=>(i?'    ':'')+t[1]+' '+t[2]).join(' ;\n')+' .').join("\n"); })();
+  function spRun(){
+    const q=$("spQ").value, info=$("spInfo");
+    try{
+      const m=/SELECT\s+(.+?)\s+WHERE\s*\{([\s\S]*)\}/i.exec(q); if(!m) throw "Falta SELECT … WHERE { … }";
+      let body=m[2]; const filters=[]; body=body.replace(/FILTER\s*\(\s*(\?\w+)\s*(<=|>=|!=|<|>|=)\s*(-?[\d.]+)\s*\)/gi,(_,v,op,n)=>{ filters.push([v,op,+n]); return " "; });
+      const pats=body.split(/\s\.(?=\s|$)|\s\.$/).map(s=>s.trim().replace(/\.$/,"").trim()).filter(Boolean).map(s=>{ const t=s.split(/\s+/); if(t.length!==3) throw "Cada patrón necesita sujeto, predicado y objeto: «"+s+"»"; return t.map(x=>x==="rdf:type"?"a":x); });
+      let B=[{}];
+      pats.forEach(p=>{ const nb=[]; B.forEach(b=>SP_T.forEach(t=>{ const c=Object.assign({},b); let ok=true; for(let k=0;k<3&&ok;k++){ const x=p[k]; if(x.startsWith("?")){ if(c[x]!=null&&c[x]!==t[k]) ok=false; else c[x]=t[k]; } else if(x!==t[k]) ok=false; } if(ok) nb.push(c); })); B=nb; });
+      B=B.filter(b=>filters.every(([v,op,n])=>{ const x=parseFloat(b[v]); if(!isFinite(x)) return false; return op==="<"?x<n:op===">"?x>n:op==="<="?x<=n:op===">="?x>=n:op==="="?x===n:x!==n; }));
+      let vars=m[1].trim()==="*"?[...new Set(pats.flat().filter(x=>x.startsWith("?")))]:m[1].trim().split(/\s+/);
+      $("spRes").innerHTML='<thead><tr>'+vars.map(v=>'<th>'+esc(v)+'</th>').join("")+'</tr></thead><tbody>'+(B.length?B.map(b=>'<tr>'+vars.map(v=>'<td class="mono">'+esc(b[v]??"")+'</td>').join("")+'</tr>').join(""):'<tr><td colspan="'+vars.length+'"><i>Sin resultados</i></td></tr>')+'</tbody>';
+      info.textContent=B.length+" resultado"+(B.length===1?"":"s")+" · "+pats.length+" patrón"+(pats.length===1?"":"es")+(filters.length?" · "+filters.length+" FILTER":"");
+    }catch(e){ $("spRes").innerHTML=""; info.textContent="Error: "+e; }
+  }
+  exButtons("spEx",[["Acciones de banca","SELECT ?accion WHERE {\n  ?accion a ex:Accion .\n  ?accion ex:sector ex:Banca .\n}"],["Bonos, emisor y sector","SELECT ?bono ?emisor ?sector WHERE {\n  ?bono a ex:Bono .\n  ?bono ex:emisor ?emisor .\n  ?emisor ex:sector ?sector .\n}"],["Precio > 10 (FILTER)","SELECT ?x ?p WHERE {\n  ?x ex:precio ?p .\n  FILTER(?p > 10)\n}"],["Todo sobre ex:SAN","SELECT ?prop ?valor WHERE {\n  ex:SAN ?prop ?valor .\n}"]],v=>{ $("spQ").value=v; spRun(); });
+  $("spQ").value="SELECT ?accion WHERE {\n  ?accion a ex:Accion .\n  ?accion ex:sector ex:Banca .\n}";
+  $("spQ").addEventListener("input",spRun); spRun();
+
+  // ---------- T7: búsqueda semántica ----------
+  const SS_DOCS=[["Informe: las acciones del Euro Stoxx 50 marcan máximos","Análisis de valores europeos."],["Los bonos del Tesoro suben de precio","Caída de la rentabilidad a 10 años."],["Guía de ETF de renta variable global","Fondos cotizados indexados."],["El bitcoin supera los 100.000 dólares","Mercado de criptomonedas."],["Calendario de dividendos de Iberdrola y Endesa","Pagos a los accionistas."],["Letras del Tesoro: rentabilidad a 12 meses","Subasta del Tesoro Público."],["Cómo funcionan los futuros sobre el IBEX 35","Productos apalancados."],["Opciones call y put explicadas","Derechos de compra y venta."],["Obligaciones corporativas: oportunidades","Deuda de empresas."]];
+  const SS_ONT={"renta variable":{syn:["equity","bolsa"],kids:["accion","etf","dividendo"]},"accion":{syn:["acciones","accionistas","valores"],kids:[]},"etf":{syn:["fondos cotizados"],kids:[]},"dividendo":{syn:["dividendos"],kids:[]},"renta fija":{syn:["deuda"],kids:["bono","letra","obligacion"]},"bono":{syn:["bonos"],kids:[]},"letra":{syn:["letras"],kids:[]},"obligacion":{syn:["obligaciones"],kids:[]},"derivado":{syn:["derivados"],kids:["futuro","opcion"]},"futuro":{syn:["futuros"],kids:[]},"opcion":{syn:["opciones"],kids:[]},"criptoactivo":{syn:["cripto","criptomonedas","criptomoneda"],kids:["bitcoin"]},"bitcoin":{syn:["btc"],kids:[]}};
+  function ssRun(){
+    const q=norm($("ssQ").value).trim(), sem=$("ssSem").checked; if(!q){ $("ssRes").innerHTML=""; $("ssExp").textContent=""; return; }
+    const has=(text,term)=>new RegExp("(^|[^a-zñ])"+term.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"(es|s)?([^a-zñ]|$)").test(text);
+    let terms=[q];
+    if(sem){ const hit=Object.keys(SS_ONT).filter(k=>has(q,k)||SS_ONT[k].syn.some(s=>has(q,s)));
+      const add=k=>{ if(!terms.includes(k)) terms.push(k); SS_ONT[k].syn.forEach(s=>{ if(!terms.includes(s)) terms.push(s); }); SS_ONT[k].kids.forEach(add); };
+      hit.forEach(add); }
+    const words=q.split(/\s+/).filter(w=>w.length>2);
+    const res=SS_DOCS.filter(([t,s])=>{ const txt=norm(t+" "+s); return (sem?terms.some(x=>has(txt,x)):false)||words.every(w=>has(txt,w)); });
+    $("ssExp").innerHTML=sem?'Términos buscados: '+terms.map(t=>'<span class="pill neutral">'+esc(t)+'</span>').join(" "):'Búsqueda literal de: '+words.map(t=>'<span class="pill neutral">'+esc(t)+'</span>').join(" ");
+    $("ssRes").innerHTML=res.length?res.map(([t,s])=>'<div class="box" style="margin:6px 0"><b>'+esc(t)+'</b><br><small>'+esc(s)+'</small></div>').join(""):'<p class="out">Ningún documento coincide.</p>';
+    $("ssRes").insertAdjacentHTML("afterbegin",'<p class="out">'+res.length+' de '+SS_DOCS.length+' documentos</p>');
+  }
+  $("ssQ").addEventListener("input",ssRun); $("ssSem").addEventListener("change",ssRun);
+  exButtons("ssSugg",[["renta variable","renta variable"],["renta fija","renta fija"],["derivados","derivados"],["cripto","cripto"],["acciones","acciones"]],v=>{ $("ssQ").value=v; ssRun(); });
+  ssRun();
+
+  // ---------- T8: folksonomía ----------
+  const FK=[["Santander publica resultados récord",["bolsa","banca","resultados"]],["¿Merece la pena el bitcoin a largo plazo?",["cripto","bitcoin","largo plazo"]],["Mi cartera de dividendos para 2027",["dividendos","renta variable","largo plazo"]],["El BCE baja los tipos de interés",["bce","tipos","banca","bolsa"]]];
+  const FK_SYN=[["bolsa","renta variable","acciones"],["cripto","bitcoin","btc","criptomonedas"],["tipos","tipos de interés","bce"]];
+  function fkDraw(){
+    $("fkPosts").innerHTML=FK.map(([t,tags],i)=>'<div class="box"><b>'+esc(t)+'</b><div style="margin:6px 0">'+tags.map(g=>'<span class="pill neutral" style="margin:2px">#'+esc(g)+'</span>').join("")+'</div><div style="display:flex;gap:4px"><input type="text" data-fk="'+i+'" placeholder="Añadir etiqueta" style="flex:1"><button class="btn" data-fkb="'+i+'">+</button></div></div>').join("");
+    const cnt={}; FK.forEach(([,tags])=>tags.forEach(g=>cnt[g]=(cnt[g]||0)+1)); const mx=Math.max(...Object.values(cnt));
+    $("fkCloud").innerHTML=Object.entries(cnt).sort((a,b)=>a[0].localeCompare(b[0])).map(([g,c])=>'<span style="display:inline-block;margin:0 8px;font-size:'+(0.85+c/mx*1.2).toFixed(2)+'rem;font-weight:'+(c===mx?700:500)+';color:'+(c===mx?'var(--accent)':'var(--ink)')+'">'+esc(g)+'<sup style="font-size:.6rem;color:var(--muted)">'+c+'</sup></span>').join("");
+    const groups=FK_SYN.map(gr=>gr.filter(g=>cnt[g])).filter(gr=>gr.length>1);
+    $("fkInfo").innerHTML=groups.length?'Sinónimos dispersos que una taxonomía o un tesauro unificarían: '+groups.map(g=>'<b>'+g.join(" / ")+'</b>').join(" · "):'No hay sinónimos dispersos.';
+    document.querySelectorAll("[data-fkb]").forEach(b=>b.addEventListener("click",()=>fkAdd(+b.dataset.fkb)));
+    document.querySelectorAll("[data-fk]").forEach(inp=>inp.addEventListener("keydown",e=>{ if(e.key==="Enter") fkAdd(+inp.dataset.fk); }));
+  }
+  function fkAdd(i){ const v=norm(document.querySelector('[data-fk="'+i+'"]').value).replace(/^#/,"").trim(); if(!v||FK[i][1].includes(v)||v.length>24) return; FK[i][1].push(v); fkDraw(); }
+  fkDraw();
+  (function(){ const B=[["Vocabularios","léxico de un campo"],["Taxonomías","categorías · Linneo"],["Tesauros","TG/TE · TR · USE"],["Ontologías","clases · OWL"],["Folksonomías","etiquetas · Vander Wal"],["Comparación","elementos × criterios"],["Mapas mentales","Buzan · radiante"]];
+    let h=""; const cx=300, cy=130; B.forEach(([l,s],i)=>{ const a=-Math.PI/2+i/B.length*2*Math.PI, x=cx+215*Math.cos(a), y=cy+100*Math.sin(a);
+      h+=SVGE("path",{d:"M"+cx+" "+cy+" Q"+((cx+x)/2+20*Math.sin(a))+" "+((cy+y)/2)+" "+x.toFixed(1)+" "+y.toFixed(1),fill:"none",stroke:"var(--p"+(i%5+1)+")","stroke-width":4,"stroke-linecap":"round"});
+      h+=SVGE("rect",{x:(x-62).toFixed(1),y:(y-17).toFixed(1),width:124,height:34,rx:8,fill:"var(--surface)",stroke:"var(--p"+(i%5+1)+")","stroke-width":2})+SVGE("text",{x:x.toFixed(1),y:(y-2).toFixed(1),"text-anchor":"middle","font-size":11,style:"fill:var(--ink);font-weight:700"},l)+SVGE("text",{x:x.toFixed(1),y:(y+11).toFixed(1),"text-anchor":"middle","font-size":9,style:"fill:var(--muted)"},s); });
+    h+=SVGE("ellipse",{cx,cy,rx:58,ry:26,fill:"var(--accent)"})+SVGE("text",{x:cx,y:cy+5,"text-anchor":"middle","font-size":14,style:"fill:var(--accent-ink);font-weight:700"},"SOC / KOS");
+    $("mmapSvg").innerHTML=h; })();
+
+  // ---------- T9: tabla de verdad ----------
+  function ttParse(src){
+    const s=src.replace(/<->|<=>/g,"↔").replace(/->|=>/g,"→").replace(/[!~]/g,"¬").replace(/&/g,"∧").replace(/\|/g,"∨").replace(/\s+/g,"");
+    let i=0; const peek=()=>s[i];
+    const prim=()=>{ const c=peek(); if(c==="¬"){ i++; const a=prim(); return {op:"¬",a}; } if(c==="("){ i++; const e=iff(); if(peek()!==")") throw "Falta «)»"; i++; return e; } if(/[pqrs]/.test(c||"")){ i++; return {v:c}; } throw c?"Símbolo inesperado «"+c+"»":"Expresión incompleta"; };
+    const and=()=>{ let a=prim(); while(peek()==="∧"){ i++; a={op:"∧",a,b:prim()}; } return a; };
+    const or=()=>{ let a=and(); while(peek()==="∨"){ i++; a={op:"∨",a,b:and()}; } return a; };
+    const imp=()=>{ const a=or(); if(peek()==="→"){ i++; return {op:"→",a,b:imp()}; } return a; };
+    const iff=()=>{ let a=imp(); while(peek()==="↔"){ i++; a={op:"↔",a,b:imp()}; } return a; };
+    const e=iff(); if(i<s.length) throw "Sobra «"+s.slice(i)+"»"; return e; }
+  const ttEval=(e,env)=>e.v?env[e.v]:e.op==="¬"?!ttEval(e.a,env):e.op==="∧"?ttEval(e.a,env)&&ttEval(e.b,env):e.op==="∨"?ttEval(e.a,env)||ttEval(e.b,env):e.op==="→"?(!ttEval(e.a,env)||ttEval(e.b,env)):ttEval(e.a,env)===ttEval(e.b,env);
+  function ttRun(){ try{ const e=ttParse($("ttQ").value), vars=[...new Set(($("ttQ").value.match(/[pqrs]/g)||[]))].sort(), n=vars.length, rows=[];
+      for(let m=0;m<2**n;m++){ const env={}; vars.forEach((v,k)=>env[v]=!((m>>(n-1-k))&1)); rows.push([env,ttEval(e,env)]); }
+      const VF=b=>b?'<b style="color:var(--ok)">V</b>':'<span style="color:var(--bad)">F</span>';
+      $("ttTable").innerHTML='<thead><tr>'+vars.map(v=>'<th>'+v+'</th>').join("")+'<th>'+esc($("ttQ").value)+'</th></tr></thead><tbody>'+rows.map(([env,r])=>'<tr>'+vars.map(v=>'<td>'+VF(env[v])+'</td>').join("")+'<td style="background:var(--surface-2)">'+VF(r)+'</td></tr>').join("")+'</tbody>';
+      const t=rows.filter(r=>r[1]).length; $("ttInfo").innerHTML=t===rows.length?'<span class="pill ok">Tautología</span> verdadera en todas las filas':t===0?'<span class="pill bad">Contradicción</span> falsa en todas las filas':'<span class="pill neutral">Contingencia</span> verdadera en '+t+' de '+rows.length+' filas';
+    }catch(err){ $("ttTable").innerHTML=""; $("ttInfo").textContent="Error: "+err; } }
+  $("ttQ").addEventListener("input",ttRun);
+  exButtons("ttEx",[["Modus tollens","(p → q) ∧ ¬q → ¬p"],["Tercero excluido","p ∨ ¬p"],["Contradicción","p ∧ ¬p"],["Implicación material","(p → q) ↔ (¬p ∨ q)"],["Con tres variables","(p ∧ q) → r"]],v=>{ $("ttQ").value=v; ttRun(); });
+  ttRun();
+
+  // ---------- T9: mini-Prolog ----------
+  const PL_SRC=`accion(san). accion(bbva). accion(tef). accion(ibe). accion(bnp).
+sector(san, banca). sector(bbva, banca). sector(bnp, banca).
+sector(tef, telecom). sector(ibe, energia).
+cotiza(san, ibex35). cotiza(bbva, ibex35). cotiza(tef, ibex35).
+cotiza(ibe, ibex35). cotiza(bnp, cac40).
+emite(tef, bono_tef_2030). emite(san, bono_san_2028).
+mismo_sector(X, Y) :- sector(X, S), sector(Y, S), X \\= Y.`;
+  $("plKB").textContent=PL_SRC.replace(/\. /g,".\n");
+  const plTerm=s=>{ s=s.trim(); const m=/^([a-z_][\w]*)\s*\((.*)\)$/.exec(s); if(m) return {f:m[1],args:m[2].split(",").map(x=>x.trim())}; const d=/^(\S+)\s*\\=\s*(\S+)$/.exec(s); if(d) return {f:"\\=",args:[d[1],d[2]]}; throw "No entiendo «"+s+"»"; };
+  const plSplit=s=>{ const out=[]; let d=0,cur=""; for(const c of s){ if(c==="(") d++; if(c===")") d--; if(c===","&&d===0){ out.push(cur); cur=""; } else cur+=c; } if(cur.trim()) out.push(cur); return out; };
+  const PL_KB=PL_SRC.split(/\.\s*(?:\n|$|\s)/).map(c=>c.trim()).filter(Boolean).map(c=>{ const [h,b]=c.split(":-"); return {head:plTerm(h),body:b?plSplit(b).map(plTerm):[]}; });
+  const isVar=x=>/^[A-Z_]/.test(x);
+  const walk=(x,s)=>{ while(isVar(x)&&s[x]!=null) x=s[x]; return x; };
+  function plSolve(goals,s,depth,out){ if(out.length>=60||depth>40) return; if(!goals.length){ out.push(s); return; }
+    const [g,...rest]=goals;
+    if(g.f==="\\="){ const a=walk(g.args[0],s), b=walk(g.args[1],s); if(a!==b&&!isVar(a)&&!isVar(b)) plSolve(rest,s,depth,out); return; }
+    PL_KB.forEach((cl,ci)=>{ if(cl.head.f!==g.f||cl.head.args.length!==g.args.length) return;
+      const ren=x=>isVar(x)?x+"#"+depth+"_"+ci:x, head=cl.head.args.map(ren), body=cl.body.map(t=>({f:t.f,args:t.args.map(ren)}));
+      let s2=Object.assign({},s), ok=true;
+      for(let k=0;k<head.length&&ok;k++){ const a=walk(g.args[k],s2), b=walk(head[k],s2); if(a===b) continue; if(isVar(a)) s2[a]=b; else if(isVar(b)) s2[b]=a; else ok=false; }
+      if(ok) plSolve(body.concat(rest),s2,depth+1,out); }); }
+  function plRun(){ const q=$("plQ").value.trim().replace(/\.$/,""); try{ if(!q) throw "Escribe una consulta";
+      const goals=plSplit(q).map(plTerm), qv=[...new Set(goals.flatMap(g=>g.args).filter(x=>isVar(x)&&x!=="_"))], out=[]; plSolve(goals,{},0,out);
+      if(!qv.length){ $("plOut").innerHTML=out.length?'<b style="color:var(--ok)">true.</b>':'<b style="color:var(--bad)">false.</b>'; return; }
+      const seen=new Set(), rows=[]; out.forEach(s=>{ const r=qv.map(v=>v+" = "+walk(v,s)).join(", "); if(!seen.has(r)){ seen.add(r); rows.push(r); } });
+      $("plOut").innerHTML=rows.length?rows.map(r=>'<div class="mono">'+esc(r)+' ;</div>').join("")+'<div class="mono" style="color:var(--muted)">('+rows.length+' solución'+(rows.length>1?'es':'')+')</div>':'<b style="color:var(--bad)">false.</b>';
+    }catch(e){ $("plOut").textContent="Error: "+e; } }
+  $("plQ").addEventListener("input",plRun);
+  exButtons("plEx",[["¿san es banca?","sector(san, banca)."],["¿Qué cotiza en el CAC 40?","cotiza(X, cac40)."],["Mismo sector que san","mismo_sector(san, Y)."],["Bonos y sector del emisor","emite(E, B), sector(E, S)."],["Energía del IBEX","accion(X), cotiza(X, ibex35), sector(X, energia)."]],v=>{ $("plQ").value=v; plRun(); });
+  plRun();
+
+  // ---------- T10: red bayesiana ----------
+  function byRun(){
+    const p=+$("byP").value/100, s=+$("byS").value/100, f=+$("byF").value/100, z=$("byZ").checked;
+    $("byPV").textContent=fmt(p*100,1)+" %"; $("bySV").textContent=fmt(s*100,0)+" %"; $("byFV").textContent=fmt(f*100,1)+" %";
+    const L1=s*(z?0.6:1), L0=f*(z?0.03:1), post=p*L1/(p*L1+(1-p)*L0||1);
+    const N=10000, fr=N*p, tp=fr*s, fp=(N-fr)*f;
+    let h='<defs><marker id="byA" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>';
+    const node=(x,y,l,sub,on)=>SVGE("rect",{x:x-80,y:y-24,width:160,height:48,rx:10,fill:on?"var(--accent-soft)":"var(--surface-2)",stroke:on?"var(--accent)":"var(--line)","stroke-width":2})+SVGE("text",{x,y:y-4,"text-anchor":"middle","font-size":12,style:"fill:var(--ink);font-weight:700"},l)+SVGE("text",{x,y:y+13,"text-anchor":"middle","font-size":10,style:"fill:var(--muted)"},sub);
+    h+=SVGE("line",{x1:225,y1:75,x2:338,y2:42,stroke:"var(--muted)","stroke-width":2,"marker-end":"url(#byA)"})+SVGE("line",{x1:225,y1:95,x2:338,y2:128,stroke:z?"var(--muted)":"var(--line)","stroke-width":2,"stroke-dasharray":z?"none":"4 4","marker-end":"url(#byA)"});
+    h+=node(145,85,"Fraude","a priori "+fmt(p*100,1)+" % → "+fmt(post*100,1)+" %",true)+node(420,35,"Alerta del modelo","observada: sí",true)+node(420,135,"País inusual",z?"observado: sí":"no observado",z);
+    $("bySvg").innerHTML=h;
+    const box=(l,v,sub,c)=>'<div class="box '+(c||'')+'"><small>'+l+'</small><div class="k" style="font-size:1.25rem">'+v+'</div><small>'+sub+'</small></div>';
+    $("byOut").innerHTML=box("P(fraude | evidencia)",fmt(post*100,1)+" %","probabilidad a posteriori","accent")+box("De cada 10.000 operaciones",fmt(tp+fp,0)+" alertas",fmt(tp,0)+" fraudes reales y "+fmt(fp,0)+" falsas alarmas")+box("Razón de verosimilitud",fmt(L1/(L0||1e-9),1)+" ×","cuánto multiplica la evidencia las probabilidades del fraude");
+  }
+  ["byP","byS","byF","byZ"].forEach(id=>$(id).addEventListener("input",byRun)); $("byZ").addEventListener("change",byRun); byRun();
+  // ---------- Glosario ----------
+  const GL = [
+    ["Agente","Entidad que percibe su entorno con sensores y actúa con actuadores con cierta autonomía (modelo de Hewitt, 1977).",1],
+    ["Agente basado en modelos","Mantiene un estado interno a partir de la historia percibida.",1],
+    ["Agente basado en utilidad","Elige la acción de mayor utilidad esperada.",1],
+    ["Agente móvil","Se traslada por la red, suspende y reanuda su ejecución.",1],
+    ["Agente reactivo simple","Actúa solo según la percepción actual con reglas condición–acción.",1],
+    ["Agente híbrido","Combina capas reactivas y deliberativas (horizontales o verticales).",2],
+    ["BDI","Creencias, deseos e intenciones: modelo de razonamiento práctico.",2],
+    ["Subsunción","Arquitectura reactiva en la que los comportamientos de mayor prioridad inhiben a los inferiores.",2],
+    ["Agente deliberativo","Razona con lógica sobre una base de conocimiento (Newell y Simon).",2],
+    ["Dato","Unidad semántica más pequeña, sin significado por sí sola.",3],
+    ["Información","Datos procesados con significado, propósito y contexto.",3],
+    ["Conocimiento","Mezcla de experiencia, valores, información y saber hacer útil para actuar.",3],
+    ["DQA","Evaluación de la calidad de los datos frente a los estándares de la empresa.",3],
+    ["DAQ","Tarjeta o sistema de adquisición que digitaliza señales físicas.",3],
+    ["Compromiso ontológico","Decisión sobre qué mirar y qué ignorar al elegir una representación.",4],
+    ["Representación del conocimiento","Expresión explícita del conocimiento para que un ordenador infiera.",4],
+    ["Cyc","Proyecto de base de conocimiento de sentido común y su motor de inferencia.",4],
+    ["Metadatos","Datos sobre datos: quién, qué, cuándo, dónde, por qué.",5],
+    ["Ontología","Definición formal de tipos, propiedades y relaciones de un dominio.",5],
+    ["Ontología de nivel superior","Términos generales comunes a todos los dominios; facilita la interoperabilidad.",5],
+    ["Preguntas de competencia","Preguntas que la ontología debe poder responder (Grüninger y Fox).",5],
+    ["Slot / facet","Propiedad de una clase / restricción del slot (tipo, cardinalidad, dominio, rango).",5],
+    ["METHONTOLOGY","Metodología que trata la creación de ontologías como un proyecto software.",5],
+    ["RDF","Modelo de datos del W3C basado en tripletas sujeto–propiedad–objeto.",6],
+    ["Turtle","Serialización legible de RDF (Dave Beckett), subconjunto de N3.",6],
+    ["N3","Notation3 de Berners-Lee: RDF más reglas y variables.",6],
+    ["RDFS","Vocabulario de clases y propiedades: subClassOf, domain, range…",6],
+    ["OWL","Lenguaje de ontologías web; Lite, DL (SHOIN) y Full.",6],
+    ["SPARQL","Lenguaje de consulta de grafos RDF (W3C, 2008).",6],
+    ["Protégé","Editor de ontologías de Stanford, el más usado para OWL.",6],
+    ["Web semántica","Web de datos con significado procesable por máquinas.",7],
+    ["Web 3.0","Término de 2006 para la evolución de la web hacia la semántica, la IA y el 3D.",7],
+    ["SOC / KOS","Sistemas de organización del conocimiento.",8],
+    ["Taxonomía","Clasificación en categorías y subcategorías.",8],
+    ["Tesauro","Vocabulario controlado con relaciones jerárquicas, asociativas y de equivalencia.",8],
+    ["Folksonomía","Clasificación por etiquetas de los usuarios (Thomas Vander Wal).",8],
+    ["Mapa mental","Representación radial de ideas (Tony Buzan).",8],
+    ["Lógica proposicional","Lógica de orden cero: proposiciones y conectivas.",9],
+    ["Lógica de primer orden","Predicados, constantes, funciones y cuantificadores ∀ y ∃.",9],
+    ["Lógica descriptiva","Conceptos, roles e individuos con semántica formal; base de OWL.",9],
+    ["Prolog","Lenguaje lógico declarativo (Colmerauer y Roussel, 1972).",9],
+    ["Cláusula de Horn","Forma lógica en la que se basan las sentencias de Prolog.",9],
+    ["Razonador semántico","Software que deduce consecuencias lógicas de hechos y axiomas.",10],
+    ["Rete","Algoritmo eficiente de emparejamiento de reglas (Drools, Evrete).",10],
+    ["Jena","Marco Java de web semántica con API RDF y SPARQL.",10],
+    ["Red bayesiana","Grafo dirigido acíclico de variables y dependencias condicionales.",10],
+    ["Razonamiento basado en casos","Resuelve adaptando la solución de un problema parecido anterior.",10],
+    ["MYCIN","Sistema experto de infecciones de la sangre (~65 % de acierto).",10]
+  ];
+  function gloss(){
+    const q = document.getElementById("glossQ").value.trim().toLowerCase();
+    const items = GL.filter(g => !q || (g[0]+" "+g[1]).toLowerCase().includes(q));
+    document.getElementById("glossList").innerHTML = items.length ? items.map(g => '<div class="gi"><dl style="margin:0"><dt>'+g[0]+'</dt><dd>'+g[1]+'</dd></dl><small><a href="#tema-'+g[2]+'">Tema '+g[2]+'</a></small></div>').join("") : '<p style="color:var(--muted)">No hay términos que coincidan. Prueba con otra palabra.</p>';
+  }
+  document.getElementById("glossQ").addEventListener("input", gloss); gloss();
+
+  renderProgress();
+  route();
+})();
+</script>
+
+</body>
+</html>

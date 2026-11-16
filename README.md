@@ -11,5 +11,6 @@ Páginas web interactivas para estudiar cada módulo: resúmenes, diagramas, eje
 | Módulo 5 · Algoritmia y complejidad en inteligencia artificial | `modulo-5.html` |
 | Módulo 6 · Sistemas inteligentes | `modulo-6.html` |
 | Módulo 7 · Aprendizaje automático y minería de datos | `modulo-7.html` |
+| Módulo 8 · Las redes neuronales, base del deep learning | `modulo-8.html` |
 
 La portada (`index.html`) enlaza todas las guías. Versión publicada con GitHub Pages: https://hrivarolainsfran-sys.github.io/guia-ciclo-vida-dato/
